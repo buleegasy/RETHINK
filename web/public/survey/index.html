@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>RE-THINK | 中学生 AI 心理辅导真实痛点与表情包偏好问卷</title>
+  <!-- Google Fonts: Outfit & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: rgba(255, 255, 255, 0.03);
+      --surface-hover: rgba(255, 255, 255, 0.06);
+      --surface-active: rgba(255, 255, 255, 0.12);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(99, 102, 241, 0.4);
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --primary: #6366f1; /* Indigo */
+      --primary-glow: rgba(99, 102, 241, 0.15);
+      --accent-blue: #06b6d4; /* Cyan */
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      position: relative;
+      padding: 20px;
+    }
+
+    /* Ambient Glow Backgrounds */
+    .glow-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .glow-circle {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.15;
+      animation: pulsate 12s infinite alternate;
+    }
+
+    .glow-circle-1 {
+      top: -10%;
+      left: -10%;
+      width: 500px;
+      height: 500px;
+      background: var(--primary);
+    }
+
+    .glow-circle-2 {
+      bottom: -10%;
+      right: -10%;
+      width: 600px;
+      height: 600px;
+      background: var(--accent-blue);
+    }
+
+    @keyframes pulsate {
+      0% { transform: scale(1) translate(0, 0); }
+      100% { transform: scale(1.15) translate(30px, -20px); }
+    }
+
+    /* Main Container (Glassmorphic) */
+    .survey-container {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 520px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      min-height: 580px;
+    }
+
+    /* Header & Progress Bar */
+    .survey-header {
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, var(--primary), var(--accent-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .progress-track {
+      height: 5px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--accent-blue));
+      border-radius: 999px;
+      transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Slide Content & Animation */
+    .survey-slides {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .slide {
+      display: none;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Typography */
+    .slide-title {
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 1.35;
+      color: var(--text);
+      margin-bottom: 12px;
+      font-family: var(--font-display);
+    }
+
+    .slide-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    /* Form Fields & Grid Layouts */
+    .options-grid {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .emoji-selection-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 480px) {
+      .emoji-selection-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+      }
+    }
+
+    /* Emoji Cards */
+    .emoji-card {
+      aspect-ratio: 1;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    .emoji-card span {
+      font-size: 40px;
+      transition: transform 0.25s ease;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+    }
+
+    .emoji-card:hover {
+      background: var(--surface-hover);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .emoji-card:hover span {
+      transform: scale(1.15) rotate(3deg);
+    }
+
+    .emoji-card.selected {
+      background: var(--primary-glow);
+      border-color: var(--primary);
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .emoji-card.selected span {
+      transform: scale(1.2);
+    }
+
+    .emoji-card::after {
+      content: '✓';
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      font-size: 10px;
+      font-weight: bold;
+      color: var(--primary);
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.2s ease;
+    }
+
+    .emoji-card.selected::after {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* Option Pills (Checkboxes & Radios) */
+    .option-pill {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .option-pill:hover {
+      background: var(--surface-hover);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateX(4px);
+    }
+
+    /* Checkbox & Radio styling */
+    .pill-indicator {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--text-muted);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .option-pill.radio .pill-indicator {
+      border-radius: 50%;
+    }
+
+    .pill-indicator::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background: var(--text);
+      border-radius: 2px;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.2s ease;
+    }
+
+    .option-pill.radio .pill-indicator::after {
+      border-radius: 50%;
+      width: 8px;
+      height: 8px;
+    }
+
+    .option-pill.selected {
+      background: var(--primary-glow);
+      border-color: var(--primary);
+    }
+
+    .option-pill.selected .pill-indicator {
+      border-color: var(--primary);
+      background: var(--primary);
+    }
+
+    .option-pill.selected .pill-indicator::after {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .pill-label {
+      font-size: 14px;
+      line-height: 1.5;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .option-pill.selected .pill-label {
+      color: #fff;
+    }
+
+    /* Text Area Styling */
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.6;
+      resize: none;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    textarea:focus {
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.04);
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.1);
+    }
+
+    /* Navigation Panel */
+    .nav-panel {
+      margin-top: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .btn {
+      font-family: var(--font-display);
+      padding: 14px 24px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      border: none;
+      outline: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #4f46e5;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn-primary:disabled {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-secondary.hidden {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* Welcome and Finished Slides */
+    .welcome-desc {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.72;
+      margin-bottom: 28px;
+      margin-top: 8px;
+    }
+
+    .badge-tag {
+      display: inline-flex;
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--accent-blue);
+      font-weight: 600;
+      margin-bottom: 16px;
+      width: fit-content;
+    }
+
+    .features-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .feature-item svg {
+      color: var(--accent-blue);
+      flex-shrink: 0;
+    }
+
+    .success-container {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      flex: 1;
+      padding: 40px 0;
+    }
+
+    .success-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgb(16, 185, 129);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgb(16, 185, 129);
+      margin-bottom: 24px;
+      animation: checkScale 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes checkScale {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .success-title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .success-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 320px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Ambient Glow -->
+  <div class="glow-container">
+    <div class="glow-circle glow-circle-1"></div>
+    <div class="glow-circle glow-circle-2"></div>
+  </div>
+
+  <!-- Survey Main Container -->
+  <main class="survey-container">
+    <!-- Header -->
+    <header class="survey-header">
+      <div class="brand-title">RE-THINK Research</div>
+      <div class="progress-track">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </header>
+
+    <!-- Survey Slides -->
+    <div class="survey-slides">
+      
+      <!-- SLIDE 0: Welcome Screen -->
+      <section class="slide active" id="slide-0">
+        <div class="badge-tag">开发辅助决策系统</div>
+        <h1 class="slide-title">AI 心理辅导中学生真实体验与表情包偏好问卷</h1>
+        <p class="welcome-desc">
+          嘿，同学！👋<br><br>
+          我们是 RE-THINK 心理智能体开发团队。在面临情绪低谷或日常压力时，我们发现通过简单的“表情包”来表达心情，远比大段文字更无痛、更高效。<br><br>
+          本问卷为匿名调查，共包含 6 道极简交互题，用时约 1.5 分钟。你的反馈将直接影响 AI 的破冰界面与交互设计，为心理竞赛项目提供坚实的研究依据。
+        </p>
+        <div class="features-list">
+          <div class="feature-item">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <span>完全匿名，仅用于学术研究与辅助开发</span>
+          </div>
+          <div class="feature-item">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <span>无复杂心理量表，极简点选交互</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 1: Emoji Voting -->
+      <section class="slide" id="slide-1" data-min-selections="1" data-max-selections="3">
+        <h2 class="slide-title">1. 你常用哪一个表情包来体现你当下的负面/低谷情绪？</h2>
+        <p class="slide-desc">不要过多思考，凭直觉选出最戳你的 1 到 3 个表情卡片（点击卡片即代表投票）。</p>
+        <div class="emoji-selection-grid">
+          <div class="emoji-card" data-value="🫠"><span>🫠</span></div>
+          <div class="emoji-card" data-value="💥"><span>💥</span></div>
+          <div class="emoji-card" data-value="😭"><span>😭</span></div>
+          <div class="emoji-card" data-value="😑"><span>😑</span></div>
+          <div class="emoji-card" data-value="🤡"><span>🤡</span></div>
+          <div class="emoji-card" data-value="🥺"><span>🥺</span></div>
+          <div class="emoji-card" data-value="🤢"><span>🤢</span></div>
+          <div class="emoji-card" data-value="💤"><span>💤</span></div>
+          <div class="emoji-card" data-value="💀"><span>💀</span></div>
+          <div class="emoji-card" data-value="🖕"><span>🖕</span></div>
+        </div>
+      </section>
+
+      <!-- SLIDE 2: Counseling Scenarios -->
+      <section class="slide" id="slide-2" data-min-selections="1">
+        <h2 class="slide-title">2. 在哪些真实痛点场景下，你更倾向于求助于 AI 心理伙伴，而非家长/老师？</h2>
+        <p class="slide-desc">请选择符合你的真实经历或预期的场景（可多选）。</p>
+        <div class="options-grid">
+          <div class="option-pill checkbox" data-value="midnight_emo">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">凌晨 emo / 深夜焦虑失眠、孤独无助时</div>
+          </div>
+          <div class="option-pill checkbox" data-value="academic_crash">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">遭遇考试砸了、名次大跌，内心防线崩塌、极度委屈沮丧</div>
+          </div>
+          <div class="option-pill checkbox" data-value="relationship_dispute">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">与死党/对象发生激烈口角，心中憋闷又不想向熟人倾诉</div>
+          </div>
+          <div class="option-pill checkbox" data-value="social_fatigue">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">感到深度的人际交往疲惫（如社交焦虑），想一个人静静吐槽</div>
+          </div>
+          <div class="option-pill checkbox" data-value="existential_void">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">觉得空虚、生活很无趣，想找个充满树洞感的安全角落发发呆</div>
+          </div>
+          <div class="option-pill checkbox" data-value="highly_private">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">遇到难以启齿的隐私困扰，极度害怕被老师/学校/家长知晓</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 3: Counseling Pain Points -->
+      <section class="slide" id="slide-3" data-min-selections="1">
+        <h2 class="slide-title">3. 你认为目前市面上的 AI 心理对话最让人反感的“致命痛点”是什么？</h2>
+        <p class="slide-desc">请根据你的实际使用体验，选出最反感的情况（可多选）。</p>
+        <div class="options-grid">
+          <div class="option-pill checkbox" data-value="toxic_positivity">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">说空洞的大道理（如一味劝说“多笑笑，一切都会好的”）</div>
+          </div>
+          <div class="option-pill checkbox" data-value="clinical_survey">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">像心理医生做门诊盘问，冷冰冰地让我填一大堆压力诊断量表</div>
+          </div>
+          <div class="option-pill checkbox" data-value="no_memory">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">“鱼的记忆”，聊着聊着就忘了我之前跟它说过的关键背景信息</div>
+          </div>
+          <div class="option-pill checkbox" data-value="stiff_template">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">说话模板化、机械生硬，一眼就看出是在用套路敷衍我</div>
+          </div>
+          <div class="option-pill checkbox" data-value="privacy_paranoia">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">隐私担忧（怀疑聊天记录会被上传服务器或转交给老师家长）</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 4: Onboarding Interface Preference -->
+      <section class="slide" id="slide-4" data-min-selections="1">
+        <h2 class="slide-title">4. 对比以下三种不同的心理 AI “开场破冰交互”，哪种更容易让你卸下防线？</h2>
+        <p class="slide-desc">假设你第一天登录系统，你最能接受的启动画面是：（单选）</p>
+        <div class="options-grid">
+          <div class="option-pill radio" data-value="emoji_selector">
+            <div class="pill-indicator"></div>
+            <div class="pill-label"><strong>8-Emoji 全屏卡片选择</strong>：没有文字压力，直接大图点选，快速传达心情</div>
+          </div>
+          <div class="option-pill radio" data-value="soft_chitchat">
+            <div class="pill-indicator"></div>
+            <div class="pill-label"><strong>纯文字温和寒暄</strong>：“嗨，今天过得累吗？跟我随便吐槽两句，我都在”</div>
+          </div>
+          <div class="option-pill radio" data-value="clinical_scale">
+            <div class="pill-indicator"></div>
+            <div class="pill-label"><strong>临床心理评估引导</strong>：直接建立数据画像（如失眠、压力水平多选题）</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 5: Skip Link opinion -->
+      <section class="slide" id="slide-5" data-min-selections="1">
+        <h2 class="slide-title">5. 你对“开场阶段锁定文本输入，必须选择表情包才能说话，但提供跳过链接”怎么看？</h2>
+        <p class="slide-desc">针对 RE-THINK 的强制表情破冰加“跳过”的设计，你的真实看法是：（单选）</p>
+        <div class="options-grid">
+          <div class="option-pill radio" data-value="strongly_support">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">非常赞成：帮我省去了开场不知道打什么字的尴尬和纠结成本</div>
+          </div>
+          <div class="option-pill radio" data-value="neutral_with_skip">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">无所谓：只要有“跳过，直接打字”这个选项存在，怎么强制都行</div>
+          </div>
+          <div class="option-pill radio" data-value="prefer_obvious_skip">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">支持但应改版：跳过按钮太小了，希望把跳过做得更显眼、更好点</div>
+          </div>
+          <div class="option-pill radio" data-value="against_locking">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">反感锁定：不喜欢任何形式的强制输入锁定，进来就该自由打字</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 6: Open suggestion -->
+      <section class="slide" id="slide-6">
+        <h2 class="slide-title">6. 最后一题，写下一句你最希望心理 AI 对你说的话，或者对我们的项目进行疯狂吐槽：</h2>
+        <p class="slide-desc">（例如：“别讲大道理，听我哭完就行” / “开场可以皮一点，别太严肃”）</p>
+        <textarea id="openFeedback" placeholder="在此写下你想说的话...（字数不限，选填）"></textarea>
+      </section>
+
+      <!-- SLIDE 7: Success Page -->
+      <section class="slide" id="slide-7">
+        <div class="success-container">
+          <div class="success-icon">
+            <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+          </div>
+          <h2 class="success-title">问卷已成功提交！</h2>
+          <p class="success-desc">感谢你的仗义相助！你的投票数据和心声已被写入系统，并正用来辅助 RE-THINK 心理智能体后续交互迭代。你可以关闭此页面了。✨</p>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Navigation Buttons -->
+    <footer class="nav-panel" id="navPanel">
+      <button class="btn btn-secondary hidden" id="prevBtn">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        <span>上一步</span>
+      </button>
+      <button class="btn btn-primary" id="nextBtn">
+        <span>开始答题</span>
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </footer>
+  </main>
+
+  <script>
+    // State management
+    const state = {
+      currentSlideIndex: 0,
+      totalSlides: 8, // 0 to 7
+      respondentId: 'survey-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 8),
+      startedAt: new Date().toISOString(),
+      answers: {
+        emojis: [],
+        scenarios: [],
+        painPoints: [],
+        onboardingPreference: '',
+        skipLinkOpinion: '',
+        openFeedback: ''
+      }
+    };
+
+    // DOM Elements
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const navPanel = document.getElementById('navPanel');
+    const slides = Array.from(document.querySelectorAll('.slide'));
+
+    // Initialization
+    function init() {
+      setupEventListeners();
+      updateProgressBar();
+    }
+
+    function setupEventListeners() {
+      // General click listener for option pills and emoji cards
+      document.addEventListener('click', (e) => {
+        // Emoji Card Toggle
+        const emojiCard = e.target.closest('.emoji-card');
+        if (emojiCard) {
+          handleEmojiSelect(emojiCard);
+          return;
+        }
+
+        // Option Pill Toggle
+        const optionPill = e.target.closest('.option-pill');
+        if (optionPill) {
+          handleOptionSelect(optionPill);
+          return;
+        }
+      });
+
+      // Navigation Buttons
+      prevBtn.addEventListener('click', goPrev);
+      nextBtn.addEventListener('click', goNext);
+    }
+
+    // Handle emoji selections (Multi-selection limit 1 to 3)
+    function handleEmojiSelect(card) {
+      const emojiVal = card.dataset.value;
+      const currentSlide = slides[state.currentSlideIndex];
+      const maxSelections = parseInt(currentSlide.dataset.maxSelections, 10) || 3;
+      
+      const isSelected = card.classList.contains('selected');
+      
+      if (isSelected) {
+        card.classList.remove('selected');
+        state.answers.emojis = state.answers.emojis.filter(item => item !== emojiVal);
+      } else {
+        if (state.answers.emojis.length >= maxSelections) {
+          // Remove the first selected one to maintain limit if needed
+          const firstSelectedVal = state.answers.emojis.shift();
+          const firstSelectedCard = currentSlide.querySelector(`.emoji-card[data-value="${firstSelectedVal}"]`);
+          if (firstSelectedCard) firstSelectedCard.classList.remove('selected');
+        }
+        card.classList.add('selected');
+        state.answers.emojis.push(emojiVal);
+      }
+      
+      validateSlideState();
+    }
+
+    // Handle option pills (Checkboxes & Radio buttons)
+    function handleOptionSelect(pill) {
+      const isCheckbox = pill.classList.contains('checkbox');
+      const val = pill.dataset.value;
+      
+      if (isCheckbox) {
+        // Multi-select Checkbox
+        const isSelected = pill.classList.contains('selected');
+        if (isSelected) {
+          pill.classList.remove('selected');
+          if (state.currentSlideIndex === 2) {
+            state.answers.scenarios = state.answers.scenarios.filter(item => item !== val);
+          } else if (state.currentSlideIndex === 3) {
+            state.answers.painPoints = state.answers.painPoints.filter(item => item !== val);
+          }
+        } else {
+          pill.classList.add('selected');
+          if (state.currentSlideIndex === 2) {
+            state.answers.scenarios.push(val);
+          } else if (state.currentSlideIndex === 3) {
+            state.answers.painPoints.push(val);
+          }
+        }
+      } else {
+        // Single-select Radio
+        const siblingPills = pill.parentNode.querySelectorAll('.option-pill');
+        siblingPills.forEach(sib => sib.classList.remove('selected'));
+        pill.classList.add('selected');
+        
+        if (state.currentSlideIndex === 4) {
+          state.answers.onboardingPreference = val;
+        } else if (state.currentSlideIndex === 5) {
+          state.answers.skipLinkOpinion = val;
+        }
+      }
+      
+      validateSlideState();
+    }
+
+    // Check if the current slide is valid to proceed
+    function validateSlideState() {
+      const currentSlide = slides[state.currentSlideIndex];
+      const minSelections = parseInt(currentSlide.dataset.minSelections, 10) || 0;
+      
+      if (minSelections === 0) {
+        nextBtn.disabled = false;
+        return true;
+      }
+      
+      let currentSelectionCount = 0;
+      if (state.currentSlideIndex === 1) {
+        currentSelectionCount = state.answers.emojis.length;
+      } else if (state.currentSlideIndex === 2) {
+        currentSelectionCount = state.answers.scenarios.length;
+      } else if (state.currentSlideIndex === 3) {
+        currentSelectionCount = state.answers.painPoints.length;
+      } else if (state.currentSlideIndex === 4) {
+        currentSelectionCount = state.answers.onboardingPreference ? 1 : 0;
+      } else if (state.currentSlideIndex === 5) {
+        currentSelectionCount = state.answers.skipLinkOpinion ? 1 : 0;
+      }
+      
+      const isValid = currentSelectionCount >= minSelections;
+      nextBtn.disabled = !isValid;
+      return isValid;
+    }
+
+    // Navigation Controls
+    function goPrev() {
+      if (state.currentSlideIndex > 0) {
+        transitionToSlide(state.currentSlideIndex - 1);
+      }
+    }
+
+    function goNext() {
+      if (state.currentSlideIndex === state.totalSlides - 2) {
+        // Final submit step
+        submitSurvey();
+      } else if (state.currentSlideIndex < state.totalSlides - 1) {
+        transitionToSlide(state.currentSlideIndex + 1);
+      }
+    }
+
+    function transitionToSlide(index) {
+      const currentSlide = slides[state.currentSlideIndex];
+      const nextSlide = slides[index];
+      
+      currentSlide.style.opacity = '0';
+      currentSlide.style.transform = 'translateY(-15px)';
+      
+      setTimeout(() => {
+        currentSlide.classList.remove('active');
+        nextSlide.classList.add('active');
+        
+        // Trigger reflow for animation
+        nextSlide.offsetHeight;
+        
+        nextSlide.style.opacity = '1';
+        nextSlide.style.transform = 'translateY(0)';
+        
+        state.currentSlideIndex = index;
+        updateUI();
+      }, 200);
+    }
+
+    // Update Navigation UI, Progress, Button Texts
+    function updateUI() {
+      // Prev Button visibility
+      if (state.currentSlideIndex === 0 || state.currentSlideIndex === state.totalSlides - 1) {
+        prevBtn.classList.add('hidden');
+      } else {
+        prevBtn.classList.remove('hidden');
+      }
+
+      // Next Button text & disabled status
+      if (state.currentSlideIndex === 0) {
+        nextBtn.innerHTML = `<span>开始答题</span><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>`;
+        nextBtn.disabled = false;
+      } else if (state.currentSlideIndex === state.totalSlides - 2) {
+        nextBtn.innerHTML = `<span>提交问卷</span><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
+        validateSlideState();
+      } else if (state.currentSlideIndex === state.totalSlides - 1) {
+        // Finish slide, hide navigation panel
+        navPanel.style.display = 'none';
+      } else {
+        nextBtn.innerHTML = `<span>下一题</span><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>`;
+        validateSlideState();
+      }
+
+      updateProgressBar();
+    }
+
+    function updateProgressBar() {
+      // Calculate progress excluding the welcome and finish slide
+      const totalSteps = state.totalSlides - 2;
+      let progress = 0;
+      if (state.currentSlideIndex > 0) {
+        progress = Math.min((state.currentSlideIndex / (state.totalSlides - 1)) * 100, 100);
+      }
+      progressBar.style.width = progress + '%';
+    }
+
+    // API Data Submission
+    async function submitSurvey() {
+      nextBtn.disabled = true;
+      nextBtn.innerHTML = `<span>提交中...</span>`;
+      
+      state.answers.openFeedback = document.getElementById('openFeedback').value.trim();
+      
+      const payload = {
+        respondentId: state.respondentId,
+        startedAt: state.startedAt,
+        completedAt: new Date().toISOString(),
+        surveyVersion: "2026.06.emoji_painpoint",
+        answers: state.answers,
+        openFeedback: state.answers.openFeedback
+      };
+
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const apiUrl = isLocalhost
+        ? 'http://localhost:8787/api/survey/submit'
+        : 'https://re-think-agent-worker.buleegasy-6c8.workers.dev/api/survey/submit';
+
+      try {
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          transitionToSlide(state.totalSlides - 1);
+        } else {
+          throw new Error('API submission failed');
+        }
+      } catch (err) {
+        console.error('Error submitting survey:', err);
+        alert('提交失败，请检查网络后重试。');
+        nextBtn.disabled = false;
+        nextBtn.innerHTML = `<span>提交问卷</span><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
+      }
+    }
+
+    // Run setup
+    init();
+  </script>
+</body>
+</html>
