@@ -114,6 +114,13 @@ const EMOTIONAL_TRIGGERS: { word: string; weight: number }[] = [
   { word: '我觉得我是', weight: 0.8 },
   { word: '我感到我是', weight: 0.8 },
   { word: '感觉就像是', weight: 0.7 },
+
+  // ---- 表情包直接输入 (权重 0.9) ----
+  { word: '🫠', weight: 0.9 },
+  { word: '💥', weight: 0.9 },
+  { word: '😭', weight: 0.9 },
+  { word: '😑', weight: 0.9 },
+  { word: '🤡', weight: 0.9 },
 ];
 
 /**

@@ -3,6 +3,14 @@ import type { KeyboardEvent } from 'react';
 import { useChatStore } from '../store/chatStore';
 import { useVoiceInput } from '../hooks/useVoiceInput';
 
+const EMOJI_CHIPS = [
+  { emoji: '🫠', label: '累瘫了', text: '🫠' },
+  { emoji: '💥', label: '要炸了', text: '💥' },
+  { emoji: '😭', label: '很难受', text: '😭' },
+  { emoji: '😑', label: '好迷茫', text: '😑' },
+  { emoji: '🤡', label: '难为情', text: '🤡' }
+];
+
 interface InputBarProps {
   onSend: (text: string) => void;
 }
@@ -10,6 +18,7 @@ interface InputBarProps {
 export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
   const [input, setInput] = useState('');
   const isStreaming = useChatStore(state => state.isStreaming);
+  const fsmState = useChatStore(state => state.fsmState);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleTranscript = useCallback((text: string) => {
@@ -72,10 +81,34 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
 
   const canSend = input.trim() && !isStreaming;
 
+  const handleSendEmoji = (text: string) => {
+    if (!isStreaming) {
+      if (isListening) stopListening();
+      onSend(text);
+    }
+  };
+
   return (
     <div className="absolute bottom-0 left-0 w-full px-4 md:px-8 pb-[calc(max(env(safe-area-inset-bottom),24px))] pt-8 bg-gradient-to-t from-surface via-surface to-transparent z-30 pointer-events-none">
       <div className="max-w-3xl mx-auto flex flex-col items-center pointer-events-auto">
         
+        {/* 表情包破冰快捷气泡 */}
+        {fsmState === 'Onboarding' && !isStreaming && (
+          <div className="w-full mb-3 flex gap-2 overflow-x-auto pb-1.5 justify-start md:justify-center scrollbar-none animate-fade-in pointer-events-auto">
+            {EMOJI_CHIPS.map((chip) => (
+              <button
+                key={chip.emoji}
+                onClick={() => handleSendEmoji(chip.text)}
+                type="button"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-outline-variant bg-surface-container-high/85 hover:bg-surface-container-highest hover:scale-105 hover:border-gemini-blue active:scale-95 text-on-surface text-sm font-medium transition-all duration-200 shrink-0 shadow-sm backdrop-blur"
+              >
+                <span>{chip.emoji}</span>
+                <span className="text-on-surface-variant text-[13px]">{chip.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Input Container */}
         <div className={`w-full relative rounded-[32px] transition-shadow duration-300 ${isStreaming ? 'gemini-thinking-glow' : 'shadow-md hover:shadow-lg focus-within:shadow-lg'}`}>
           <div className="relative flex items-end bg-surface-container-high rounded-[32px] overflow-hidden p-1">

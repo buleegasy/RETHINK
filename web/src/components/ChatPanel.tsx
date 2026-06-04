@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useChatStore } from '../store/chatStore';
 import { MessageBubble } from './MessageBubble';
 import { GeminiWelcome } from './GeminiWelcome';
+import { EmojiSelector } from './EmojiSelector';
 import { useChat } from '../hooks/useChat';
 
 export const ChatPanel: React.FC = () => {
@@ -10,6 +11,8 @@ export const ChatPanel: React.FC = () => {
   const { sendMessage } = useChat();
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  
+  const [showEmojiSelector, setShowEmojiSelector] = useState(false);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -18,16 +21,25 @@ export const ChatPanel: React.FC = () => {
   }, [messages, isStreaming]);
 
   const handleStart = () => {
-    // 标记破冰开始，用隰藏消息触发后端 Onboarding 第一层
+    // 切换到表情包选择大屏
+    setShowEmojiSelector(true);
+  };
+
+  const handleSelectEmoji = (emojiText: string) => {
+    // 标记破冰开始，将表情包作为首条输入发送给 AI 并激活聊天界面
     setOnboardingComplete(true);
-    sendMessage('开启疗愈对话', undefined, undefined, { isHidden: true });
+    sendMessage(emojiText);
   };
 
   return (
     <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8 scroll-smooth bg-transparent relative z-10">
       <div className="max-w-2xl mx-auto flex flex-col gap-1">
         {!hasCompletedOnboarding ? (
-          <GeminiWelcome onStart={handleStart} />
+          !showEmojiSelector ? (
+            <GeminiWelcome onStart={handleStart} />
+          ) : (
+            <EmojiSelector onSelect={handleSelectEmoji} />
+          )
         ) : (
           messages.map((msg, idx) => {
             const prev = messages[idx - 1];
