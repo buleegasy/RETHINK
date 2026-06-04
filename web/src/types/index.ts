@@ -143,4 +143,6 @@ export interface SSEChunk {
   fsmTrigger?: string;
   /** UI 控制参数 */
   uiControl?: UIControl;
+  /** 破冰层级 */
+  icebreakerLayer?: number;
 }

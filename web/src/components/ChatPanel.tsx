@@ -16,7 +16,7 @@ export const ChatPanel: React.FC = () => {
 
   return (
     <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth bg-transparent relative z-10">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-3xl mx-auto space-y-8">
         {messages.length === 0 ? (
           <GeminiWelcome />
         ) : (

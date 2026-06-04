@@ -86,7 +86,7 @@ chatRouter.post('/', async (c) => {
   }
 
   // ── 5. 构建 System Prompt（基于 FSM 状态） ──
-  const systemPrompt = buildSystemPromptFSM(fsmCtx.currentState, ragContext, profile, facialEmotion);
+  const systemPrompt = buildSystemPromptFSM(fsmCtx.currentState, ragContext, profile, facialEmotion, fsmCtx.icebreaker);
 
   const client = getLLMClient(c.env);
   const model = getModelName(c.env, requestedModel);
@@ -266,6 +266,12 @@ chatRouter.post('/', async (c) => {
         const parsed = JSON.parse(fullResponse.trim());
         if (parsed.ui_control) uiControl = parsed.ui_control;
         if (parsed.agent_reply) finalReply = parsed.agent_reply;
+
+        // 解析破冰画像增量更新
+        if (parsed.icebreaker_update && fsmCtx.currentState === 'Onboarding') {
+          fsmCtx.icebreaker = applyIcebreakerUpdate(fsmCtx.icebreaker, parsed.icebreaker_update);
+          console.log(`[Icebreaker] Layer ${fsmCtx.icebreaker.layer}, moodWord=${fsmCtx.icebreaker.moodWord || 'n/a'}, stressor=${fsmCtx.icebreaker.primaryStressor || 'n/a'}`);
+        }
       } catch (e) {
         console.warn('Failed to parse final JSON from AI:', e);
       }
@@ -282,7 +288,7 @@ chatRouter.post('/', async (c) => {
       const updatedMessages: ChatMessage[] = [...messages, { role: 'assistant', content: finalReply }];
       await saveToD1(c.env.DB, sessionId, updatedMessages, stageToIndex(finalStage) + 1, fsmCtx);
 
-      // 发送结束标志（含 FSM 状态转移信息 + UI 控制参数）
+      // 发送结束标志（含 FSM 状态转移信息 + UI 控制参数 + 破冰层级）
       await streamEvent.writeSSE({
         data: JSON.stringify({
           delta: '',
@@ -293,6 +299,7 @@ chatRouter.post('/', async (c) => {
           fsmState: fsmCtx.currentState,
           fsmTrigger: postTransition.trigger,
           uiControl,
+          icebreakerLayer: fsmCtx.icebreaker.layer,
           ...ragMeta,
         })
       });
@@ -335,4 +342,39 @@ async function saveToD1(
   } catch (e) {
     console.error('Failed to save session to D1:', e);
   }
+}
+
+/**
+ * 破冰画像增量更新：将 AI 输出的 icebreaker_update 合并到 FSMContext
+ */
+function applyIcebreakerUpdate(
+  current: import('../lib/fsm').IcebreakerProfile,
+  update: Record<string, unknown>,
+): import('../lib/fsm').IcebreakerProfile {
+  const result = { ...current };
+
+  // 推进层级
+  if (typeof update.next_layer === 'number') {
+    result.layer = update.next_layer;
+  }
+
+  // 各维度增量更新（仅更新非 null 字段）
+  if (update.mood_word != null) result.moodWord = String(update.mood_word);
+  if (update.attribution_style != null) result.attributionStyle = update.attribution_style as typeof result.attributionStyle;
+  if (update.vulnerability_stance != null) result.vulnerabilityStance = update.vulnerability_stance as typeof result.vulnerabilityStance;
+  if (update.primary_stressor != null) result.primaryStressor = String(update.primary_stressor);
+  if (update.social_support != null) result.socialSupport = update.social_support as typeof result.socialSupport;
+  if (update.duration != null) result.duration = update.duration as typeof result.duration;
+  if (update.expressed_need != null) result.expressedNeed = String(update.expressed_need);
+  if (update.profile_summary != null) result.profileSummary = String(update.profile_summary);
+
+  // 数组字段：累加而非覆盖
+  if (Array.isArray(update.core_beliefs) && update.core_beliefs.length > 0) {
+    result.coreBeliefs = [...result.coreBeliefs, ...update.core_beliefs.map(String)];
+  }
+  if (typeof update.observations === 'string' && update.observations) {
+    result.observations = [...result.observations, update.observations];
+  }
+
+  return result;
 }

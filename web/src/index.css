@@ -40,9 +40,9 @@
 }
 
 @layer components {
-  /* ── Gemini sparkle gradient text (Soothing Pastel) ── */
+  /* ── Gemini sparkle gradient text (Clean Cyan-Blue) ── */
   .gemini-gradient-text {
-    background: linear-gradient(90deg, #8AB4F8 0%, #D7AEFB 33%, #F6B26B 66%, #8AB4F8 100%);
+    background: linear-gradient(90deg, #4285F4 0%, #00BCD4 33%, #8AB4F8 66%, #4285F4 100%);
     background-size: 300% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -81,11 +81,28 @@
     opacity: 0.3;
   }
 
-  /* ── Gemini sparkle icon container (Soothing) ── */
+  /* ── Gemini sparkle icon container (Clean Cyan-Blue) ── */
   .gemini-sparkle-icon {
-    background: linear-gradient(135deg, #8AB4F8, #A6C8FF, #D7AEFB, #F6B26B);
+    background: linear-gradient(135deg, #4285F4, #00BCD4, #8AB4F8, #4285F4);
     background-size: 300% 300%;
     animation: sparkle 6s ease-in-out infinite;
+  }
+
+  /* ── Book-like Typography for AI Replies ── */
+  .gemini-prose {
+    @apply prose prose-slate dark:prose-invert max-w-none text-[16px] md:text-[17px] tracking-[0.02em] font-sans;
+  }
+  .gemini-prose p {
+    @apply leading-loose my-6;
+  }
+  .gemini-prose li {
+    @apply my-3 leading-relaxed;
+  }
+  .gemini-prose strong {
+    @apply font-medium text-on-surface;
+  }
+  .gemini-prose h3, .gemini-prose h4 {
+    @apply mt-8 mb-4 font-display font-medium;
   }
 
   /* ── Suggestion Chip (Gemini style) ── */

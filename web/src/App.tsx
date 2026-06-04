@@ -16,8 +16,7 @@ const GeminiSparkle = ({ className = '' }: { className?: string }) => (
     <defs>
       <linearGradient id="gemini-grad" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
         <stop stopColor="#4285F4"/>
-        <stop offset="0.5" stopColor="#A142F4"/>
-        <stop offset="1" stopColor="#4285F4"/>
+        <stop offset="1" stopColor="#00BCD4"/>
       </linearGradient>
     </defs>
   </svg>

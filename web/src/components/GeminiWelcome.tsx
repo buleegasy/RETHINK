@@ -37,7 +37,7 @@ export function GeminiWelcome() {
         className="text-4xl md:text-5xl font-display font-medium text-center px-4"
       >
         <span className="gemini-gradient-text leading-tight pb-1">
-          Hello, how can I help?
+          你好，欢迎来到这里
         </span>
       </motion.h1>
       
@@ -48,7 +48,7 @@ export function GeminiWelcome() {
         transition={{ delay: 0.4, duration: 0.8 }}
         className="mt-4 text-on-surface-variant text-lg font-sans max-w-md text-center"
       >
-        I'm ready to listen and help you re-think through any challenges.
+        在这里，你可以放心地说出任何感受。我会认真听。
       </motion.p>
     </div>
   );

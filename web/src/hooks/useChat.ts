@@ -95,6 +95,10 @@ export function useChat() {
                 if (parsed.uiControl) {
                   useChatStore.getState().setUIControl(parsed.uiControl);
                 }
+                // 更新破冰层级
+                if (parsed.icebreakerLayer) {
+                  useChatStore.getState().setIcebreakerLayer(parsed.icebreakerLayer);
+                }
                 // 存储后端返回的 sessionId
                 if (parsed.sessionId && !sessionId) {
                   setSessionId(parsed.sessionId);

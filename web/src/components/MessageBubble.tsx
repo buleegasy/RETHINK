@@ -49,7 +49,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isStreami
       <div
         className={`max-w-[85%] md:max-w-[calc(100%-56px)] ${
           isUser
-            ? 'bg-surface-container-high text-on-surface rounded-bubble rounded-br-[12px] px-6 py-3.5 shadow-sm border border-outline-variant/30'
+            ? 'bg-surface-variant/40 text-on-surface rounded-bubble rounded-br-[12px] px-6 py-4 shadow-sm border border-outline-variant/20'
             : 'pt-0.5'
         }`}
       >

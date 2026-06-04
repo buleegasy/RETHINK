@@ -12,6 +12,7 @@ interface ChatState {
   hasCompletedOnboarding: boolean;
   isStreaming: boolean;
   selectedModel: string;
+  icebreakerLayer: number;
   
   // Actions
   setSessionId: (id: string) => void;
@@ -24,6 +25,7 @@ interface ChatState {
   setOnboardingComplete: (complete: boolean) => void;
   setIsStreaming: (isStreaming: boolean) => void;
   setSelectedModel: (model: string) => void;
+  setIcebreakerLayer: (layer: number) => void;
   clearChat: () => void;
 }
 
@@ -36,6 +38,7 @@ export const useChatStore = create<ChatState>((set) => ({
   hasCompletedOnboarding: true,
   isStreaming: false,
   selectedModel: 'deepseek-v3',
+  icebreakerLayer: 1,
 
   setSessionId: (id) => set({ sessionId: id }),
   
@@ -84,6 +87,8 @@ export const useChatStore = create<ChatState>((set) => ({
   
   setSelectedModel: (model) => set({ selectedModel: model }),
 
+  setIcebreakerLayer: (icebreakerLayer) => set({ icebreakerLayer }),
+
   clearChat: () => set({ 
     sessionId: null, 
     messages: [], 
@@ -92,5 +97,6 @@ export const useChatStore = create<ChatState>((set) => ({
     uiControl: null,
     hasCompletedOnboarding: true,
     isStreaming: false,
+    icebreakerLayer: 1,
   }),
 }));

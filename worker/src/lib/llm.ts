@@ -3,7 +3,7 @@ import type { Env, ChatMessage, FSMState, UserProfile } from '../types';
 import type { IntentType } from './intent-router';
 import type { RAGContext } from './rag';
 import { formatRAGContext } from './rag';
-import { getPromptForState } from './fsm';
+import { getPromptForState, type IcebreakerProfile } from './fsm';
 
 // ============================================================
 // System Prompt 模块化组件
@@ -71,6 +71,44 @@ const OUTPUT_FORMAT_JSON = `
 1. 严禁在 JSON 字段内使用括号动作描写（如"(递纸巾)"）。
 2. 严禁输出任何 JSON 结构之外的文字说明。
 3. 确保 JSON 格式合法，特殊字符需正确转义。`;
+
+/**
+ * 破冰阶段专用输出格式
+ */
+const OUTPUT_FORMAT_ICEBREAKER = `
+【🔴 强制输出格式规范 - 必须返回合法 JSON 对象】：
+你必须将回复封装在以下 JSON 结构中，严禁包含任何 JSON 以外的文字：
+
+{
+  "state_machine": "Onboarding",
+  "agent_reply": "你的对话回复（纯文字，不要括号动作描写）",
+  "icebreaker_update": {
+    "next_layer": 当前层完成后下一轮应进入的层级编号（1-5 的整数，如果用户太防御需要多聊可保持当前层）,
+    "mood_word": "用户在 Layer 1 中使用的情绪词，没有则填 null",
+    "attribution_style": "internal 或 external 或 mixed，Layer 2 判断，没有则填 null",
+    "vulnerability_stance": "accepting 或 resisting 或 denying，Layer 3 判断，没有则填 null",
+    "primary_stressor": "用户的核心压力域描述，Layer 4，没有则填 null",
+    "social_support": "strong 或 moderate 或 weak，Layer 4，没有则填 null",
+    "duration": "recent 或 ongoing 或 chronic，Layer 4，没有则填 null",
+    "core_beliefs": ["用户表达的核心信念原文，数组，没有则为空数组"],
+    "expressed_need": "listen 或 direction 或 rest，Layer 5，没有则填 null",
+    "profile_summary": "综合所有已收集信息的 2-3 句微观画像摘要，仅在 Layer 5 填写，否则填 null",
+    "observations": "你在本轮对话中观察到的微观心理信号（必填）"
+  },
+  "ui_control": {
+    "color_theme": "对应的颜色代码（如 #0A1128）",
+    "lighting_style": "光影质感描述（如 soft_ambient）",
+    "transition_speed": "渐变速度（如 5000ms）",
+    "effect": "视觉特效描述（如 slow_breathing）"
+  }
+}
+
+【重要规则】：
+1. icebreaker_update 每个字段只填你在当前轮次中确实收集到的信息，没有的填 null。
+2. next_layer：当前层完成则设为当前层+1，用户太防御则保持当前层。
+3. observations 必须每轮都写，记录微妙心理信号。
+4. agent_reply 中严禁括号动作描写。
+5. 确保 JSON 格式合法。`;
 
 /**
  * 电影级色彩心理学规则
@@ -175,13 +213,33 @@ export function buildSystemPromptFSM(
   ragContext?: RAGContext,
   profile?: UserProfile,
   facialEmotion?: { label: string; labelZh: string; confidence: number },
+  icebreaker?: IcebreakerProfile,
 ): string {
   const parts: string[] = [];
 
   // 1. FSM 状态专属角色定义 + 任务指令
-  parts.push(getPromptForState(fsmState));
+  parts.push(getPromptForState(fsmState, icebreaker?.layer));
 
-  // 1.1 注入用户画像 (Onboarding Anchoring)
+  // 1.1 注入破冰已收集的画像数据（多轮记忆）
+  if (fsmState === 'Onboarding' && icebreaker && icebreaker.layer > 1) {
+    let accumulated = '\n【已收集的画像数据 — 请基于这些信息继续对话】\n';
+    if (icebreaker.moodWord) accumulated += '- 情绪词: "' + icebreaker.moodWord + '"\n';
+    if (icebreaker.attributionStyle) accumulated += '- 归因模式: ' + icebreaker.attributionStyle + '\n';
+    if (icebreaker.vulnerabilityStance) accumulated += '- 脆弱性态度: ' + icebreaker.vulnerabilityStance + '\n';
+    if (icebreaker.primaryStressor) accumulated += '- 核心压力源: ' + icebreaker.primaryStressor + '\n';
+    if (icebreaker.socialSupport) accumulated += '- 社会支持: ' + icebreaker.socialSupport + '\n';
+    if (icebreaker.duration) accumulated += '- 持续时间: ' + icebreaker.duration + '\n';
+    if (icebreaker.coreBeliefs.length > 0) accumulated += '- 核心信念: ' + icebreaker.coreBeliefs.map(b => '"' + b + '"').join(', ') + '\n';
+    if (icebreaker.observations.length > 0) accumulated += '- 历史观察: ' + icebreaker.observations.join(' | ') + '\n';
+    parts.push(accumulated);
+  }
+
+  // 1.2 注入破冰画像摘要（非 Onboarding 状态，用于后续阶段的上下文感知）
+  if (fsmState !== 'Onboarding' && icebreaker && icebreaker.profileSummary) {
+    parts.push('\n【用户画像摘要（来自破冰对话）】\n' + icebreaker.profileSummary + '\n');
+  }
+
+  // 1.3 注入用户画像 (Onboarding Anchoring — 来自旧版卡片选择，向后兼容)
   if (profile) {
     const profileText = `
 【重要：已掌握的用户初始画像】
@@ -223,8 +281,12 @@ export function buildSystemPromptFSM(
   // 5. 电影级 UI 规则
   parts.push(CINEMATIC_UI_RULES);
 
-  // 6. 输出格式规范
-  parts.push(OUTPUT_FORMAT_JSON);
+  // 6. 输出格式规范（破冰阶段使用专用格式）
+  if (fsmState === 'Onboarding') {
+    parts.push(OUTPUT_FORMAT_ICEBREAKER);
+  } else {
+    parts.push(OUTPUT_FORMAT_JSON);
+  }
 
   return parts.join('\n');
 }
