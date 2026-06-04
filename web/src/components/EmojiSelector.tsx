@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 
 interface EmojiSelectorProps {
   onSelect: (emojiText: string) => void;
+  onSkip: () => void;
 }
 
 const EMOJI_OPTIONS = [
@@ -16,7 +17,7 @@ const EMOJI_OPTIONS = [
   { emoji: '💤', text: '💤', colorClass: 'hover:border-slate-400 hover:shadow-slate-500/10' }
 ];
 
-export const EmojiSelector: React.FC<EmojiSelectorProps> = ({ onSelect }) => {
+export const EmojiSelector: React.FC<EmojiSelectorProps> = ({ onSelect, onSkip }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[75vh] w-full px-4 select-none">
       {/* Header Text */}
@@ -55,6 +56,17 @@ export const EmojiSelector: React.FC<EmojiSelectorProps> = ({ onSelect }) => {
           </motion.div>
         ))}
       </div>
+
+      {/* Skip button/link */}
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.4 }}
+        whileHover={{ opacity: 0.8 }}
+        onClick={onSkip}
+        className="mt-10 text-on-surface text-xs font-sans underline cursor-pointer hover:text-on-surface transition-all duration-300 border-none bg-transparent outline-none"
+      >
+        跳过，直接输入文字
+      </motion.button>
     </div>
   );
 };

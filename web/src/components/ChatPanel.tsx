@@ -31,6 +31,11 @@ export const ChatPanel: React.FC = () => {
     sendMessage(emojiText);
   };
 
+  const handleSkipEmoji = () => {
+    // 直接解锁输入框，不发送预设表情包，由用户自由输入第一句
+    setOnboardingComplete(true);
+  };
+
   return (
     <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8 scroll-smooth bg-transparent relative z-10">
       <div className="max-w-2xl mx-auto flex flex-col gap-1">
@@ -38,7 +43,7 @@ export const ChatPanel: React.FC = () => {
           !showEmojiSelector ? (
             <GeminiWelcome onStart={handleStart} />
           ) : (
-            <EmojiSelector onSelect={handleSelectEmoji} />
+            <EmojiSelector onSelect={handleSelectEmoji} onSkip={handleSkipEmoji} />
           )
         ) : (
           messages.map((msg, idx) => {
