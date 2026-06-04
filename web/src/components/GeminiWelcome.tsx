@@ -46,7 +46,8 @@ export function GeminiWelcome({ onStart }: GeminiWelcomeProps) {
         transition={{ delay: 0.4, duration: 0.8 }}
         className="mt-4 text-on-surface-variant text-lg font-sans max-w-md text-center"
       >
-        在这里，你可以放心地说出任何感受。我会认真听。
+        在这里，你可以放心地说出任何感受。<br />
+        <span className="text-on-surface-variant/60 text-base">点击下方，我会先问你几个简单的问题来了解你。</span>
       </motion.p>
 
       {/* ── Start Button ── */}
@@ -58,7 +59,7 @@ export function GeminiWelcome({ onStart }: GeminiWelcomeProps) {
           onClick={onStart}
           className="mt-10 px-8 py-3.5 rounded-full bg-on-surface text-surface font-medium text-[16px] tracking-wide hover:scale-105 active:scale-95 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2.5 group"
         >
-          <span>开启疗愈对话</span>
+          <span>开始对话</span>
           <svg className="w-5 h-5 opacity-70 group-hover:opacity-100 group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
           </svg>

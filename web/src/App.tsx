@@ -26,6 +26,7 @@ function App() {
   const { sendMessage, error } = useChat();
   const selectedModel = useChatStore(state => state.selectedModel);
   const setSelectedModel = useChatStore(state => state.setSelectedModel);
+  const hasCompletedOnboarding = useChatStore(state => state.hasCompletedOnboarding);
 
   const [currentEmotion, setCurrentEmotion] = useState<EmotionResult | null>(null);
 
@@ -88,7 +89,7 @@ function App() {
         )}
 
         <ChatPanel />
-        <InputBar onSend={handleSendWithEmotion} />
+        {hasCompletedOnboarding && <InputBar onSend={handleSendWithEmotion} />}
       </div>
 
       {/* 摄像头情绪面板 */}
