@@ -12,7 +12,6 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
   const isStreaming = useChatStore(state => state.isStreaming);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // 语音转录回调
   const handleTranscript = useCallback((text: string) => {
     setInput(prev => {
       const trimmedPrev = prev.trim();
@@ -31,11 +30,10 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
 
   const isListening = voiceState === 'listening';
 
-  // 丝滑自动调整 textarea 高度，防止闪动
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = 'auto'; // 先重置，以便准确获取 scrollHeight
+      textarea.style.height = '56px'; 
       const scrollHeight = textarea.scrollHeight;
       textarea.style.height = `${Math.min(scrollHeight, 200)}px`;
     }
@@ -48,7 +46,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
       onSend(textToSend);
       setInput('');
       if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.height = '56px';
       }
     }
   };
@@ -75,19 +73,20 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
   const canSend = input.trim() && !isStreaming;
 
   return (
-    <div className="absolute bottom-0 left-0 w-full px-4 md:px-6 pb-[calc(max(env(safe-area-inset-bottom),24px))] pt-8 bg-gradient-to-t from-surface via-surface to-transparent z-30">
-      <div className="max-w-3xl mx-auto flex flex-col items-center">
-        {/* Floating Input Pill */}
-        <div className={`w-full relative transition-all duration-300 ease-md3-standard rounded-input ${isStreaming ? 'gemini-thinking-glow' : 'shadow-lg hover:shadow-xl'}`}>
-          <div className={`relative flex items-end gap-2 bg-surface-container-high rounded-input p-2 z-10 transition-colors duration-300 ${isStreaming ? 'bg-surface' : ''}`}>
+    <div className="absolute bottom-0 left-0 w-full px-4 md:px-8 pb-[calc(max(env(safe-area-inset-bottom),24px))] pt-8 bg-gradient-to-t from-surface via-surface to-transparent z-30 pointer-events-none">
+      <div className="max-w-3xl mx-auto flex flex-col items-center pointer-events-auto">
+        
+        {/* Input Container */}
+        <div className={`w-full relative rounded-[32px] transition-shadow duration-300 ${isStreaming ? 'gemini-thinking-glow' : 'shadow-md hover:shadow-lg focus-within:shadow-lg'}`}>
+          <div className="relative flex items-end bg-surface-container-high rounded-[32px] overflow-hidden">
             
-            {/* Microphone button */}
-            {isVoiceSupported && (
+            {/* Voice Button or Spacer */}
+            {isVoiceSupported ? (
               <button
                 onClick={handleVoiceToggle}
                 disabled={isStreaming}
                 aria-label={isListening ? '停止录音' : '语音输入'}
-                className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ease-md3-standard ${
+                className={`flex-shrink-0 w-10 h-10 ml-2 mb-2 rounded-full flex items-center justify-center transition-all duration-300 ease-md3-standard ${
                   isListening
                     ? 'bg-gemini-blue/10 text-gemini-blue animate-pulse-gentle'
                     : 'text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface'
@@ -96,58 +95,59 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
                 {isListening ? (
                   <span className="relative flex items-center justify-center w-5 h-5">
                     <span className="absolute inline-flex h-full w-full rounded-full bg-gemini-blue/30 animate-ping-slow" />
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3z"/>
                       <path d="M17 12c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V22h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
                     </svg>
                   </span>
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
                     <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
                     <line x1="12" x2="12" y1="19" y2="22"/>
                   </svg>
                 )}
               </button>
+            ) : (
+              <div className="w-4 flex-shrink-0" />
             )}
 
             {/* Textarea */}
-            <div className="flex-1 relative flex items-center min-h-[48px]">
-              <textarea
-                ref={textareaRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={placeholder}
-                disabled={isStreaming}
-                className={`w-full bg-transparent px-3 py-3 text-[16px] font-sans text-on-surface placeholder-on-surface-variant border-none focus:outline-none resize-none overflow-y-auto max-h-[200px] leading-relaxed transition-all duration-200 ${
-                  isListening ? 'placeholder-gemini-blue' : ''
-                } ${isStreaming ? 'opacity-70 cursor-not-allowed' : ''}`}
-                rows={1}
-                style={{ minHeight: '48px', margin: 0, boxSizing: 'border-box' }}
-              />
-            </div>
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              disabled={isStreaming}
+              rows={1}
+              style={{ minHeight: '56px', margin: 0 }}
+              className={`flex-1 bg-transparent px-2 py-4 text-[16px] font-sans text-on-surface placeholder-on-surface-variant border-none focus:outline-none resize-none overflow-y-auto max-h-[200px] leading-relaxed transition-opacity duration-200 ${
+                isListening ? 'placeholder-gemini-blue' : ''
+              } ${isStreaming ? 'opacity-70 cursor-not-allowed' : ''}`}
+            />
 
-            {/* Send button */}
+            {/* Send Button */}
             <button
               onClick={handleSend}
               disabled={!canSend}
               aria-label="发送消息"
-              className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ease-md3-standard ${
+              className={`flex-shrink-0 w-10 h-10 mr-2 mb-2 rounded-full flex items-center justify-center transition-all duration-300 ease-md3-standard ${
                 canSend
                   ? 'bg-on-surface text-surface hover:scale-105 active:scale-95 shadow-sm'
                   : 'bg-transparent text-on-surface-variant cursor-not-allowed'
               }`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3.4 20.4l17.45-7.48c.81-.35.81-1.49 0-1.84L3.4 3.6c-.66-.29-1.39.2-1.39.91L2 9.12c0 .5.37.93.87.99L17 12 2.87 13.88c-.5.07-.87.5-.87 1l.01 4.61c0 .71.73 1.2 1.39.91z"/>
               </svg>
             </button>
+
           </div>
         </div>
 
-        {/* Bottom disclaimer */}
-        <div className="text-center mt-3">
+        {/* Bottom Disclaimer */}
+        <div className="text-center mt-3 pointer-events-auto">
           {voiceError && (
             <p className="text-xs text-error font-sans animate-fade-in mb-1">
               语音识别出错：{voiceError}
