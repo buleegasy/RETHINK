@@ -108,7 +108,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isStreami
           chunks.map((chunk, idx) => (
             <div 
               key={idx} 
-              className="bg-surface-container-low text-on-surface rounded-2xl rounded-tl-[4px] px-5 py-3.5 shadow-sm border border-outline-variant/10 gemini-prose animate-message-in w-fit"
+              className="text-on-surface gemini-prose animate-message-in w-full max-w-[90%] md:max-w-2xl pt-1"
             >
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {chunk}
