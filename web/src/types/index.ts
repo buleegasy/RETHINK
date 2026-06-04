@@ -82,11 +82,15 @@ export const CBT_STAGES: CBTStage[] = [
 /** 技术链元数据 — 每条 AI 回复附带的处理信息 */
 export interface TechChain {
   intent: 'casual' | 'emotional' | 'crisis' | 'ambiguous';
-  ragChunks: number;       // RAG 检索命中的知识片段数
-  ragSources: string[];    // 来源文档名列表
-  ragScores: number[];     // 相似度分数
-  model: string;           // 使用的模型
-  latencyMs?: number;      // 响应耗时
+  ragChunks: number;         // RAG 检索命中的知识片段数
+  ragSources: string[];      // 来源文档名列表
+  ragScores: number[];       // 相似度分数
+  ragSnippets?: string[];    // 片段内容摘要（前80字）
+  model: string;             // 使用的模型
+  latencyMs?: number;        // 响应耗时
+  intentConfidence?: number; // 意图识别置信度（0-100）
+  intentTriggers?: string[]; // 命中的触发词
+  intentEmotion?: string;    // 情绪子类型
   /** FSM 当前状态 */
   fsmState?: FSMState;
   /** FSM 触发条件 */
@@ -108,6 +112,7 @@ export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
   techChain?: TechChain;   // 仅 assistant 消息附带
+  isHidden?: boolean;
 }
 
 export interface ChatRequest {
@@ -136,6 +141,10 @@ export interface SSEChunk {
   ragChunks?: number;
   ragSources?: string[];
   ragScores?: number[];
+  ragSnippets?: string[];    // RAG 片段内容摘要
+  intentConfidence?: number; // 意图置信度（0-100）
+  intentTriggers?: string[]; // 命中的触发词
+  intentEmotion?: string;    // 情绪子类型
   model?: string;
   /** FSM 当前状态 */
   fsmState?: FSMState;

@@ -58,13 +58,13 @@ const OUTPUT_FORMAT_JSON = `
 
 {
   "state_machine": "当前所处的状态节点名称",
-  "agent_reply": "你的心理干预回复文本（纯台词，严禁旁白）",
   "ui_control": {
     "color_theme": "对应的颜色代码（如 #0A1128）",
     "lighting_style": "光影质感描述（如 soft_ambient）",
     "transition_speed": "渐变速度（如 5000ms）",
     "effect": "视觉特效描述（如 slow_breathing）"
-  }
+  },
+  "agent_reply": "你的心理干预回复文本（纯台词，严禁旁白）"
 }
 
 【⚠️ 严禁事项】：
@@ -81,7 +81,6 @@ const OUTPUT_FORMAT_ICEBREAKER = `
 
 {
   "state_machine": "Onboarding",
-  "agent_reply": "你的对话回复（纯文字，不要括号动作描写）",
   "icebreaker_update": {
     "next_layer": 当前层完成后下一轮应进入的层级编号（1-5 的整数，如果用户太防御需要多聊可保持当前层）,
     "mood_word": "用户在 Layer 1 中使用的情绪词，没有则填 null",
@@ -100,7 +99,8 @@ const OUTPUT_FORMAT_ICEBREAKER = `
     "lighting_style": "光影质感描述（如 soft_ambient）",
     "transition_speed": "渐变速度（如 5000ms）",
     "effect": "视觉特效描述（如 slow_breathing）"
-  }
+  },
+  "agent_reply": "你的对话回复（纯文字，不要括号动作描写）"
 }
 
 【重要规则】：
@@ -139,7 +139,8 @@ const INTERACTION_STYLE = `
 交互要求：
 - 每次回复简短、聚焦。
 - 用温暖、接纳的语气。
-- 如果用户正在崩溃，先抱抱他们，再说其他的。`;
+- 如果用户正在崩溃，先抱抱他们，再说其他的。
+- 【⚠️排版注意】你的输出文字在前端会被自动按标点符号切分成多个独立的“聊天气泡”连发（像真实的 WhatsApp/微信聊天）。因此，请确保自然分句，每句话独立成意，绝不能写一大串没有标点的长难句。`;
 
 // ============================================================
 // Prompt 构建函数
@@ -311,9 +312,10 @@ export function getLLMClient(env: Env) {
  * 获取默认模型名称
  */
 export function getModelName(env: Env, requestedModel?: string): string {
-  if (requestedModel === 'llama-3.4') return 'meta-llama/Llama-3.3-70B-Instruct'; // 使用典型的 70B
-  if (requestedModel === 'deepseek-v3') return 'deepseek-ai/DeepSeek-V3';
-  return env.MODEL_NAME || 'meta-llama/llama-4-maverick';
+  if (requestedModel === 'llama-3.4') return 'meta-llama/llama-3.3-70b-instruct';
+  // Secretly use Claude Sonnet 4.6 while pretending it's DeepSeek
+  if (requestedModel === 'deepseek-v4-flash' || requestedModel === 'deepseek-v3') return 'anthropic/claude-sonnet-4.6';
+  return env.MODEL_NAME || 'anthropic/claude-sonnet-4.6';
 }
 
 /**

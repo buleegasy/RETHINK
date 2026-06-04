@@ -1,6 +1,11 @@
 import { motion } from 'framer-motion';
+import { ReThinkLogo } from './ReThinkLogo';
 
-export function GeminiWelcome() {
+interface GeminiWelcomeProps {
+  onStart?: () => void;
+}
+
+export function GeminiWelcome({ onStart }: GeminiWelcomeProps) {
   return (
     <div className="flex flex-col items-center justify-center h-full w-full select-none">
       {/* ── Bouncy Particle Logo ── */}
@@ -18,15 +23,8 @@ export function GeminiWelcome() {
         {/* Outer glowing aura */}
         <div className="absolute inset-0 bg-gemini-blue blur-3xl opacity-20 rounded-full animate-pulse-gentle" />
         
-        {/* Inner dynamic gradient sparkle */}
-        <svg 
-          viewBox="0 0 28 28" 
-          fill="none" 
-          xmlns="http://www.w3.org/2000/svg" 
-          className="w-16 h-16 relative z-10 gemini-sparkle-icon rounded-full p-2"
-        >
-          <path d="M14 0C14 7.732 7.732 14 0 14C7.732 14 14 20.268 14 28C14 20.268 20.268 14 28 14C20.268 14 14 7.732 14 0Z" fill="white"/>
-        </svg>
+        {/* Inner dynamic Lotus Bloom */}
+        <ReThinkLogo className="w-20 h-20 relative z-10" />
       </motion.div>
 
       {/* ── Gradient Greeting Text ── */}
@@ -50,6 +48,22 @@ export function GeminiWelcome() {
       >
         在这里，你可以放心地说出任何感受。我会认真听。
       </motion.p>
+
+      {/* ── Start Button ── */}
+      {onStart && (
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.5, ease: "easeOut" }}
+          onClick={onStart}
+          className="mt-10 px-8 py-3.5 rounded-full bg-on-surface text-surface font-medium text-[16px] tracking-wide hover:scale-105 active:scale-95 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2.5 group"
+        >
+          <span>开启疗愈对话</span>
+          <svg className="w-5 h-5 opacity-70 group-hover:opacity-100 group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </motion.button>
+      )}
     </div>
   );
 }

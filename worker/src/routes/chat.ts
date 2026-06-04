@@ -91,11 +91,16 @@ chatRouter.post('/', async (c) => {
   const client = getLLMClient(c.env);
   const model = getModelName(c.env, requestedModel);
 
-  // 准备 RAG 元数据
+  // 准备 RAG 元数据（含片段摘要，前80字）
   const ragMeta = {
     ragChunks: ragContext?.chunks?.length || 0,
     ragSources: ragContext?.sourceDocuments || [],
     ragScores: ragContext?.scores?.map(s => Math.round(s * 100) / 100) || [],
+    ragSnippets: ragContext?.chunks?.map(c => c.substring(0, 80).replace(/\n/g, ' ').trim()) || [],
+    // 意图识别详细数据
+    intentConfidence: Math.round(intentResult.confidence * 100),
+    intentTriggers: intentResult.triggers,
+    intentEmotion: intentResult.emotion,
     model,
   };
 

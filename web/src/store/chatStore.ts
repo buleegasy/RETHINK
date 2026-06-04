@@ -37,7 +37,7 @@ export const useChatStore = create<ChatState>((set) => ({
   uiControl: null,
   hasCompletedOnboarding: true,
   isStreaming: false,
-  selectedModel: 'deepseek-v3',
+  selectedModel: 'deepseek-v4-flash',
   icebreakerLayer: 1,
 
   setSessionId: (id) => set({ sessionId: id }),

@@ -17,14 +17,23 @@ export function useChat() {
     selectedModel,
   } = useChatStore();
 
-  const sendMessage = async (text: string, profile?: UserProfile, facialEmotion?: { label: string; labelZh: string; confidence: number }) => {
+  const sendMessage = async (
+    text: string, 
+    profile?: UserProfile, 
+    facialEmotion?: { label: string; labelZh: string; confidence: number },
+    options?: { isHidden?: boolean }
+  ) => {
     if (!text.trim() && !profile) return;
 
     setError(null);
     setIsStreaming(true);
 
     // 添加用户消息
-    const userMsg: ChatMessage = { role: 'user', content: text.trim() || '(开启我的专属疗愈空间)' };
+    const userMsg: ChatMessage = { 
+      role: 'user', 
+      content: text.trim() || '(开启我的专属疗愈空间)',
+      isHidden: options?.isHidden 
+    };
     addMessage(userMsg);
 
     // 预先添加一条空的 assistant 消息用于流式填充
@@ -111,6 +120,10 @@ export function useChat() {
                     ragChunks: parsed.ragChunks || 0,
                     ragSources: parsed.ragSources || [],
                     ragScores: parsed.ragScores || [],
+                    ragSnippets: parsed.ragSnippets || [],
+                    intentConfidence: parsed.intentConfidence,
+                    intentTriggers: parsed.intentTriggers || [],
+                    intentEmotion: parsed.intentEmotion,
                     model: parsed.model || 'unknown',
                     fsmState: parsed.fsmState,
                     fsmTrigger: parsed.fsmTrigger,
