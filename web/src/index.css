@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-surface-dim text-on-surface font-sans antialiased;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ── Gemini-style scrollbar ── */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-outline/40 rounded-full transition-colors;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-outline/70;
+  }
+
+  /* Selection highlight */
+  ::selection {
+    background-color: rgba(66, 133, 244, 0.2);
+    color: #1F1F1F;
+  }
+}
+
+@layer components {
+  /* ── Gemini sparkle gradient text ── */
+  .gemini-gradient-text {
+    background: linear-gradient(135deg, #4285F4 0%, #A142F4 50%, #4285F4 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: sparkle 3s ease-in-out infinite;
+  }
+
+  /* ── Gemini sparkle icon container ── */
+  .gemini-sparkle-icon {
+    background: linear-gradient(135deg, #4285F4, #8AB4F8, #A142F4, #D7AEFB);
+    background-size: 300% 300%;
+    animation: sparkle 4s ease-in-out infinite;
+  }
+
+  /* ── M3 Elevated Surface ── */
+  .surface-elevated {
+    @apply bg-surface shadow-md rounded-card;
+  }
+
+  /* ── Suggestion Chip (Gemini style) ── */
+  .suggestion-chip {
+    @apply px-4 py-2.5 rounded-full border border-outline text-on-surface-variant text-sm
+           hover:bg-surface-container hover:border-outline-variant
+           active:bg-surface-container-high
+           transition-all duration-200 ease-md3-standard cursor-pointer select-none;
+  }
+}
+
+@layer utilities {
+  /* ── Gemini Markdown Prose ── */
+  .gemini-prose {
+    @apply text-[15px] text-on-surface leading-[1.75] max-w-none font-sans;
+  }
+  .gemini-prose p {
+    @apply mb-4;
+  }
+  .gemini-prose p:last-child {
+    @apply mb-0;
+  }
+  .gemini-prose strong {
+    @apply font-semibold text-on-surface;
+  }
+  .gemini-prose em {
+    @apply italic text-on-surface-variant;
+  }
+  .gemini-prose ul, .gemini-prose ol {
+    @apply pl-5 mb-4 space-y-1;
+  }
+  .gemini-prose li {
+    @apply text-on-surface;
+  }
+  .gemini-prose pre {
+    @apply bg-surface-container rounded-xl p-4 text-[13px] overflow-x-auto my-4 border border-outline-variant;
+  }
+  .gemini-prose code {
+    @apply font-mono bg-surface-container px-1.5 py-0.5 text-[13px] text-gemini-blue rounded-md;
+  }
+  .gemini-prose pre code {
+    @apply bg-transparent p-0 text-on-surface;
+  }
+  .gemini-prose blockquote {
+    @apply border-l-4 border-gemini-blue-pale pl-4 my-4 text-on-surface-variant italic;
+  }
+  .gemini-prose h1, .gemini-prose h2, .gemini-prose h3 {
+    @apply font-display font-medium text-on-surface mt-6 mb-3;
+  }
+  .gemini-prose h1 { @apply text-xl; }
+  .gemini-prose h2 { @apply text-lg; }
+  .gemini-prose h3 { @apply text-base; }
+  .gemini-prose a {
+    @apply text-gemini-blue underline decoration-gemini-blue/30 hover:decoration-gemini-blue transition-colors;
+  }
+  .gemini-prose hr {
+    @apply border-outline-variant my-6;
+  }
+}

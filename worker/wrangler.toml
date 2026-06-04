@@ -1,0 +1,44 @@
+name = "re-think-agent-worker"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ==========================
+# Cloudflare D1 数据库绑定
+# ==========================
+[[d1_databases]]
+binding = "DB"
+database_name = "re-think-sessions"
+database_id = "c98e99dc-c1d9-4c88-8807-851ee6fcbbc9"
+
+# ==========================
+# Cloudflare Vectorize 向量数据库（RAG 知识库）
+# ==========================
+[[vectorize]]
+binding = "VECTORIZE"
+index_name = "sag-knowledge-index"
+
+# ==========================
+# Cloudflare Workers AI（Embedding 模型）
+# ==========================
+[ai]
+binding = "AI"
+
+# ==========================
+# 本地开发配置
+# ==========================
+[dev]
+port = 8787
+local_protocol = "http"
+
+# ==========================
+# 生产环境 环境变量
+# ==========================
+[vars]
+API_BASE_URL = "https://openrouter.ai/api/v1"
+MODEL_NAME = "meta-llama/llama-4-maverick"
+
+# ==========================
+# 生产环境 Secrets（通过 wrangler secret put 设置）
+# API_KEY = "sk-or-v1-xxxx"          (OpenRouter API Key)
+# ==========================

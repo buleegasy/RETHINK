@@ -1,0 +1,19 @@
+{
+  "name": "re-think-agent",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "worker",
+    "web"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:worker\" \"npm run dev:web\"",
+    "dev:worker": "npm run dev --workspace=worker",
+    "dev:web": "npm run dev --workspace=web",
+    "build": "npm run build --workspace=web",
+    "deploy": "npm run deploy --workspace=worker"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

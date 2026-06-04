@@ -1,0 +1,9 @@
+name = "re-think-web"
+pages_build_output_dir = "dist"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "re-think-sessions"
+database_id = "c98e99dc-c1d9-4c88-8807-851ee6fcbbc9"
