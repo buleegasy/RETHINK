@@ -197,13 +197,6 @@
       margin-bottom: 24px;
     }
 
-    @media (max-width: 480px) {
-      .emoji-selection-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
-      }
-    }
-
     /* Emoji Cards */
     .emoji-card {
       aspect-ratio: 1;
@@ -517,6 +510,90 @@
       color: var(--text-muted);
       line-height: 1.6;
       max-width: 320px;
+    }
+
+    /* Mobile Responsiveness Improvements */
+    @media (max-width: 640px) {
+      body {
+        padding: 12px 10px;
+      }
+      
+      .survey-container {
+        padding: 24px 16px;
+        border-radius: var(--radius-md);
+        min-height: 500px;
+        max-width: 100%;
+      }
+
+      .survey-header {
+        margin-bottom: 16px;
+        gap: 8px;
+      }
+
+      .slide-title {
+        font-size: 19px;
+        margin-bottom: 10px;
+      }
+
+      .slide-desc {
+        font-size: 13px;
+        margin-bottom: 16px;
+      }
+
+      .welcome-desc {
+        font-size: 13.5px;
+        margin-bottom: 16px;
+        line-height: 1.5;
+      }
+
+      .option-pill {
+        padding: 12px 14px;
+        gap: 12px;
+        border-radius: var(--radius-md);
+      }
+
+      .pill-label {
+        font-size: 13px;
+      }
+
+      .emoji-selection-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+      }
+
+      .emoji-card {
+        border-radius: var(--radius-md);
+      }
+
+      .emoji-card span {
+        font-size: 32px;
+      }
+
+      textarea {
+        min-height: 100px;
+        font-size: 14px;
+        padding: 12px;
+      }
+
+      .nav-panel {
+        padding-top: 16px;
+      }
+
+      .btn {
+        padding: 12px 18px;
+        font-size: 14px;
+      }
+      
+      .badge-tag {
+        margin-bottom: 12px;
+      }
+    }
+
+    @media (max-width: 350px) {
+      .emoji-selection-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+      }
     }
   </style>
 </head>
