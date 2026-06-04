@@ -78,7 +78,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
         
         {/* Input Container */}
         <div className={`w-full relative rounded-[32px] transition-shadow duration-300 ${isStreaming ? 'gemini-thinking-glow' : 'shadow-md hover:shadow-lg focus-within:shadow-lg'}`}>
-          <div className="relative flex items-end bg-surface-container-high rounded-[32px] overflow-hidden">
+          <div className="relative flex items-end bg-surface-container-high rounded-[32px] overflow-hidden p-2">
             
             {/* Voice Button or Spacer */}
             {isVoiceSupported ? (
@@ -86,7 +86,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
                 onClick={handleVoiceToggle}
                 disabled={isStreaming}
                 aria-label={isListening ? '停止录音' : '语音输入'}
-                className={`flex-shrink-0 w-10 h-10 ml-2 mb-2 rounded-full flex items-center justify-center transition-all duration-300 ease-md3-standard ${
+                className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ease-md3-standard ${
                   isListening
                     ? 'bg-gemini-blue/10 text-gemini-blue animate-pulse-gentle'
                     : 'text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface'
@@ -109,7 +109,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
                 )}
               </button>
             ) : (
-              <div className="w-4 flex-shrink-0" />
+              <div className="w-2 flex-shrink-0" />
             )}
 
             {/* Textarea */}
@@ -121,8 +121,8 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
               placeholder={placeholder}
               disabled={isStreaming}
               rows={1}
-              style={{ minHeight: '56px', margin: 0 }}
-              className={`flex-1 bg-transparent px-2 py-4 text-[16px] font-sans text-on-surface placeholder-on-surface-variant border-none focus:outline-none resize-none overflow-y-auto max-h-[200px] leading-relaxed transition-opacity duration-200 ${
+              style={{ minHeight: '40px', margin: 0 }}
+              className={`flex-1 bg-transparent px-3 py-2 text-[16px] leading-[24px] font-sans text-on-surface placeholder-on-surface-variant border-none focus:outline-none resize-none overflow-y-auto max-h-[160px] transition-opacity duration-200 ${
                 isListening ? 'placeholder-gemini-blue' : ''
               } ${isStreaming ? 'opacity-70 cursor-not-allowed' : ''}`}
             />
@@ -132,7 +132,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
               onClick={handleSend}
               disabled={!canSend}
               aria-label="发送消息"
-              className={`flex-shrink-0 w-10 h-10 mr-2 mb-2 rounded-full flex items-center justify-center transition-all duration-300 ease-md3-standard ${
+              className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ease-md3-standard ${
                 canSend
                   ? 'bg-on-surface text-surface hover:scale-105 active:scale-95 shadow-sm'
                   : 'bg-transparent text-on-surface-variant cursor-not-allowed'
