@@ -121,6 +121,9 @@ const EMOTIONAL_TRIGGERS: { word: string; weight: number }[] = [
   { word: '😭', weight: 0.9 },
   { word: '😑', weight: 0.9 },
   { word: '🤡', weight: 0.9 },
+  { word: '🥺', weight: 0.9 },
+  { word: '🤢', weight: 0.9 },
+  { word: '💤', weight: 0.9 },
 ];
 
 /**
