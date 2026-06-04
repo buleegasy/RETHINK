@@ -548,7 +548,7 @@
         <p class="welcome-desc">
           嘿，同学！👋<br><br>
           我们是 RE-THINK 心理智能体开发团队。在面临情绪低谷或日常压力时，我们发现通过简单的“表情包”来表达心情，远比大段文字更无痛、更高效。<br><br>
-          本问卷为匿名调查，共包含 6 道极简交互题，用时约 1.5 分钟。你的反馈将直接影响 AI 的破冰界面与交互设计，为心理竞赛项目提供坚实的研究依据。
+          本问卷为匿名调查，共包含 5 道极简交互题，用时约 1.5 分钟。你的反馈将直接影响 AI 的破冰界面与交互设计，为心理竞赛项目提供坚实的研究依据。
         </p>
         <div class="features-list">
           <div class="feature-item">
@@ -660,39 +660,15 @@
         </div>
       </section>
 
-      <!-- SLIDE 5: Skip Link opinion -->
-      <section class="slide" id="slide-5" data-min-selections="1">
-        <h2 class="slide-title">5. 你对“开场阶段锁定文本输入，必须选择表情包才能说话，但提供跳过链接”怎么看？</h2>
-        <p class="slide-desc">针对 RE-THINK 的强制表情破冰加“跳过”的设计，你的真实看法是：（单选）</p>
-        <div class="options-grid">
-          <div class="option-pill radio" data-value="strongly_support">
-            <div class="pill-indicator"></div>
-            <div class="pill-label">非常赞成：帮我省去了开场不知道打什么字的尴尬和纠结成本</div>
-          </div>
-          <div class="option-pill radio" data-value="neutral_with_skip">
-            <div class="pill-indicator"></div>
-            <div class="pill-label">无所谓：只要有“跳过，直接打字”这个选项存在，怎么强制都行</div>
-          </div>
-          <div class="option-pill radio" data-value="prefer_obvious_skip">
-            <div class="pill-indicator"></div>
-            <div class="pill-label">支持但应改版：跳过按钮太小了，希望把跳过做得更显眼、更好点</div>
-          </div>
-          <div class="option-pill radio" data-value="against_locking">
-            <div class="pill-indicator"></div>
-            <div class="pill-label">反感锁定：不喜欢任何形式的强制输入锁定，进来就该自由打字</div>
-          </div>
-        </div>
+      <!-- SLIDE 5: Open suggestion -->
+      <section class="slide" id="slide-5">
+        <h2 class="slide-title">5. 你对未来的 AI 心理辅导有任何建议、期待或吐槽吗？</h2>
+        <p class="slide-desc">请留下你最真实的感受或想法（可选填，字数不限）。</p>
+        <textarea id="openFeedback" placeholder="在此输入你的想法..."></textarea>
       </section>
 
-      <!-- SLIDE 6: Open suggestion -->
+      <!-- SLIDE 6: Success Page -->
       <section class="slide" id="slide-6">
-        <h2 class="slide-title">6. 最后一题，写下一句你最希望心理 AI 对你说的话，或者对我们的项目进行疯狂吐槽：</h2>
-        <p class="slide-desc">（例如：“别讲大道理，听我哭完就行” / “开场可以皮一点，别太严肃”）</p>
-        <textarea id="openFeedback" placeholder="在此写下你想说的话...（字数不限，选填）"></textarea>
-      </section>
-
-      <!-- SLIDE 7: Success Page -->
-      <section class="slide" id="slide-7">
         <div class="success-container">
           <div class="success-icon">
             <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -700,7 +676,7 @@
             </svg>
           </div>
           <h2 class="success-title">问卷已成功提交！</h2>
-          <p class="success-desc">感谢你的仗义相助！你的投票数据和心声已被写入系统，并正用来辅助 RE-THINK 心理智能体后续交互迭代。你可以关闭此页面了。✨</p>
+          <p class="success-desc">感谢你的仗义相助！你的投票数据和建议已被写入系统，并正用来辅助 RE-THINK 心理智能体后续交互迭代。你可以关闭此页面了。✨</p>
         </div>
       </section>
 
@@ -723,7 +699,7 @@
     // State management
     const state = {
       currentSlideIndex: 0,
-      totalSlides: 8, // 0 to 7
+      totalSlides: 7, // 0 to 6
       respondentId: 'survey-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 8),
       startedAt: new Date().toISOString(),
       answers: {
@@ -731,7 +707,6 @@
         scenarios: [],
         painPoints: [],
         onboardingPreference: '',
-        skipLinkOpinion: '',
         openFeedback: ''
       }
     };
@@ -828,8 +803,6 @@
         
         if (state.currentSlideIndex === 4) {
           state.answers.onboardingPreference = val;
-        } else if (state.currentSlideIndex === 5) {
-          state.answers.skipLinkOpinion = val;
         }
       }
       
@@ -855,8 +828,6 @@
         currentSelectionCount = state.answers.painPoints.length;
       } else if (state.currentSlideIndex === 4) {
         currentSelectionCount = state.answers.onboardingPreference ? 1 : 0;
-      } else if (state.currentSlideIndex === 5) {
-        currentSelectionCount = state.answers.skipLinkOpinion ? 1 : 0;
       }
       
       const isValid = currentSelectionCount >= minSelections;
@@ -950,7 +921,7 @@
         respondentId: state.respondentId,
         startedAt: state.startedAt,
         completedAt: new Date().toISOString(),
-        surveyVersion: "2026.06.emoji_painpoint",
+        surveyVersion: "2026.06.emoji_painpoint_v2",
         answers: state.answers,
         openFeedback: state.answers.openFeedback
       };
