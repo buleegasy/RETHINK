@@ -33,9 +33,9 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = '56px'; 
+      textarea.style.height = '40px'; 
       const scrollHeight = textarea.scrollHeight;
-      textarea.style.height = `${Math.min(scrollHeight, 200)}px`;
+      textarea.style.height = `${Math.min(scrollHeight, 160)}px`;
     }
   }, [input]);
 
@@ -46,7 +46,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
       onSend(textToSend);
       setInput('');
       if (textareaRef.current) {
-        textareaRef.current.style.height = '56px';
+        textareaRef.current.style.height = '40px';
       }
     }
   };
