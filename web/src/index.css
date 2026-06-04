@@ -19,17 +19,17 @@
 
   /* ── Gemini-style scrollbar ── */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-outline/40 rounded-full transition-colors;
+    @apply bg-outline-variant/60 rounded-full transition-colors;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-outline/70;
+    @apply bg-outline/80;
   }
 
   /* Selection highlight */
@@ -40,41 +40,66 @@
 }
 
 @layer components {
-  /* ── Gemini sparkle gradient text ── */
+  /* ── Gemini sparkle gradient text (Soothing Pastel) ── */
   .gemini-gradient-text {
-    background: linear-gradient(135deg, #4285F4 0%, #A142F4 50%, #4285F4 100%);
-    background-size: 200% 200%;
+    background: linear-gradient(90deg, #8AB4F8 0%, #D7AEFB 33%, #F6B26B 66%, #8AB4F8 100%);
+    background-size: 300% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: sparkle 3s ease-in-out infinite;
+    animation: sparkleMesh 12s ease-in-out infinite;
   }
 
-  /* ── Gemini sparkle icon container ── */
+  /* ── Authentic Gemini Thinking Glow (Shimmer Mesh - Light & Soothing) ── */
+  .gemini-thinking-glow {
+    position: relative;
+  }
+  
+  .gemini-thinking-glow::before {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #E8F0FE, #F3E8FD, #FCE8E6, #E8F0FE);
+    background-size: 200% 100%;
+    animation: shimmerGlow 4s ease-in-out infinite;
+    z-index: -1;
+    opacity: 0.6;
+    filter: blur(14px);
+    transition: opacity 0.5s ease;
+  }
+
+  .gemini-thinking-glow::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #D2E3FC, #E8D8FA, #FCE8E6, #D2E3FC);
+    background-size: 200% 100%;
+    animation: shimmerGlow 4s ease-in-out infinite;
+    z-index: -1;
+    opacity: 0.3;
+  }
+
+  /* ── Gemini sparkle icon container (Soothing) ── */
   .gemini-sparkle-icon {
-    background: linear-gradient(135deg, #4285F4, #8AB4F8, #A142F4, #D7AEFB);
+    background: linear-gradient(135deg, #8AB4F8, #A6C8FF, #D7AEFB, #F6B26B);
     background-size: 300% 300%;
-    animation: sparkle 4s ease-in-out infinite;
-  }
-
-  /* ── M3 Elevated Surface ── */
-  .surface-elevated {
-    @apply bg-surface shadow-md rounded-card;
+    animation: sparkle 6s ease-in-out infinite;
   }
 
   /* ── Suggestion Chip (Gemini style) ── */
   .suggestion-chip {
-    @apply px-4 py-2.5 rounded-full border border-outline text-on-surface-variant text-sm
-           hover:bg-surface-container hover:border-outline-variant
-           active:bg-surface-container-high
-           transition-all duration-200 ease-md3-standard cursor-pointer select-none;
+    @apply px-4 py-2 rounded-full border border-outline-variant text-on-surface text-[14px]
+           hover:bg-surface-container hover:border-outline
+           transition-all duration-200 ease-out cursor-pointer select-none whitespace-nowrap;
   }
 }
 
 @layer utilities {
   /* ── Gemini Markdown Prose ── */
   .gemini-prose {
-    @apply text-[15px] text-on-surface leading-[1.75] max-w-none font-sans;
+    @apply text-[16px] text-on-surface leading-[1.65] max-w-none font-sans;
   }
   .gemini-prose p {
     @apply mb-4;
@@ -88,34 +113,51 @@
   .gemini-prose em {
     @apply italic text-on-surface-variant;
   }
-  .gemini-prose ul, .gemini-prose ol {
-    @apply pl-5 mb-4 space-y-1;
+  .gemini-prose ul {
+    @apply mb-4 space-y-1 list-disc pl-6;
+  }
+  .gemini-prose ol {
+    @apply mb-4 space-y-1 list-decimal pl-6;
   }
   .gemini-prose li {
-    @apply text-on-surface;
+    @apply text-on-surface pl-1;
+  }
+  .gemini-prose li::marker {
+    @apply text-on-surface-variant;
   }
   .gemini-prose pre {
-    @apply bg-surface-container rounded-xl p-4 text-[13px] overflow-x-auto my-4 border border-outline-variant;
+    @apply bg-surface-container rounded-2xl p-4 text-[13px] overflow-x-auto my-4 border-none shadow-inner-soft;
   }
   .gemini-prose code {
-    @apply font-mono bg-surface-container px-1.5 py-0.5 text-[13px] text-gemini-blue rounded-md;
+    @apply font-mono bg-surface-container px-1.5 py-0.5 text-[13px] text-on-surface rounded-md font-medium;
   }
   .gemini-prose pre code {
-    @apply bg-transparent p-0 text-on-surface;
+    @apply bg-transparent p-0 text-on-surface font-normal;
   }
   .gemini-prose blockquote {
-    @apply border-l-4 border-gemini-blue-pale pl-4 my-4 text-on-surface-variant italic;
+    @apply border-l-4 border-gemini-blue pl-4 my-4 text-on-surface-variant italic bg-gemini-blue/5 py-2 rounded-r-xl;
   }
   .gemini-prose h1, .gemini-prose h2, .gemini-prose h3 {
     @apply font-display font-medium text-on-surface mt-6 mb-3;
   }
-  .gemini-prose h1 { @apply text-xl; }
-  .gemini-prose h2 { @apply text-lg; }
-  .gemini-prose h3 { @apply text-base; }
+  .gemini-prose h1 { @apply text-2xl; }
+  .gemini-prose h2 { @apply text-xl; }
+  .gemini-prose h3 { @apply text-lg; }
   .gemini-prose a {
     @apply text-gemini-blue underline decoration-gemini-blue/30 hover:decoration-gemini-blue transition-colors;
   }
   .gemini-prose hr {
     @apply border-outline-variant my-6;
   }
+}
+
+@keyframes shimmerGlow {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+@keyframes sparkleMesh {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }

@@ -1,11 +1,10 @@
 import { useState, useCallback } from 'react';
-import { StageIndicator } from './components/StageIndicator';
 import { ChatPanel } from './components/ChatPanel';
 import { InputBar } from './components/InputBar';
 import { CameraPanel } from './components/CameraPanel';
+import { AmbientGlow } from './components/AmbientGlow';
 import { useChat } from './hooks/useChat';
 import { useChatStore } from './store/chatStore';
-import { CBT_STAGES } from './types';
 import type { UserProfile } from './types';
 import type { EmotionResult } from './hooks/useFaceEmotion';
 import { EMOTION_MAP } from './hooks/useFaceEmotion';
@@ -24,33 +23,12 @@ const GeminiSparkle = ({ className = '' }: { className?: string }) => (
   </svg>
 );
 
-const STAGE_COLORS: Record<string, string> = {
-  '剥离事实': 'bg-stage-blue',
-  '捕获想法': 'bg-stage-green',
-  '扫描漏洞': 'bg-stage-orange',
-  '证据质询': 'bg-stage-red',
-  '重构认知': 'bg-stage-purple',
-};
-
-const STAGE_TEXT_COLORS: Record<string, string> = {
-  '剥离事实': 'text-stage-blue',
-  '捕获想法': 'text-stage-green',
-  '扫描漏洞': 'text-stage-orange',
-  '证据质询': 'text-stage-red',
-  '重构认知': 'text-stage-purple',
-};
-
 function App() {
   const { sendMessage, error } = useChat();
-  const currentStage = useChatStore(state => state.currentStage);
   const selectedModel = useChatStore(state => state.selectedModel);
   const setSelectedModel = useChatStore(state => state.setSelectedModel);
 
   const [currentEmotion, setCurrentEmotion] = useState<EmotionResult | null>(null);
-
-  const stageIndex = CBT_STAGES.indexOf(currentStage) + 1;
-  const colorClass = STAGE_COLORS[currentStage];
-  const textColorClass = STAGE_TEXT_COLORS[currentStage];
 
   const handleSendWithEmotion = useCallback((text: string, profile?: UserProfile) => {
     const emotionPayload = currentEmotion && currentEmotion.label !== 'neutral' && currentEmotion.confidence > 50
@@ -65,8 +43,7 @@ function App() {
 
   return (
     <div className="fixed inset-0 flex w-full overflow-hidden bg-surface-dim">
-      {/* 左侧阶段指示器 (桌面端) */}
-      <StageIndicator />
+      <AmbientGlow />
 
       {/* 主对话区 */}
       <div className="flex flex-col flex-1 h-full relative">
@@ -80,17 +57,8 @@ function App() {
             </h1>
           </div>
 
-          {/* 右侧：模型选择 + 阶段 */}
+          {/* 右侧：模型选择 */}
           <div className="flex items-center gap-3">
-            {/* 阶段药丸 */}
-            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container text-xs font-medium ${textColorClass}`}>
-              <div className="relative flex items-center justify-center w-1.5 h-1.5">
-                <div className={`absolute w-full h-full rounded-full ${colorClass} opacity-60 animate-ping-slow`} />
-                <div className={`relative w-1.5 h-1.5 rounded-full ${colorClass}`} />
-              </div>
-              {stageIndex}/5
-            </div>
-
             {/* 模型选择器 */}
             <div className="relative">
               <select
