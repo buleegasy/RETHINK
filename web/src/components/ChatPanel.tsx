@@ -24,20 +24,31 @@ export const ChatPanel: React.FC = () => {
   };
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth bg-transparent relative z-10">
-      <div className="max-w-3xl mx-auto space-y-8">
+    <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8 scroll-smooth bg-transparent relative z-10">
+      <div className="max-w-2xl mx-auto flex flex-col gap-1">
         {!hasCompletedOnboarding ? (
           <GeminiWelcome onStart={handleStart} />
         ) : (
-          messages.map((msg, idx) => (
-            <MessageBubble
-              key={msg.id || idx}
-              message={msg}
-              isStreaming={isStreaming && idx === messages.length - 1 && msg.role === 'assistant'}
-            />
-          ))
+          messages.map((msg, idx) => {
+            const prev = messages[idx - 1];
+            const next = messages[idx + 1];
+            const isFirstInGroup = !prev || prev.isHidden || prev.role !== msg.role;
+            const isLastInGroup = !next || next.isHidden || next.role !== msg.role;
+            // Add extra top margin when a new "speaker" starts
+            const needsGroupSep = isFirstInGroup && idx > 0;
+            return (
+              <div key={msg.id || idx} className={needsGroupSep ? 'mt-4' : ''}>
+                <MessageBubble
+                  message={msg}
+                  isStreaming={isStreaming && idx === messages.length - 1 && msg.role === 'assistant'}
+                  isFirstInGroup={isFirstInGroup}
+                  isLastInGroup={isLastInGroup}
+                />
+              </div>
+            );
+          })
         )}
-        <div ref={bottomRef} className="h-32" />
+        <div ref={bottomRef} className="h-28" />
       </div>
     </div>
   );

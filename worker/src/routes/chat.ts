@@ -381,5 +381,10 @@ function applyIcebreakerUpdate(
     result.observations = [...result.observations, update.observations];
   }
 
+  // AI 主动退出破冰信号
+  if (update.exit_icebreaker === true) {
+    result.exitSignal = true;
+  }
+
   return result;
 }

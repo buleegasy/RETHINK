@@ -59,6 +59,11 @@ export interface IcebreakerProfile {
   profileSummary?: string;
   /** 每轮 AI 的观察笔记 */
   observations: string[];
+  /**
+   * AI 主动标记退出破冰信号。
+   * 当 AI 感知到用户直入主题、情绪严重或已提供足够信息，应设为 true
+   */
+  exitSignal?: boolean;
 }
 
 /** FSM 运行上下文 — 跨轮次持久化 */
@@ -179,46 +184,73 @@ function transitionFromOnboarding(
   intent: IntentResult,
   phase: 'pre' | 'post',
 ): FSMTransitionResult {
-  // 破冰退出条件：
-  //   - 最少完成 Layer 3 + 画像足够丰富
-  //   - 或 Layer 5 已完成（最大轮次）
-  //   - 或用户画像已通过其他方式收集
-  //   - 或 pre 阶段检测到强烈情绪信号 → 提前进入倾听
-
   const icebreaker = ctx.icebreaker;
   const layer = icebreaker.layer;
 
-  // 如果在 pre 阶段检测到强烈情绪信号 → 提前进入倾听
-  if (phase === 'pre' && intent.type === 'emotional' && intent.confidence >= 0.7) {
+  // ── 全局最高优先级：AI 主动标记 exitSignal （post 阶段）——
+  // AI 感知用户直入主题 / 内容已足够丰富，主动退出破冰
+  if (phase === 'post' && icebreaker.exitSignal) {
     return {
       nextState: 'Active_Listening',
-      trigger: '用户在破冰阶段即流露明显情绪，提前进入倾听',
-      contextUpdate: {
-        profileCollected: true,
-        emotionalStreak: 1,
-      },
+      trigger: 'AI 判断用户已直入主题，主动跳出破冰',
+      contextUpdate: { profileCollected: true, emotionalStreak: 1 },
     };
   }
 
-  // Post 阶段：评估是否退出破冰
-  if (phase === 'post') {
-    const minLayerReached = layer >= 3;
-    const maxLayerReached = layer >= 5;
+  // ── Pre 阶段：代码层快速跳出判断（不需要等 AI 回复）——
+  if (phase === 'pre') {
 
-    // 画像丰富度：至少收集到 moodWord + primaryStressor + 一条 coreBelief
-    const profileRich = !!(
-      icebreaker.moodWord &&
-      icebreaker.primaryStressor &&
-      icebreaker.coreBeliefs.length > 0
-    );
-
-    const shouldAdvance =
-      (minLayerReached && profileRich) || maxLayerReached || ctx.profileCollected;
-
-    if (shouldAdvance) {
+    // 1. 高强度情绪信号（降低阈值使其更易触发）
+    if (intent.type === 'emotional' && intent.confidence >= 0.45) {
       return {
         nextState: 'Active_Listening',
-        trigger: `破冰完成 (layer=${layer}, profileRich=${profileRich})`,
+        trigger: `用户在破冰阶段即流露明显情绪 (confidence=${intent.confidence.toFixed(2)})，提前进入倾听`,
+        contextUpdate: { profileCollected: true, emotionalStreak: 1 },
+      };
+    }
+
+    // 2. 用户消息较长（主动提供丰富信息）且包含任意情绪信号
+    //    心理学依据：发出较长消息的用户已处于表达状态，继续破冰小问题反而打断关系
+    const userMsgLength = intent.triggers.join('').length; // 促劤：这里利用触发词长度作为代理
+    if (intent.type !== 'casual' && intent.confidence >= 0.3 && layer >= 2) {
+      // 已经破冰了至少 2 轮，且用户有一定情绪负荷
+      return {
+        nextState: 'Active_Listening',
+        trigger: `用户已开起话头 (layer=${layer})，且对话有一定情绪深度，进入倾听`,
+        contextUpdate: { profileCollected: true, emotionalStreak: 1 },
+      };
+    }
+
+    // 3. 意图不明但已经破冰超过 3 轮
+    if (intent.type === 'ambiguous' && layer >= 4) {
+      return {
+        nextState: 'Active_Listening',
+        trigger: `破冰已达 Layer ${layer}，过渡到倾听`,
+        contextUpdate: { profileCollected: true },
+      };
+    }
+  }
+
+  // ── Post 阶段：常规画像丰富度检查 ——
+  if (phase === 'post') {
+    const maxLayerReached = layer >= 5;
+
+    // 画像丰富度：收集到任意两个维度（降低门槛，以前需要 moodWord+stressor+belief）
+    const collectedDimensions = [
+      icebreaker.moodWord,
+      icebreaker.primaryStressor,
+      icebreaker.attributionStyle,
+      icebreaker.vulnerabilityStance,
+      icebreaker.coreBeliefs.length > 0 ? 'yes' : null,
+    ].filter(Boolean).length;
+
+    const profileRich = collectedDimensions >= 2;
+    const minLayerReached = layer >= 3;
+
+    if ((minLayerReached && profileRich) || maxLayerReached || ctx.profileCollected) {
+      return {
+        nextState: 'Active_Listening',
+        trigger: `破冰完成 (layer=${layer}, 已收集维度=${collectedDimensions})`,
         contextUpdate: { profileCollected: true },
       };
     }

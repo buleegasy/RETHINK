@@ -82,6 +82,7 @@ const OUTPUT_FORMAT_ICEBREAKER = `
 {
   "state_machine": "Onboarding",
   "icebreaker_update": {
+    "exit_icebreaker": 如果用户直入主题/情绪严重/已提供足够多的信息应立即跳出破冰则设为 true，否则 false,
     "next_layer": 当前层完成后下一轮应进入的层级编号（1-5 的整数，如果用户太防御需要多聊可保持当前层）,
     "mood_word": "用户在 Layer 1 中使用的情绪词，没有则填 null",
     "attribution_style": "internal 或 external 或 mixed，Layer 2 判断，没有则填 null",
@@ -104,11 +105,18 @@ const OUTPUT_FORMAT_ICEBREAKER = `
 }
 
 【重要规则】：
-1. icebreaker_update 每个字段只填你在当前轮次中确实收集到的信息，没有的填 null。
-2. next_layer：当前层完成则设为当前层+1，用户太防御则保持当前层。
-3. observations 必须每轮都写，记录微妙心理信号。
-4. agent_reply 中严禁括号动作描写。
-5. 确保 JSON 格式合法。`;
+1. 以下情况必须将 exit_icebreaker 设为 true，agent_reply 直接过渡到共情倾听模式：
+   - 用户开始就说出具体问题（分手、被老师批评、考试失利、家庭冲突等）
+   - 情绪已明显达到高强度（崩溃、哭泣、极度焦虑、“我不知道怎么办了”、“急死我了”）
+   - 用户已提供充足的背景信息，继续破冰小问题会显得硬凰或轻浮
+   - 用户明确寻求帮助（“我想聊聊……”“帮我分析”“我需要帮助”）
+   - 判断标准：如果继续破冰提问会让人感觉“你没有在听我说”，就必须退出。
+2. exit_icebreaker=true 时，agent_reply 应直接对用户说的内容作出共情回应，而不是继续破冰提问。
+3. icebreaker_update 每个字段只填你在当前轮次中确实收集到的信息，没有的填 null。
+4. next_layer：当前层完成则设为当前层+1，用户太防御则保持当前层。
+5. observations 必须每轮都写，记录微妙心理信号。
+6. agent_reply 中严禁括号动作描写。
+7. 确保 JSON 格式合法。`;
 
 /**
  * 电影级色彩心理学规则
