@@ -523,6 +523,8 @@
       gap: 12px;
     }
   </style>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -591,11 +593,11 @@
         <section class="card-panel">
           <h2 class="card-title">
             <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-            <span>情绪表情包得票排行榜</span>
+            <span>情绪表情包投票偏好</span>
             <span class="badge">限选3个</span>
           </h2>
-          <div class="leaderboard-list" id="emojiLeaderboard">
-            <!-- Dynamic insert -->
+          <div style="position: relative; height: 320px; width: 100%;">
+            <canvas id="emojiChart"></canvas>
           </div>
         </section>
 
@@ -605,8 +607,8 @@
             <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
             <span>首屏启动交互方案偏好</span>
           </h2>
-          <div class="pref-cards-grid" id="onboardingPreferenceStats">
-            <!-- Dynamic insert -->
+          <div style="position: relative; height: 320px; width: 100%; display: flex; align-items: center; justify-content: center;">
+            <canvas id="onboardingChart"></canvas>
           </div>
         </section>
       </div>
@@ -619,8 +621,8 @@
             <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
             <span>AI 辅导高频心理求助场景分布</span>
           </h2>
-          <div class="distribution-list" id="scenariosDistribution">
-            <!-- Dynamic insert -->
+          <div style="position: relative; height: 320px; width: 100%; display: flex; align-items: center; justify-content: center;">
+            <canvas id="scenariosChart"></canvas>
           </div>
         </section>
 
@@ -630,8 +632,8 @@
             <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
             <span>AI 心理对话的“致命反感痛点”</span>
           </h2>
-          <div class="distribution-list" id="painPointsDistribution">
-            <!-- Dynamic insert -->
+          <div style="position: relative; height: 320px; width: 100%; display: flex; align-items: center; justify-content: center;">
+            <canvas id="painPointsChart"></canvas>
           </div>
         </section>
       </div>
@@ -772,28 +774,6 @@
         percent: total > 0 ? Math.round((votes / total) * 100) : 0
       })).sort((a, b) => b.votes - a.votes);
 
-      // Render Emojis
-      const emojiContainer = document.getElementById('emojiLeaderboard');
-      emojiContainer.innerHTML = '';
-      sortedEmojis.forEach((item, idx) => {
-        const row = document.createElement('div');
-        row.className = 'leaderboard-item';
-        row.innerHTML = `
-          <div class="emoji-rank">${idx + 1}</div>
-          <div class="emoji-avatar"><span>${item.emoji}</span></div>
-          <div class="emoji-stat-details">
-            <div class="emoji-label-row">
-              <span class="emoji-name">${item.name}</span>
-              <span class="emoji-count">${item.votes} 票 (${item.percent}%)</span>
-            </div>
-            <div class="bar-track">
-              <div class="bar-fill" style="width: ${item.percent}%"></div>
-            </div>
-          </div>
-        `;
-        emojiContainer.appendChild(row);
-      });
-
       // 3. Aggregate Onboarding preference
       const onboardingVotes = { emoji_selector: 0, soft_chitchat: 0, clinical_scale: 0 };
       results.forEach(row => {
@@ -801,27 +781,7 @@
         if (onboardingVotes[pref] !== undefined) onboardingVotes[pref]++;
       });
 
-      const onboardingContainer = document.getElementById('onboardingPreferenceStats');
-      onboardingContainer.innerHTML = '';
-      Object.entries(onboardingVotes).forEach(([key, votes]) => {
-        const info = PREF_MAP[key];
-        const percent = total > 0 ? Math.round((votes / total) * 100) : 0;
-        const card = document.createElement('div');
-        card.className = 'pref-stat-card';
-        card.innerHTML = `
-          <div class="pref-info">
-            <span class="pref-name">${info.name}</span>
-            <span class="pref-desc">${info.desc}</span>
-          </div>
-          <div class="pref-num-block">
-            <span class="pref-percentage">${percent}%</span>
-            <div class="pref-votes">${votes} 票</div>
-          </div>
-        `;
-        onboardingContainer.appendChild(card);
-      });
-
-      // 4. Aggregate Scenarios (多选题以参与总人数作为分母表示覆盖率)
+      // 4. Aggregate Scenarios
       const scenarioVotes = {};
       Object.keys(SCENARIO_MAP).forEach(key => scenarioVotes[key] = 0);
       results.forEach(row => {
@@ -829,27 +789,6 @@
         list.forEach(item => {
           if (scenarioVotes[item] !== undefined) scenarioVotes[item]++;
         });
-      });
-
-      const scenarioContainer = document.getElementById('scenariosDistribution');
-      scenarioContainer.innerHTML = '';
-      Object.entries(scenarioVotes).map(([key, votes]) => ({
-        label: SCENARIO_MAP[key],
-        percent: total > 0 ? Math.round((votes / total) * 100) : 0,
-        votes
-      })).sort((a,b) => b.votes - a.votes).forEach(item => {
-        const row = document.createElement('div');
-        row.className = 'dist-item';
-        row.innerHTML = `
-          <div class="dist-label-row">
-            <span class="dist-label">${item.label}</span>
-            <span class="dist-percent">${item.percent}% (${item.votes}票)</span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill" style="width: ${item.percent}%"></div>
-          </div>
-        `;
-        scenarioContainer.appendChild(row);
       });
 
       // 5. Aggregate Pain Points
@@ -862,25 +801,153 @@
         });
       });
 
-      const painContainer = document.getElementById('painPointsDistribution');
-      painContainer.innerHTML = '';
-      Object.entries(painVotes).map(([key, votes]) => ({
-        label: PAIN_MAP[key],
-        percent: total > 0 ? Math.round((votes / total) * 100) : 0,
-        votes
-      })).sort((a,b) => b.votes - a.votes).forEach(item => {
-        const row = document.createElement('div');
-        row.className = 'dist-item';
-        row.innerHTML = `
-          <div class="dist-label-row">
-            <span class="dist-label">${item.label}</span>
-            <span class="dist-percent">${item.percent}% (${item.votes}票)</span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill" style="width: ${item.percent}%"></div>
-          </div>
-        `;
-        painContainer.appendChild(row);
+      // ── Chart.js Configurations ──
+      // Destory previous charts to avoid reuse canvas errors
+      if (window.emojiChartInstance) window.emojiChartInstance.destroy();
+      if (window.onboardingChartInstance) window.onboardingChartInstance.destroy();
+      if (window.scenariosChartInstance) window.scenariosChartInstance.destroy();
+      if (window.painPointsChartInstance) window.painPointsChartInstance.destroy();
+
+      // Chart.js Global settings matching theme
+      Chart.defaults.color = 'rgba(244, 244, 245, 0.6)';
+      Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.05)';
+      Chart.defaults.font.family = "'Plus Jakarta Sans', -apple-system, sans-serif";
+
+      // 1) Emojis horizontal bar chart
+      const ctxEmoji = document.getElementById('emojiChart').getContext('2d');
+      window.emojiChartInstance = new Chart(ctxEmoji, {
+        type: 'bar',
+        data: {
+          labels: sortedEmojis.map(item => item.emoji + ' ' + item.name),
+          datasets: [{
+            label: '票数',
+            data: sortedEmojis.map(item => item.votes),
+            backgroundColor: 'rgba(99, 102, 241, 0.7)',
+            borderColor: '#6366f1',
+            borderWidth: 1.5,
+            borderRadius: 8
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: true }, ticks: { stepSize: 1 } },
+            y: { grid: { display: false } }
+          }
+        }
+      });
+
+      // 2) Onboarding Preference doughnut chart
+      const ctxOnboarding = document.getElementById('onboardingChart').getContext('2d');
+      window.onboardingChartInstance = new Chart(ctxOnboarding, {
+        type: 'doughnut',
+        data: {
+          labels: ['全屏表情选择', '纯文字温和寒暄', '测评评估引导'],
+          datasets: [{
+            data: [onboardingVotes.emoji_selector, onboardingVotes.soft_chitchat, onboardingVotes.clinical_scale],
+            backgroundColor: [
+              'rgba(99, 102, 241, 0.75)', // Indigo
+              'rgba(6, 182, 212, 0.75)',  // Cyan
+              'rgba(16, 185, 129, 0.75)'   // Emerald
+            ],
+            borderColor: 'rgba(9, 9, 11, 0.9)',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { boxWidth: 12, padding: 16 }
+            }
+          },
+          cutout: '58%'
+        }
+      });
+
+      // 3) Scenarios Polar Area chart
+      const ctxScenarios = document.getElementById('scenariosChart').getContext('2d');
+      window.scenariosChartInstance = new Chart(ctxScenarios, {
+        type: 'polarArea',
+        data: {
+          labels: Object.keys(SCENARIO_MAP).map(key => {
+            const fullLabel = SCENARIO_MAP[key];
+            return fullLabel.includes('/') ? fullLabel.split(' / ')[0] : fullLabel;
+          }),
+          datasets: [{
+            data: Object.keys(SCENARIO_MAP).map(key => scenarioVotes[key]),
+            backgroundColor: [
+              'rgba(6, 182, 212, 0.6)',
+              'rgba(16, 185, 129, 0.6)',
+              'rgba(245, 158, 11, 0.6)',
+              'rgba(139, 92, 246, 0.6)',
+              'rgba(99, 102, 241, 0.6)',
+              'rgba(244, 63, 94, 0.6)'
+            ],
+            borderColor: 'rgba(255, 255, 255, 0.05)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { boxWidth: 10, font: { size: 9 }, padding: 8 }
+            }
+          },
+          scales: {
+            r: {
+              grid: { color: 'rgba(255, 255, 255, 0.04)' },
+              ticks: { display: false }
+            }
+          }
+        }
+      });
+
+      // 4) Pain points Radar chart
+      const ctxPain = document.getElementById('painPointsChart').getContext('2d');
+      window.painPointsChartInstance = new Chart(ctxPain, {
+        type: 'radar',
+        data: {
+          labels: Object.keys(PAIN_MAP).map(key => {
+            const label = PAIN_MAP[key];
+            return label.includes('/') ? label.split(' / ')[0] : label.split('（')[0];
+          }),
+          datasets: [{
+            label: '痛点认同数',
+            data: Object.keys(PAIN_MAP).map(key => painVotes[key]),
+            backgroundColor: 'rgba(244, 63, 94, 0.15)',
+            borderColor: 'rgba(244, 63, 94, 0.85)',
+            borderWidth: 2,
+            pointBackgroundColor: 'rgb(244, 63, 94)',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgb(244, 63, 94)'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            r: {
+              grid: { color: 'rgba(255, 255, 255, 0.04)' },
+              angleLines: { color: 'rgba(255, 255, 255, 0.04)' },
+              pointLabels: {
+                color: 'rgba(244, 244, 245, 0.65)',
+                font: { size: 9 }
+              },
+              ticks: { display: false }
+            }
+          }
+        }
       });
 
       // 6. Suggestions Feed
