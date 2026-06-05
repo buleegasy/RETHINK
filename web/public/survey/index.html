@@ -624,14 +624,63 @@
         <h1 class="slide-title">关于中学生在心理健康辅导智能体交互响应机制、回复话术风格及情感回馈模式方面的偏好度专项调查研究</h1>
         <p class="welcome-desc">
           嘿，同学！👋<br><br>
-          我们是 RE-THINK 心理智能体开发团队。在面临情绪低谷或日常压力时，我们发现通过简单的“表情包”来表达心情，远比大段文字更无痛、更高效。<br><br>
-          本问卷为匿名调查，共包含 5 道极简交互题，用时约 40 秒。你的反馈将直接影响 AI 的界面与交互设计。
+          我们是 RE-THINK 心理智能体课题组。在面临情绪低谷或日常压力时，我们想知道什么样的数字陪伴真正契合你的真实诉求。<br><br>
+          本问卷为完全匿名调查，共包含 10 道交互题，用时约 2 分钟。你的每一次点击与选择，都将直接影响下一代青少年代际互助数字产品的底层架构与逻辑设计。
         </p>
       </section>
 
-      <!-- SLIDE 1: Emoji Voting -->
-      <section class="slide" id="slide-1" data-min-selections="1" data-max-selections="3">
-        <h2 class="slide-title">1. 哪个表情包最能代表你当下的负面/低谷情绪？</h2>
+      
+      <!-- SLIDE 1: Demographics -->
+      <section class="slide" id="slide-1" data-min-selections="1">
+        <h2 class="slide-title">1. 你的就读阶段是？</h2>
+        <p class="slide-desc">单选。</p>
+        <div class="options-grid">
+          <div class="option-pill radio" data-value="middle_school" data-field="demographics">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">🎒 初中生</div>
+          </div>
+          <div class="option-pill radio" data-value="high_school" data-field="demographics">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">🏫 高中生 (含中职等)</div>
+          </div>
+          <div class="option-pill radio" data-value="college" data-field="demographics">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">🎓 大学生及以上</div>
+          </div>
+          <div class="option-pill radio" data-value="other" data-field="demographics">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">✨ 其他</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 2: AI Experience -->
+      <section class="slide" id="slide-11" data-min-selections="1">
+        <h2 class="slide-title">2. 你之前尝试过用 AI 聊天来缓解情绪或解决心理困扰吗？</h2>
+        <p class="slide-desc">单选。</p>
+        <div class="options-grid">
+          <div class="option-pill radio" data-value="never" data-field="aiExperience">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">🤔 从来没有，这是第一次听说</div>
+          </div>
+          <div class="option-pill radio" data-value="general_ai" data-field="aiExperience">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">🤖 用过通用大模型 (如豆包, Kimi, ChatGPT 等)</div>
+          </div>
+          <div class="option-pill radio" data-value="specialized_ai" data-field="aiExperience">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">📱 用过专门的心理/陪伴类 AI (如星野, Pi 等)</div>
+          </div>
+          <div class="option-pill radio" data-value="heavy_user" data-field="aiExperience">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">💬 我是重度用户，经常找 AI 倾诉</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 3: Emoji Voting -->
+      <section class="slide" id="slide-11" data-min-selections="1" data-max-selections="3">
+        <h2 class="slide-title">3. 哪个表情包最能代表你当下的负面/低谷情绪？</h2>
         <p class="slide-desc">凭直觉选出 1~3 个表情（点击卡片选择）。</p>
         <div class="emoji-selection-grid">
           <div class="emoji-card" data-value="🫠"><span>🫠</span></div>
@@ -647,9 +696,9 @@
         </div>
       </section>
 
-      <!-- SLIDE 2: Counseling Scenarios -->
-      <section class="slide" id="slide-2" data-min-selections="1">
-        <h2 class="slide-title">2. 什么场景下，你更倾向于求助 AI 心理伙伴，而非家长/老师？</h2>
+      <!-- SLIDE 4: Counseling Scenarios -->
+      <section class="slide" id="slide-11" data-min-selections="1">
+        <h2 class="slide-title">4. 什么场景下，你更倾向于求助 AI 心理伙伴，而非家长/老师？</h2>
         <p class="slide-desc">可多选。</p>
         <div class="options-grid">
           <div class="option-pill checkbox" data-value="midnight_emo">
@@ -663,6 +712,10 @@
           <div class="option-pill checkbox" data-value="relationship_dispute">
             <div class="pill-indicator"></div>
             <div class="pill-label">与朋友/熟人发生纠葛，憋屈不想跟熟人说</div>
+          </div>
+          <div class="option-pill checkbox" data-value="puppy_love">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">青春期感情困扰（如失恋、暗恋），觉得难以启齿</div>
           </div>
           <div class="option-pill checkbox" data-value="social_fatigue">
             <div class="pill-indicator"></div>
@@ -679,9 +732,9 @@
         </div>
       </section>
 
-      <!-- SLIDE 3: Counseling Pain Points -->
-      <section class="slide" id="slide-3" data-min-selections="1">
-        <h2 class="slide-title">3. 你觉得目前 AI 心理对话最让人反感的“痛点”是什么？</h2>
+      <!-- SLIDE 5: Counseling Pain Points -->
+      <section class="slide" id="slide-11" data-min-selections="1">
+        <h2 class="slide-title">5. 你觉得目前 AI 心理对话最让人反感的“痛点”是什么？</h2>
         <p class="slide-desc">可多选。</p>
         <div class="options-grid">
           <div class="option-pill checkbox" data-value="toxic_positivity">
@@ -707,35 +760,113 @@
         </div>
       </section>
 
-      <!-- SLIDE 4: Onboarding Interface Preference -->
-      <section class="slide" id="slide-4" data-min-selections="1">
-        <h2 class="slide-title">4. 以下三种心理 AI 开场界面，哪种更容易让你卸下心理防线？</h2>
+      
+      
+      <!-- SLIDE 6: Privacy Preference -->
+      <section class="slide" id="slide-6" data-min-selections="1">
+        <h2 class="slide-title">6. 针对 AI 的“记忆能力”，你更倾向于哪种隐私边界？</h2>
         <p class="slide-desc">单选。</p>
         <div class="options-grid">
-          <div class="option-pill radio" data-value="emoji_selector">
+          <div class="option-pill radio" data-value="full_memory" data-field="privacyPreference">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">🧠 希望它像老朋友一样记住我所有的过往和喜好</div>
+          </div>
+          <div class="option-pill radio" data-value="user_controlled" data-field="privacyPreference">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">🧹 希望提供“一键清空记忆”按钮，把控权在我自己</div>
+          </div>
+          <div class="option-pill radio" data-value="burn_after_reading" data-field="privacyPreference">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">🔥 绝对的“阅后即焚”，关掉界面后不要留下任何痕迹</div>
+          </div>
+          <div class="option-pill radio" data-value="neutral" data-field="privacyPreference">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">🤷 无所谓，只要它当前聊得懂我就行</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 7: Preferred AI Persona -->
+      <section class="slide" id="slide-11" data-min-selections="1" data-max-selections="2">
+        <h2 class="slide-title">7. 当你遇到困惑时，你更希望 AI 扮演什么样的角色？</h2>
+        <p class="slide-desc">最多选 2 项。</p>
+        <div class="options-grid">
+          <div class="option-pill checkbox" data-value="listener" data-field="preferredPersona">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">🫂 温柔倾听的“树洞” (无条件共情，给我安慰)</div>
+          </div>
+          <div class="option-pill checkbox" data-value="analyst" data-field="preferredPersona">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">🧠 理性客观的“分析师” (帮我梳理逻辑，分析利弊)</div>
+          </div>
+          <div class="option-pill checkbox" data-value="mentor" data-field="preferredPersona">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">🧙‍♂️ 经验丰富的“严厉导师” (一针见血，甚至骂醒我)</div>
+          </div>
+          <div class="option-pill checkbox" data-value="professional" data-field="preferredPersona">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">🏥 专业的“心理医生” (使用专业的心理疏导方法)</div>
+          </div>
+          <div class="option-pill checkbox" data-value="joker" data-field="preferredPersona">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">🤡 幽默风趣的“乐子人” (用玩笑化解我的焦虑)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 8: Willingness to Pay -->
+      <section class="slide" id="slide-11" data-min-selections="1">
+        <h2 class="slide-title">8. 如果有一款能真正懂你、并提供深度专业心理疏导的 AI 产品，你的付费意愿是？</h2>
+        <p class="slide-desc">单选。</p>
+        <div class="options-grid">
+          <div class="option-pill radio" data-value="free" data-field="willingnessToPay">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">🆓 只接受免费使用</div>
+          </div>
+          <div class="option-pill radio" data-value="coffee" data-field="willingnessToPay">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">☕️ 愿意支付一杯奶茶钱 (约 10-20元/月)</div>
+          </div>
+          <div class="option-pill radio" data-value="fastfood" data-field="willingnessToPay">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">🍔 愿意支付一顿快餐钱 (约 20-50元/月)</div>
+          </div>
+          <div class="option-pill radio" data-value="premium" data-field="willingnessToPay">
+            <div class="pill-indicator"></div>
+            <div class="pill-label">💎 愿意支付更高价格，只要真的有帮助 (> 50元/月)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 9: Onboarding Interface Preference -->
+      <section class="slide" id="slide-11" data-min-selections="1">
+        <h2 class="slide-title">9. 以下三种心理 AI 开场界面，哪种更容易让你卸下心理防线？</h2>
+        <p class="slide-desc">单选。</p>
+        <div class="options-grid">
+          <div class="option-pill radio" data-value="emoji_selector" data-field="onboardingPreference">
             <div class="pill-indicator"></div>
             <div class="pill-label"><strong>全屏表情包选择</strong>：大图情绪点选，无打字和开场压力</div>
           </div>
-          <div class="option-pill radio" data-value="soft_chitchat">
+          <div class="option-pill radio" data-value="soft_chitchat" data-field="onboardingPreference">
             <div class="pill-indicator"></div>
             <div class="pill-label"><strong>纯文字温和寒暄</strong>：文字问候“今天累吗？随便聊聊”</div>
           </div>
-          <div class="option-pill radio" data-value="clinical_scale">
+          <div class="option-pill radio" data-value="clinical_scale" data-field="onboardingPreference">
             <div class="pill-indicator"></div>
             <div class="pill-label"><strong>压力评估引导</strong>：一上来直接做轻量化压力评估选择题</div>
           </div>
         </div>
       </section>
 
-      <!-- SLIDE 5: Open suggestion -->
-      <section class="slide" id="slide-5">
-        <h2 class="slide-title">5. 你对未来的 AI 心理辅导有任何建议、期待或吐槽吗？</h2>
+      <!-- SLIDE 10: Open suggestion -->
+      <section class="slide" id="slide-11">
+        <h2 class="slide-title">10. 你对未来的 AI 心理辅导有任何建议、期待或吐槽吗？</h2>
         <p class="slide-desc">请留下你最真实的感受或想法（可选填，字数不限）。</p>
         <textarea id="openFeedback" placeholder="在此输入你的想法..."></textarea>
       </section>
 
-      <!-- SLIDE 6: Success Page -->
-      <section class="slide" id="slide-6">
+      <!-- SLIDE 11: Success Page -->
+      <section class="slide" id="slide-11">
         <div class="success-container">
           <div class="success-icon">
             <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -766,13 +897,18 @@
     // State management
     const state = {
       currentSlideIndex: 0,
-      totalSlides: 7, // 0 to 6
+      totalSlides: 12, // 0 to 6
       respondentId: 'survey-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 8),
       startedAt: new Date().toISOString(),
-      answers: {
+            answers: {
+        demographics: '',
+        aiExperience: '',
         emojis: [],
         scenarios: [],
         painPoints: [],
+        preferredPersona: [],
+        willingnessToPay: '',
+        privacyPreference: '',
         onboardingPreference: '',
         openFeedback: ''
       }
@@ -839,38 +975,47 @@
       validateSlideState();
     }
 
-    // Handle option pills (Checkboxes & Radio buttons)
+
+    // Handle option pills (Checkboxes & Radio buttons) dynamically
     function handleOptionSelect(pill) {
       const isCheckbox = pill.classList.contains('checkbox');
       const val = pill.dataset.value;
+      const currentSlide = slides[state.currentSlideIndex];
       
+      // Determine which field this option belongs to based on the current slide or data-field
+      let field = pill.dataset.field;
+      if (!field) {
+        // Fallback for old mapping
+        if (state.currentSlideIndex === 4) field = 'scenarios';
+        else if (state.currentSlideIndex === 5) field = 'painPoints';
+        else if (state.currentSlideIndex === 8) field = 'onboardingPreference';
+      }
+      
+      if (!field) return;
+
       if (isCheckbox) {
         // Multi-select Checkbox
         const isSelected = pill.classList.contains('selected');
+        const maxSelections = parseInt(currentSlide.dataset.maxSelections, 10) || 999;
+        
         if (isSelected) {
           pill.classList.remove('selected');
-          if (state.currentSlideIndex === 2) {
-            state.answers.scenarios = state.answers.scenarios.filter(item => item !== val);
-          } else if (state.currentSlideIndex === 3) {
-            state.answers.painPoints = state.answers.painPoints.filter(item => item !== val);
-          }
+          state.answers[field] = state.answers[field].filter(item => item !== val);
         } else {
-          pill.classList.add('selected');
-          if (state.currentSlideIndex === 2) {
-            state.answers.scenarios.push(val);
-          } else if (state.currentSlideIndex === 3) {
-            state.answers.painPoints.push(val);
+          if (state.answers[field].length >= maxSelections) {
+             const firstSelectedVal = state.answers[field].shift();
+             const firstSelectedCard = currentSlide.querySelector(`.option-pill[data-value="${firstSelectedVal}"]`);
+             if (firstSelectedCard) firstSelectedCard.classList.remove('selected');
           }
+          pill.classList.add('selected');
+          state.answers[field].push(val);
         }
       } else {
         // Single-select Radio
         const siblingPills = pill.parentNode.querySelectorAll('.option-pill');
         siblingPills.forEach(sib => sib.classList.remove('selected'));
         pill.classList.add('selected');
-        
-        if (state.currentSlideIndex === 4) {
-          state.answers.onboardingPreference = val;
-        }
+        state.answers[field] = val;
       }
       
       validateSlideState();
@@ -888,12 +1033,22 @@
       
       let currentSelectionCount = 0;
       if (state.currentSlideIndex === 1) {
-        currentSelectionCount = state.answers.emojis.length;
+        currentSelectionCount = state.answers.demographics ? 1 : 0;
       } else if (state.currentSlideIndex === 2) {
-        currentSelectionCount = state.answers.scenarios.length;
+        currentSelectionCount = state.answers.aiExperience ? 1 : 0;
       } else if (state.currentSlideIndex === 3) {
-        currentSelectionCount = state.answers.painPoints.length;
+        currentSelectionCount = state.answers.emojis.length;
       } else if (state.currentSlideIndex === 4) {
+        currentSelectionCount = state.answers.scenarios.length;
+      } else if (state.currentSlideIndex === 5) {
+        currentSelectionCount = state.answers.painPoints.length;
+      } else if (state.currentSlideIndex === 6) {
+        currentSelectionCount = state.answers.privacyPreference ? 1 : 0;
+      } else if (state.currentSlideIndex === 7) {
+        currentSelectionCount = state.answers.preferredPersona.length;
+      } else if (state.currentSlideIndex === 8) {
+        currentSelectionCount = state.answers.willingnessToPay ? 1 : 0;
+      } else if (state.currentSlideIndex === 9) {
         currentSelectionCount = state.answers.onboardingPreference ? 1 : 0;
       }
       
@@ -994,12 +1149,10 @@
       };
 
       const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const apiUrl = isLocalhost
-        ? 'http://localhost:8787/api/survey/submit'
-        : 'https://re-think-agent-worker.buleegasy-6c8.workers.dev/api/survey/submit';
+      const apiUrl = isLocalhost ? 'http://localhost:8787/api/survey/submit' : 'https://api-proxy-9mv.pages.dev/api/survey/submit';
 
       try {
-        const res = await fetch(apiUrl, {
+        const res = await fetch(apiUrl + '?t=' + new Date().getTime(), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -1023,3 +1176,5 @@
   </script>
 </body>
 </html>
+ 
+  

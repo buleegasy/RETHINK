@@ -719,6 +719,43 @@
         </section>
       </div>
 
+      
+      <!-- NEW ROW: Onboarding & Privacy -->
+      <div class="grid-2col" style="margin-top: 16px;">
+        <section class="card-panel">
+          <h2 class="card-title">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--primary)" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            隐私边界与记忆机制
+          </h2>
+          <div class="chart-container">
+            <canvas id="privacyChart"></canvas>
+          </div>
+        </section>
+      </div>
+
+      <!-- NEW ROW: Traffic & Region Analysis -->
+      <div class="grid-2col" style="margin-top: 16px;">
+        <section class="card-panel">
+          <h2 class="card-title">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+            <span>问卷提交流量趋势 (每分钟)</span>
+          </h2>
+          <div class="chart-container">
+            <canvas id="trafficChart"></canvas>
+          </div>
+        </section>
+
+        <section class="card-panel">
+          <h2 class="card-title">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>受访者 IP 地域分布</span>
+          </h2>
+          <div class="chart-container">
+            <canvas id="regionChart"></canvas>
+          </div>
+        </section>
+      </div>
+
       <!-- Feedbacks Panel -->
       <section class="card-panel">
         <h2 class="card-title">
@@ -727,6 +764,39 @@
         </h2>
         <div class="feedback-feed" id="feedbackFeed">
           <!-- Dynamic insert -->
+        </div>
+      </section>
+
+      <!-- Raw Data Table & Export Module -->
+      <section class="card-panel" style="margin-top: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 class="card-title" style="margin-bottom: 0;">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+            <span>问卷原始数据明细池 (用于深度交叉分析)</span>
+          </h2>
+          <button id="exportCsvBtn" class="btn btn-primary">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            导出完整 CSV
+          </button>
+        </div>
+        
+        <div style="overflow-x: auto; max-height: 400px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+            <thead style="background: rgba(255,255,255,0.02); position: sticky; top: 0; z-index: 1;">
+              <tr>
+                <th style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-muted);">提交时间</th>
+                <th style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-muted);">IP地域</th>
+                <th style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-muted);">群体</th>
+                <th style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-muted);">情绪</th>
+                <th style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-muted);">痛点</th>
+                <th style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-muted);">人设偏好</th>
+                <th style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-muted);">隐私策略</th>
+                <th style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-muted);">开放建议</th>
+              </tr>
+            </thead>
+            <tbody id="rawDataTableBody">
+            </tbody>
+          </table>
         </div>
       </section>
 
@@ -753,6 +823,7 @@
       'midnight_emo': '凌晨 emo / 深夜焦虑失眠',
       'academic_crash': '考试砸了 / 沮丧委屈',
       'relationship_dispute': '人际争吵 / 憋闷不想跟熟人说',
+      'puppy_love': '恋爱困扰 / 失恋、感情问题',
       'social_fatigue': '社交焦虑疲惫 / 躲起来倾诉',
       'existential_void': '空虚无趣 / 树洞发呆',
       'highly_private': '敏感隐私 / 极度害怕学校家长知晓'
@@ -780,38 +851,41 @@
     const dashboardContent = document.getElementById('dashboardContent');
     const refreshBtn = document.getElementById('refreshBtn');
 
-    async function loadData() {
-      // Show loading
-      loadingPanel.style.display = 'block';
-      emptyPanel.style.display = 'none';
-      dashboardContent.style.display = 'none';
+    async function loadData(isAutoRefresh = false) {
+      if (!isAutoRefresh) {
+        loadingPanel.style.display = 'block';
+        emptyPanel.style.display = 'none';
+        dashboardContent.style.display = 'none';
+      }
 
       const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const apiUrl = isLocalhost
-        ? 'http://localhost:8787/api/survey/results'
-        : 'https://re-think-agent-worker.buleegasy-6c8.workers.dev/api/survey/results';
+      const apiUrl = isLocalhost ? 'http://localhost:8787/api/survey/results' : 'https://api-proxy-9mv.pages.dev/api/survey/results';
 
       try {
-        const response = await fetch(apiUrl);
+        const response = await fetch(apiUrl + (apiUrl.includes('?') ? '&' : '?') + 't=' + new Date().getTime());
         if (!response.ok) throw new Error('Failed to fetch data');
         const data = await response.json();
         
         if (!data || !data.results || data.results.length === 0) {
-          loadingPanel.style.display = 'none';
-          emptyPanel.style.display = 'block';
+          if (!isAutoRefresh) {
+            loadingPanel.style.display = 'none';
+            emptyPanel.style.display = 'block';
+          }
           return;
         }
 
-        renderDashboard(data.results);
+        renderDashboard(data.results, isAutoRefresh);
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
-        alert('无法拉取问卷数据，请检查服务状态。');
-        loadingPanel.style.display = 'none';
-        emptyPanel.style.display = 'block';
+        if (!isAutoRefresh) {
+          alert('无法拉取问卷数据，请检查服务状态。');
+          loadingPanel.style.display = 'none';
+          emptyPanel.style.display = 'block';
+        }
       }
     }
 
-    function renderDashboard(results) {
+    function renderDashboard(results, isAutoRefresh = false) {
       // 1. Basic Stats
       const total = results.length;
       document.getElementById('statTotal').textContent = total;
@@ -872,6 +946,34 @@
         });
       });
 
+
+      // New Aggregations
+      const demoVotes = { middle_school: 0, high_school: 0, college: 0, other: 0 };
+      const aiExpVotes = { never: 0, general_ai: 0, specialized_ai: 0, heavy_user: 0 };
+      const personaVotes = { listener: 0, analyst: 0, mentor: 0, professional: 0, joker: 0 };
+      const wtpVotes = { free: 0, coffee: 0, fastfood: 0, premium: 0 };
+      const privacyVotes = { full_memory: 0, user_controlled: 0, burn_after_reading: 0, neutral: 0 };
+
+
+      results.forEach(row => {
+        const demo = row.data?.answers?.demographics;
+        if (demo && demoVotes[demo] !== undefined) demoVotes[demo]++;
+
+        const exp = row.data?.answers?.aiExperience;
+        if (exp && aiExpVotes[exp] !== undefined) aiExpVotes[exp]++;
+
+        const personas = row.data?.answers?.preferredPersona || [];
+        personas.forEach(p => {
+          if (personaVotes[p] !== undefined) personaVotes[p]++;
+        });
+
+        const wtp = row.data?.answers?.willingnessToPay;
+        if (wtp && wtpVotes[wtp] !== undefined) wtpVotes[wtp]++;
+        const privacy = row.data?.answers?.privacyPreference;
+        if (privacy && privacyVotes[privacy] !== undefined) privacyVotes[privacy]++;
+
+      });
+
       // 5. Aggregate Pain Points
       const painVotes = {};
       Object.keys(PAIN_MAP).forEach(key => painVotes[key] = 0);
@@ -888,6 +990,18 @@
       if (window.onboardingChartInstance) window.onboardingChartInstance.destroy();
       if (window.scenariosChartInstance) window.scenariosChartInstance.destroy();
       if (window.painPointsChartInstance) window.painPointsChartInstance.destroy();
+
+      if (window.demographicsChartInstance) window.demographicsChartInstance.destroy();
+      if (window.aiExperienceChartInstance) window.aiExperienceChartInstance.destroy();
+      if (window.personaChartInstance) window.personaChartInstance.destroy();
+      if (window.wtpChartInstance) window.wtpChartInstance.destroy();
+
+      // Disable animation for auto-refresh to make it seamless
+      if (isAutoRefresh) {
+        Chart.defaults.animation = false;
+      } else {
+        Chart.defaults.animation = true;
+      }
 
       // Chart.js Global settings matching theme
       Chart.defaults.color = 'rgba(244, 244, 245, 0.6)';
@@ -999,8 +1113,10 @@
           },
           scales: {
             r: {
+              min: 0,
+              beginAtZero: true,
               grid: { color: 'rgba(255, 255, 255, 0.04)' },
-              ticks: { display: false }
+              ticks: { display: false, stepSize: 1 }
             }
           }
         }
@@ -1033,14 +1149,131 @@
           plugins: { legend: { display: false } },
           scales: {
             r: {
+              min: 0,
+              beginAtZero: true,
               grid: { color: 'rgba(255, 255, 255, 0.04)' },
               angleLines: { color: 'rgba(255, 255, 255, 0.04)' },
               pointLabels: {
                 color: 'rgba(244, 244, 245, 0.65)',
                 font: { size: isMobile ? 8 : 9 }
               },
-              ticks: { display: false }
+              ticks: { display: false, stepSize: 1 }
             }
+          }
+        }
+      });
+
+
+      
+
+      
+      // Privacy Chart (Pie)
+      if (window.privacyChartInstance) window.privacyChartInstance.destroy();
+      const ctxPrivacy = document.getElementById('privacyChart').getContext('2d');
+      window.privacyChartInstance = new Chart(ctxPrivacy, {
+        type: 'pie',
+        data: {
+          labels: ['记住所有(老朋友)', '自己掌控清空', '绝对阅后即焚', '无所谓能懂就行'],
+          datasets: [{
+            data: [privacyVotes.full_memory, privacyVotes.user_controlled, privacyVotes.burn_after_reading, privacyVotes.neutral],
+            backgroundColor: ['#6366f1', '#06b6d4', '#f43f5e', '#94a3b8'],
+            borderColor: 'rgba(9, 9, 11, 0.9)', borderWidth: 2
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, color: '#f4f4f5' } } } }
+      });
+
+      // ── Traffic & Region Analysis ──
+      const trafficData = {};
+      const regionData = {};
+
+      // Mapping for China provinces (Cloudflare cf.region returns Pinyin/English)
+      const CN_PROVINCE_MAP = {
+        'Beijing': '北京', 'Shanghai': '上海', 'Tianjin': '天津', 'Chongqing': '重庆',
+        'Guangdong': '广东', 'Zhejiang': '浙江', 'Jiangsu': '江苏', 'Shandong': '山东',
+        'Sichuan': '四川', 'Henan': '河南', 'Hebei': '河北', 'Hunan': '湖南',
+        'Hubei': '湖北', 'Fujian': '福建', 'Anhui': '安徽', 'Liaoning': '辽宁',
+        'Shaanxi': '陕西', 'Jiangxi': '江西', 'Guangxi': '广西', 'Yunnan': '云南',
+        'Heilongjiang': '黑龙江', 'Guizhou': '贵州', 'Shanxi': '山西', 'Jilin': '吉林',
+        'Gansu': '甘肃', 'Inner Mongolia': '内蒙古', 'Xinjiang': '新疆', 'Hainan': '海南',
+        'Ningxia': '宁夏', 'Qinghai': '青海', 'Tibet': '西藏', 'Hong Kong': '香港',
+        'Macau': '澳门', 'Taiwan': '台湾'
+      };
+
+      results.forEach(row => {
+        // Traffic aggregation (by Minute)
+        let dateStr = '未知时间';
+        if (row.createdAt) {
+          const d = new Date(row.createdAt);
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          const hh = String(d.getHours()).padStart(2, '0');
+          const min = String(d.getMinutes()).padStart(2, '0');
+          dateStr = `${mm}-${dd} ${hh}:${min}`;
+        }
+        trafficData[dateStr] = (trafficData[dateStr] || 0) + 1;
+
+        // Region aggregation
+        let rawRegion = row.data?.metadata?.region || '未知 (历史数据)';
+        // Attempt translation if country is CN, or just match the key
+        let region = CN_PROVINCE_MAP[rawRegion] || rawRegion;
+        regionData[region] = (regionData[region] || 0) + 1;
+      });
+
+      // Traffic Chart (Line)
+      if (window.trafficChartInstance) window.trafficChartInstance.destroy();
+      const ctxTraffic = document.getElementById('trafficChart').getContext('2d');
+      const trafficDates = Object.keys(trafficData).sort(); // Sort chronologically
+      window.trafficChartInstance = new Chart(ctxTraffic, {
+        type: 'line',
+        data: {
+          labels: trafficDates,
+          datasets: [{
+            label: '每分钟提交量',
+            data: trafficDates.map(d => trafficData[d]),
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+            y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { stepSize: 1 } }
+          }
+        }
+      });
+
+      // Region Chart (Bar)
+      if (window.regionChartInstance) window.regionChartInstance.destroy();
+      const ctxRegion = document.getElementById('regionChart').getContext('2d');
+      // Sort regions by count descending
+      const sortedRegions = Object.entries(regionData).sort((a, b) => b[1] - a[1]);
+      window.regionChartInstance = new Chart(ctxRegion, {
+        type: 'bar',
+        data: {
+          labels: sortedRegions.map(r => r[0]),
+          datasets: [{
+            label: '受访者数量',
+            data: sortedRegions.map(r => r[1]),
+            backgroundColor: 'rgba(56, 189, 248, 0.7)',
+            borderColor: '#38bdf8',
+            borderWidth: 1,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { stepSize: 1 } }
           }
         }
       });
@@ -1069,9 +1302,49 @@
         });
       }
 
-      // Hide loading, show content
-      loadingPanel.style.display = 'none';
-      dashboardContent.style.display = 'flex';
+      
+      // 7. Render Data Table
+      const tbody = document.getElementById('rawDataTableBody');
+      tbody.innerHTML = '';
+      results.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+        
+        const d = row.data?.answers || {};
+        const timeStr = row.createdAt ? new Date(row.createdAt).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }) : '-';
+        let rawRegion = row.data?.metadata?.region || '未知';
+        const regionStr = CN_PROVINCE_MAP[rawRegion] || rawRegion;
+        const demoStr = d.demographics || '-';
+        const emojisStr = (d.emojis || []).join(' ');
+        const painsStr = (d.painPoints || []).map(p => PAIN_MAP[p] || p).join('; ');
+        const personaStr = (d.preferredPersona || []).join('; ');
+        const privacyStr = d.privacyPreference || '-';
+        
+        // Truncate feedback
+        let feedback = (row.openFeedback || '').replace(/\n/g, ' ');
+        if (feedback.length > 30) feedback = feedback.substring(0, 30) + '...';
+
+        tr.innerHTML = `
+          <td style="padding: 12px 16px; white-space: nowrap; color: var(--text-muted);">${timeStr}</td>
+          <td style="padding: 12px 16px; color: #38bdf8;">${regionStr}</td>
+          <td style="padding: 12px 16px;">${demoStr}</td>
+          <td style="padding: 12px 16px; font-size: 16px;">${emojisStr}</td>
+          <td style="padding: 12px 16px; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${painsStr}">${painsStr}</td>
+          <td style="padding: 12px 16px;">${personaStr}</td>
+          <td style="padding: 12px 16px;">${privacyStr}</td>
+          <td style="padding: 12px 16px; max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${row.openFeedback || ''}">${escapeHtml(feedback)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      
+      // Store raw results globally for CSV export
+      window._rawResults = results;
+
+      if (!isAutoRefresh) {
+        // Hide loading, show content
+        loadingPanel.style.display = 'none';
+        dashboardContent.style.display = 'flex';
+      }
     }
 
     function escapeHtml(text) {
@@ -1083,8 +1356,58 @@
     // Refresh Trigger
     refreshBtn.addEventListener('click', loadData);
 
-    // Initial Load
-    loadData();
+    
+    document.getElementById('exportCsvBtn')?.addEventListener('click', () => {
+      const results = window._rawResults;
+      if (!results || results.length === 0) return alert('无数据可导出');
+      
+      let csvContent = "ID,提交时间,问卷版本,IP地址,国家,省份/地区,城市,就读阶段,AI经验,情绪表情,求助场景,痛点,期待人设,付费意愿,开场偏好,隐私偏好,开放反馈\n";
+      
+      results.forEach(row => {
+        const d = row.data?.answers || {};
+        const meta = row.data?.metadata || {};
+        const id = row.id;
+        const time = row.createdAt || '';
+        const version = row.data?.surveyVersion || 'v1';
+        
+        const ip = meta.ip || '';
+        const country = meta.country || '';
+        let rawRegion = meta.region || '';
+        const region = typeof CN_PROVINCE_MAP !== 'undefined' && CN_PROVINCE_MAP[rawRegion] ? CN_PROVINCE_MAP[rawRegion] : rawRegion;
+        const city = meta.city || '';
+
+        const demo = d.demographics || '';
+        const aiexp = d.aiExperience || '';
+        const emojis = (d.emojis || []).join('|');
+        const scenarios = (d.scenarios || []).join('|');
+        const pain = (d.painPoints || []).join('|');
+        const persona = (d.preferredPersona || []).join('|');
+        const wtp = d.willingnessToPay || '';
+        const onboard = d.onboardingPreference || '';
+        const privacy = d.privacyPreference || '';
+        let feedback = (row.openFeedback || '').replace(/"/g, '""');
+        if (feedback) feedback = `"${feedback}"`;
+        
+        csvContent += `${id},${time},${version},${ip},${country},${region},${city},${demo},${aiexp},${emojis},${scenarios},${pain},${persona},${wtp},${onboard},${privacy},${feedback}\n`;
+      });
+      
+      const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `survey_export_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    // Auto-refresh mechanism (every 2 seconds for real-time updates)
+    setInterval(() => {
+      loadData(true);
+    }, 2000);
+
+    // Initial load
+    window.addEventListener('DOMContentLoaded', () => loadData(false));
   </script>
 </body>
 </html>

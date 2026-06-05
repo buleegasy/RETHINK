@@ -42,3 +42,9 @@ MODEL_NAME = "meta-llama/llama-4-maverick"
 # 生产环境 Secrets（通过 wrangler secret put 设置）
 # API_KEY = "sk-or-v1-xxxx"          (OpenRouter API Key)
 # ==========================
+
+# Intercept API requests on the Pages domains directly
+routes = [
+  { pattern = "survey.rethink.buleegasy.space/api/*", zone_name = "buleegasy.space" },
+  { pattern = "rethink.buleegasy.space/api/*", zone_name = "buleegasy.space" }
+]

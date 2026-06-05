@@ -18,6 +18,15 @@ surveyRouter.post('/submit', async (c) => {
       return c.json({ error: 'respondentId is required' }, 400);
     }
     
+    // Add IP and region metadata
+    const cf = c.req.raw.cf;
+    body.metadata = {
+      country: c.req.header('X-Client-Country') || cf?.country || 'Unknown',
+      region: c.req.header('X-Client-Region') || cf?.region || 'Unknown',
+      city: c.req.header('X-Client-City') || cf?.city || 'Unknown',
+      ip: c.req.header('X-Client-IP') || c.req.header('cf-connecting-ip') || 'Unknown'
+    };
+
     // 将完整数据转为字符串存储
     const dataStr = JSON.stringify(body);
     

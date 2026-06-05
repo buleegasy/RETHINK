@@ -8,5 +8,4 @@ export const corsMiddleware = cors({
   allowHeaders: ['Content-Type', 'Authorization'],
   exposeHeaders: ['Content-Length'],
   maxAge: 600,
-  credentials: true,
 });
