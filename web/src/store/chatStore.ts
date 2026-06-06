@@ -1,7 +1,13 @@
 import { create } from 'zustand';
-import type { ChatMessage, CBTStage, FSMState, TechChain, UIControl } from '../types';
+import type { ChatMessage, CBTStage, FSMState, TechChain, UIControl, User } from '../types';
 
 interface ChatState {
+  // Auth state
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  
+  // Chat state
   sessionId: string | null;
   messages: ChatMessage[];
   currentStage: CBTStage;
@@ -15,6 +21,8 @@ interface ChatState {
   icebreakerLayer: number;
   
   // Actions
+  login: (user: User, token: string) => void;
+  logout: () => void;
   setSessionId: (id: string) => void;
   addMessage: (msg: ChatMessage) => void;
   updateLastMessage: (delta: string) => void;
@@ -29,74 +37,119 @@ interface ChatState {
   clearChat: () => void;
 }
 
-export const useChatStore = create<ChatState>((set) => ({
-  sessionId: null,
-  messages: [],
-  currentStage: '剥离事实',
-  fsmState: 'Onboarding',
-  uiControl: null,
-  hasCompletedOnboarding: false,
-  isStreaming: false,
-  selectedModel: 'deepseek-v4-flash',
-  icebreakerLayer: 1,
+const getStoredToken = () => localStorage.getItem('rethink_auth_token');
+const getStoredUser = () => {
+  const u = localStorage.getItem('rethink_auth_user');
+  try {
+    return u ? JSON.parse(u) : null;
+  } catch {
+    return null;
+  }
+};
 
-  setSessionId: (id) => set({ sessionId: id }),
-  
-  addMessage: (msg) => set((state) => ({ 
-    messages: [...state.messages, { ...msg, id: crypto.randomUUID() }] 
-  })),
-  
-  updateLastMessage: (delta) => set((state) => {
-    const newMessages = [...state.messages];
-    if (newMessages.length > 0) {
-      const lastIdx = newMessages.length - 1;
-      // 只有当前是一条 assistant 消息时，才允许 append
-      if (newMessages[lastIdx].role === 'assistant') {
-        newMessages[lastIdx] = {
-          ...newMessages[lastIdx],
-          content: newMessages[lastIdx].content + delta,
-        };
-      }
-    }
-    return { messages: newMessages };
-  }),
+export const useChatStore = create<ChatState>((set) => {
+  const initialToken = getStoredToken();
+  const initialUser = getStoredUser();
 
-  setLastMessageTechChain: (techChain) => set((state) => {
-    const newMessages = [...state.messages];
-    if (newMessages.length > 0) {
-      const lastIdx = newMessages.length - 1;
-      if (newMessages[lastIdx].role === 'assistant') {
-        newMessages[lastIdx] = {
-          ...newMessages[lastIdx],
-          techChain,
-        };
-      }
-    }
-    return { messages: newMessages };
-  }),
-  
-  setStage: (stage) => set({ currentStage: stage }),
+  return {
+    // Auth initial state
+    user: initialUser,
+    token: initialToken,
+    isAuthenticated: !!initialToken,
 
-  setFSMState: (fsmState) => set({ fsmState }),
-  
-  setUIControl: (uiControl) => set({ uiControl }),
-
-  setOnboardingComplete: (hasCompletedOnboarding) => set({ hasCompletedOnboarding }),
-
-  setIsStreaming: (isStreaming) => set({ isStreaming }),
-  
-  setSelectedModel: (model) => set({ selectedModel: model }),
-
-  setIcebreakerLayer: (icebreakerLayer) => set({ icebreakerLayer }),
-
-  clearChat: () => set({ 
-    sessionId: null, 
-    messages: [], 
+    // Chat initial state
+    sessionId: null,
+    messages: [],
     currentStage: '剥离事实',
     fsmState: 'Onboarding',
     uiControl: null,
     hasCompletedOnboarding: false,
     isStreaming: false,
+    selectedModel: 'deepseek-v4-flash',
     icebreakerLayer: 1,
-  }),
-}));
+
+    // Auth Actions
+    login: (user, token) => {
+      localStorage.setItem('rethink_auth_token', token);
+      localStorage.setItem('rethink_auth_user', JSON.stringify(user));
+      set({ user, token, isAuthenticated: true });
+    },
+    logout: () => {
+      localStorage.removeItem('rethink_auth_token');
+      localStorage.removeItem('rethink_auth_user');
+      set({ 
+        user: null, 
+        token: null, 
+        isAuthenticated: false, 
+        sessionId: null, 
+        messages: [], 
+        hasCompletedOnboarding: false,
+        uiControl: null,
+        icebreakerLayer: 1,
+        fsmState: 'Onboarding',
+        currentStage: '剥离事实'
+      });
+    },
+
+    // Chat Actions
+    setSessionId: (id) => set({ sessionId: id }),
+    
+    addMessage: (msg) => set((state) => ({ 
+      messages: [...state.messages, { ...msg, id: crypto.randomUUID() }] 
+    })),
+    
+    updateLastMessage: (delta) => set((state) => {
+      const newMessages = [...state.messages];
+      if (newMessages.length > 0) {
+        const lastIdx = newMessages.length - 1;
+        // 只有当前是一条 assistant 消息时，才允许 append
+        if (newMessages[lastIdx].role === 'assistant') {
+          newMessages[lastIdx] = {
+            ...newMessages[lastIdx],
+            content: newMessages[lastIdx].content + delta,
+          };
+        }
+      }
+      return { messages: newMessages };
+    }),
+
+    setLastMessageTechChain: (techChain) => set((state) => {
+      const newMessages = [...state.messages];
+      if (newMessages.length > 0) {
+        const lastIdx = newMessages.length - 1;
+        if (newMessages[lastIdx].role === 'assistant') {
+          newMessages[lastIdx] = {
+            ...newMessages[lastIdx],
+            techChain,
+          };
+        }
+      }
+      return { messages: newMessages };
+    }),
+    
+    setStage: (stage) => set({ currentStage: stage }),
+
+    setFSMState: (fsmState) => set({ fsmState }),
+    
+    setUIControl: (uiControl) => set({ uiControl }),
+
+    setOnboardingComplete: (hasCompletedOnboarding) => set({ hasCompletedOnboarding }),
+
+    setIsStreaming: (isStreaming) => set({ isStreaming }),
+    
+    setSelectedModel: (model) => set({ selectedModel: model }),
+
+    setIcebreakerLayer: (icebreakerLayer) => set({ icebreakerLayer }),
+
+    clearChat: () => set({ 
+      sessionId: null, 
+      messages: [], 
+      currentStage: '剥离事实',
+      fsmState: 'Onboarding',
+      uiControl: null,
+      hasCompletedOnboarding: false,
+      isStreaming: false,
+      icebreakerLayer: 1,
+    }),
+  };
+});

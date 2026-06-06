@@ -37,10 +37,13 @@ local_protocol = "http"
 [vars]
 API_BASE_URL = "https://openrouter.ai/api/v1"
 MODEL_NAME = "meta-llama/llama-4-maverick"
+FIREBASE_PROJECT_ID = "re-think-agent-beta"
+TURNSTILE_SECRET_KEY = "1x00000000000000000000000000000000"
 
 # ==========================
 # 生产环境 Secrets（通过 wrangler secret put 设置）
 # API_KEY = "sk-or-v1-xxxx"          (OpenRouter API Key)
+# FIREBASE_API_KEY = "AIzaSy..."     (Firebase Auth Web API Key)
 # ==========================
 
 # Intercept API requests on the Pages domains directly

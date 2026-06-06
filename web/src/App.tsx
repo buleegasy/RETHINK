@@ -3,6 +3,7 @@ import { ChatPanel } from './components/ChatPanel';
 import { InputBar } from './components/InputBar';
 import { CameraPanel } from './components/CameraPanel';
 import { AmbientGlow } from './components/AmbientGlow';
+import { LoginWall } from './components/LoginWall';
 import { useChat } from './hooks/useChat';
 import { useChatStore } from './store/chatStore';
 import type { UserProfile } from './types';
@@ -27,6 +28,11 @@ function App() {
   const selectedModel = useChatStore(state => state.selectedModel);
   const setSelectedModel = useChatStore(state => state.setSelectedModel);
   const hasCompletedOnboarding = useChatStore(state => state.hasCompletedOnboarding);
+  
+  // Auth state
+  const isAuthenticated = useChatStore(state => state.isAuthenticated);
+  const user = useChatStore(state => state.user);
+  const logout = useChatStore(state => state.logout);
 
   const [currentEmotion, setCurrentEmotion] = useState<EmotionResult | null>(null);
 
@@ -57,7 +63,7 @@ function App() {
             </h1>
           </div>
 
-          {/* 右侧：模型选择 */}
+          {/* 右侧：模型选择 + 退出 */}
           <div className="flex items-center gap-3">
             {/* 模型选择器 */}
             <div className="relative">
@@ -73,6 +79,15 @@ function App() {
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
               </div>
             </div>
+
+            {isAuthenticated && (
+              <button
+                onClick={logout}
+                className="text-xs text-error font-medium px-2 py-1.5 hover:bg-error-container/20 rounded-full transition-colors duration-200"
+              >
+                退出
+              </button>
+            )}
           </div>
         </div>
 
@@ -92,8 +107,27 @@ function App() {
         {hasCompletedOnboarding && <InputBar onSend={handleSendWithEmotion} />}
       </div>
 
+      {/* ── Desktop Profile Pill ── */}
+      {isAuthenticated && user && (
+        <div className="absolute top-4 right-4 z-40 hidden md:flex items-center gap-3 bg-surface/65 backdrop-blur-md border border-outline-variant/30 px-4 py-2 rounded-full shadow-sm">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-indigo-500 to-cyan-500 flex items-center justify-center text-[10px] font-bold text-white uppercase shadow-sm">
+            {user.username.substring(0, 2)}
+          </div>
+          <span className="text-xs font-medium text-on-surface">{user.username}</span>
+          <button 
+            onClick={logout} 
+            className="text-[11px] text-error hover:text-error-hover pl-2 border-l border-outline-variant/30 ml-1 transition-colors duration-200"
+          >
+            退出登录
+          </button>
+        </div>
+      )}
+
       {/* 摄像头情绪面板 */}
       <CameraPanel onEmotionChange={setCurrentEmotion} />
+
+      {/* 登录、验证码墙 */}
+      {!isAuthenticated && <LoginWall />}
     </div>
   );
 }

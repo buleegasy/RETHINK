@@ -10,3 +10,10 @@ API_BASE_URL=https://openrouter.ai/api/v1
 
 # 使用的模型名称（Llama 3.3 70B，后续可升级为 Llama 4）
 MODEL_NAME=meta-llama/llama-3.3-70b-instruct
+
+# Firebase Auth Configuration
+FIREBASE_API_KEY=AIzaSyYourFirebaseApiKeyHere
+FIREBASE_PROJECT_ID=re-think-agent-beta
+
+# Cloudflare Turnstile Configuration (Testing key defaults to always pass)
+TURNSTILE_SECRET_KEY=1x00000000000000000000000000000000

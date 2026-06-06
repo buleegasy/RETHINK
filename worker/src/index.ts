@@ -4,6 +4,8 @@ import { chatRouter } from './routes/chat';
 import { knowledgeRouter } from './routes/ingest';
 import { onboardingRouter } from './routes/onboarding';
 import { surveyRouter } from './routes/survey';
+import { authRouter } from './routes/auth';
+import { adminRouter } from './routes/admin';
 import type { Env } from './types';
 
 const app = new Hono<{ Bindings: Env }>();
@@ -15,6 +17,8 @@ app.use('*', corsMiddleware);
 app.get('/', (c) => c.text('RE-THINK Agent API (Cloudflare Worker) is running!'));
 
 // 挂载路由
+app.route('/api/auth', authRouter);
+app.route('/api/admin', adminRouter);
 app.route('/api/chat', chatRouter);
 app.route('/api/knowledge', knowledgeRouter);
 app.route('/api/onboarding', onboardingRouter);

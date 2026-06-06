@@ -11,11 +11,13 @@ import {
   type FSMContext,
   type FSMState,
 } from '../lib/fsm';
-import type { Env, ChatRequest, ChatMessage, SessionRow } from '../types';
+import { requireAuth } from '../lib/auth-utils';
+import type { Env, ChatRequest, ChatMessage, SessionRow, HonoSchema, AuthUser } from '../types';
 
-export const chatRouter = new Hono<{ Bindings: Env }>();
+export const chatRouter = new Hono<HonoSchema>();
 
-chatRouter.post('/', async (c) => {
+chatRouter.post('/', requireAuth, async (c) => {
+  const user = c.get('user') as AuthUser;
   const body = await c.req.json<ChatRequest>();
   const { messages, stream = true, sessionId = crypto.randomUUID(), profile, facialEmotion, model: requestedModel } = body;
 
@@ -30,9 +32,20 @@ chatRouter.post('/', async (c) => {
   try {
     const session = await c.env.DB.prepare('SELECT * FROM sessions WHERE id = ?')
       .bind(sessionId)
-      .first<SessionRow>();
+      .first<any>();
 
     if (session) {
+      if (session.user_id && session.user_id !== user.uid) {
+        return c.json({ error: 'Forbidden: Session does not belong to you' }, 403);
+      }
+      
+      // Auto-bind anonymous session to logged-in user
+      if (!session.user_id) {
+        await c.env.DB.prepare('UPDATE sessions SET user_id = ?, updated_at = unixepoch() WHERE id = ?')
+          .bind(user.uid, sessionId)
+          .run();
+      }
+
       currentStageIndex = session.current_stage - 1;
       // 恢复 FSM 上下文
       if (session.fsm_state) {
@@ -58,7 +71,7 @@ chatRouter.post('/', async (c) => {
 
   // ── 2. 意图路由（代码层面） ──
   const userLastMessage = messages.filter(m => m.role === 'user').pop()?.content || '';
-  const intentResult = classifyIntent(userLastMessage);
+  const intentResult = await classifyIntent(userLastMessage, c.env);
 
   console.log(`[Intent Router] type=${intentResult.type}, confidence=${intentResult.confidence}, triggers=${intentResult.triggers.join(',')}`);
 
@@ -120,26 +133,47 @@ chatRouter.post('/', async (c) => {
       });
 
       const responseText = response.choices[0]?.message?.content || '';
-      const stage = detectStage(responseText, currentStageIndex);
+      
+      // 解析 JSON 响应
+      let cleanReply = responseText;
+      let uiControl = undefined;
+      
+      try {
+        const parsed = JSON.parse(responseText.trim());
+        if (parsed.agent_reply) cleanReply = parsed.agent_reply;
+        if (parsed.ui_control) uiControl = parsed.ui_control;
+
+        // 解析破冰画像增量更新 (Onboarding 状态)
+        if (parsed.icebreaker_update && fsmCtx.currentState === 'Onboarding') {
+          fsmCtx.icebreaker = applyIcebreakerUpdate(fsmCtx.icebreaker, parsed.icebreaker_update);
+          console.log(`[Icebreaker Non-Stream] Layer ${fsmCtx.icebreaker.layer}, moodWord=${fsmCtx.icebreaker.moodWord || 'n/a'}`);
+        }
+      } catch (e) {
+        console.warn('Failed to parse final JSON in non-streaming mode:', e);
+      }
+
+      const stage = detectStage(cleanReply, currentStageIndex);
 
       // FSM Post-response 转移
       fsmCtx.turnCount += 1; // AI 回复也计入 turnCount
-      const postTransition = transition(fsmCtx, intentResult, 'post', responseText);
+      const postTransition = transition(fsmCtx, intentResult, 'post', cleanReply);
       fsmCtx = applyTransition(fsmCtx, postTransition);
 
       console.log(`[FSM] post-transition: ${postTransition.trigger} → state=${fsmCtx.currentState}`);
 
-      // 保存回 D1
-      const updatedMessages: ChatMessage[] = [...messages, { role: 'assistant', content: responseText }];
-      await saveToD1(c.env.DB, sessionId, updatedMessages, stageToIndex(stage) + 1, fsmCtx);
+      // 保存回 D1（存入干净的对话内容而非原始 JSON）
+      const updatedMessages: ChatMessage[] = [...messages, { role: 'assistant', content: cleanReply }];
+      await saveToD1(c.env.DB, sessionId, updatedMessages, stageToIndex(stage) + 1, fsmCtx, user.uid);
 
       return c.json({
-        content: responseText,
+        content: cleanReply,
         stage,
         sessionId,
         intent: intentResult.type,
         fsmState: fsmCtx.currentState,
         fsmTrigger: postTransition.trigger,
+        uiControl,
+        icebreakerLayer: fsmCtx.icebreaker.layer,
         ...ragMeta,
       });
     } catch (err: any) {
@@ -291,7 +325,7 @@ chatRouter.post('/', async (c) => {
       // 计算最终 CBT 阶段（向后兼容）
       const finalStage = detectStage(finalReply, currentStageIndex);
       const updatedMessages: ChatMessage[] = [...messages, { role: 'assistant', content: finalReply }];
-      await saveToD1(c.env.DB, sessionId, updatedMessages, stageToIndex(finalStage) + 1, fsmCtx);
+      await saveToD1(c.env.DB, sessionId, updatedMessages, stageToIndex(finalStage) + 1, fsmCtx, user.uid);
 
       // 发送结束标志（含 FSM 状态转移信息 + UI 控制参数 + 破冰层级）
       await streamEvent.writeSSE({
@@ -327,6 +361,7 @@ async function saveToD1(
   messages: ChatMessage[],
   stageNum: number,
   fsmCtx: FSMContext,
+  userId: string,
 ) {
   try {
     const messagesJson = JSON.stringify(messages);
@@ -335,15 +370,16 @@ async function saveToD1(
     const fsmContextJson = JSON.stringify(fsmCtx);
 
     await db.prepare(`
-      INSERT INTO sessions (id, title, messages, current_stage, fsm_state, fsm_context, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())
+      INSERT INTO sessions (id, title, messages, current_stage, fsm_state, fsm_context, user_id, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())
       ON CONFLICT(id) DO UPDATE SET 
         messages = excluded.messages,
         current_stage = excluded.current_stage,
         fsm_state = excluded.fsm_state,
         fsm_context = excluded.fsm_context,
+        user_id = excluded.user_id,
         updated_at = unixepoch()
-    `).bind(sessionId, title, messagesJson, stageNum, fsmState, fsmContextJson).run();
+    `).bind(sessionId, title, messagesJson, stageNum, fsmState, fsmContextJson, userId).run();
   } catch (e) {
     console.error('Failed to save session to D1:', e);
   }

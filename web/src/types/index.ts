@@ -155,3 +155,16 @@ export interface SSEChunk {
   /** 破冰层级 */
   icebreakerLayer?: number;
 }
+
+export interface User {
+  uid: string;
+  username: string;
+  email: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  user: User;
+  token: string;
+  error?: string;
+}

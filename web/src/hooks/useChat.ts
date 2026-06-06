@@ -15,6 +15,7 @@ export function useChat() {
     setIsStreaming,
     setSessionId,
     selectedModel,
+    token,
   } = useChatStore();
 
   const sendMessage = async (
@@ -46,7 +47,10 @@ export function useChat() {
       const apiUrl = import.meta.env.VITE_API_URL || '';
       const response = await fetch(`${apiUrl}/api/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({
           messages: payloadMessages,
           stream: true,

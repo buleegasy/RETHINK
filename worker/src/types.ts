@@ -1,4 +1,15 @@
-// Worker 环境变量类型（由 wrangler cf-typegen 生成，手动同步）
+export interface AuthUser {
+  uid: string;
+  email: string;
+}
+
+export interface HonoSchema {
+  Bindings: Env;
+  Variables: {
+    user: AuthUser;
+  };
+}
+
 export interface Env {
   DB: D1Database;
   AI: Ai;
@@ -6,6 +17,10 @@ export interface Env {
   API_KEY: string;
   API_BASE_URL: string;
   MODEL_NAME: string;
+  FIREBASE_API_KEY: string;
+  FIREBASE_PROJECT_ID: string;
+  TURNSTILE_SECRET_KEY: string;
+  ADMIN_SECRET_TOKEN: string;
 }
 
 // ============================================================
