@@ -30,6 +30,7 @@ export interface UseFaceEmotionReturn {
   startCamera: () => Promise<void>;
   stopCamera: () => void;
   error: string | null;
+  setCanvasRef: (canvas: HTMLCanvasElement | null) => void;
 }
 
 const MODEL_URL = '/cv-models/';
@@ -57,6 +58,11 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isActiveRef = useRef(false);
   const historyRef = useRef<Record<EmotionLabel, number>[]>([]);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  const setCanvasRef = useCallback((canvas: HTMLCanvasElement | null) => {
+    canvasRef.current = canvas;
+  }, []);
 
   // 分析单帧情绪
   const analyzeFrame = useCallback(async () => {
@@ -71,6 +77,22 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
         .withFaceExpressions();
 
       if (!detection || !isActiveRef.current) return;
+
+      // 绘制覆盖层
+      if (canvasRef.current) {
+        const displaySize = { width: video.videoWidth, height: video.videoHeight };
+        if (displaySize.width > 0 && displaySize.height > 0) {
+          faceapi.matchDimensions(canvasRef.current, displaySize);
+          const resizedDetections = faceapi.resizeResults(detection, displaySize);
+          const ctx = canvasRef.current.getContext('2d');
+          if (ctx) {
+             ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+          }
+          // 因为外层使用了 scale-x-[-1] 进行水平翻转，由于 canvas 也会被整体翻转，所以我们直接画正向的内容即可，CSS翻转会处理镜像
+          faceapi.draw.drawDetections(canvasRef.current, resizedDetections);
+          faceapi.draw.drawFaceLandmarks(canvasRef.current, resizedDetections);
+        }
+      }
 
       const expressions = detection.expressions as unknown as Record<EmotionLabel, number>;
 
@@ -195,6 +217,10 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
     setIsCameraActive(false);
     setCurrentEmotion(null);
     historyRef.current = [];
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext('2d');
+      if (ctx) ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    }
   }, []);
 
   useEffect(() => {
@@ -214,5 +240,6 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
     startCamera,
     stopCamera,
     error,
+    setCanvasRef,
   };
 }

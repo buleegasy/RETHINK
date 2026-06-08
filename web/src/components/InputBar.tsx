@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import type { KeyboardEvent } from 'react';
 import { useChatStore } from '../store/chatStore';
 import { useVoiceInput } from '../hooks/useVoiceInput';
+import { CameraPanel } from './CameraPanel';
+import type { EmotionResult } from '../hooks/useFaceEmotion';
 
 const EMOJI_CHIPS = [
   '🫠', '😭', '🥺', '🤡', '😑', '😡', 
@@ -10,9 +12,10 @@ const EMOJI_CHIPS = [
 
 interface InputBarProps {
   onSend: (text: string) => void;
+  onEmotionChange?: (emotion: EmotionResult | null) => void;
 }
 
-export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
+export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) => {
   const [input, setInput] = useState('');
   const isStreaming = useChatStore(state => state.isStreaming);
   const fsmState = useChatStore(state => state.fsmState);
@@ -89,6 +92,11 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
     <div className="absolute bottom-0 left-0 w-full px-4 md:px-8 pb-[calc(max(env(safe-area-inset-bottom),24px))] pt-8 bg-gradient-to-t from-surface via-surface to-transparent z-30 pointer-events-none">
       <div className="max-w-3xl mx-auto flex flex-col items-center pointer-events-auto">
         
+        {/* 摄像头情感感知（原生融合区） */}
+        <div className="w-full mb-3 flex justify-start pl-2 md:pl-0 animate-fade-in">
+          <CameraPanel onEmotionChange={onEmotionChange} />
+        </div>
+
         {/* 表情包破冰快捷气泡 */}
         {fsmState === 'Onboarding' && !isStreaming && (
           <div className="w-full mb-4 flex gap-2.5 overflow-x-auto pb-2 justify-start md:justify-center scrollbar-none animate-fade-in pointer-events-auto">

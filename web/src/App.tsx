@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { ChatPanel } from './components/ChatPanel';
 import { InputBar } from './components/InputBar';
-import { CameraPanel } from './components/CameraPanel';
 import { AmbientGlow } from './components/AmbientGlow';
 import { LoginWall } from './components/LoginWall';
 import { useChat } from './hooks/useChat';
@@ -75,7 +74,12 @@ function App() {
         )}
 
         <ChatPanel />
-        {hasCompletedOnboarding && <InputBar onSend={handleSendWithEmotion} />}
+        {hasCompletedOnboarding && (
+          <InputBar 
+            onSend={handleSendWithEmotion} 
+            onEmotionChange={setCurrentEmotion} 
+          />
+        )}
       </div>
 
       {/* ── Desktop Profile Pill ── */}
@@ -93,9 +97,6 @@ function App() {
           </button>
         </div>
       )}
-
-      {/* 摄像头情绪面板 */}
-      <CameraPanel onEmotionChange={setCurrentEmotion} />
 
       {/* 登录、验证码墙 */}
       {!isAuthenticated && <LoginWall />}
