@@ -7,6 +7,7 @@ interface EmojiSelectorProps {
 }
 
 const EMOJI_OPTIONS = [
+  { emoji: '🖕', colorClass: 'hover:border-amber-400 hover:shadow-amber-500/10' },
   { emoji: '🫠', colorClass: 'hover:border-blue-400 hover:shadow-blue-500/10' },
   { emoji: '😭', colorClass: 'hover:border-red-400 hover:shadow-red-500/10' },
   { emoji: '🥺', colorClass: 'hover:border-pink-400 hover:shadow-pink-500/10' },
