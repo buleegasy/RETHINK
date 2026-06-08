@@ -7,14 +7,14 @@ interface EmojiSelectorProps {
 }
 
 const EMOJI_OPTIONS = [
+  { emoji: '🖕', text: '🖕(感到极度愤怒/不满)', colorClass: 'hover:border-amber-400 hover:shadow-amber-500/10' },
   { emoji: '🫠', text: '🫠', colorClass: 'hover:border-blue-400 hover:shadow-blue-500/10' },
-  { emoji: '💥', text: '💥', colorClass: 'hover:border-amber-400 hover:shadow-amber-500/10' },
   { emoji: '😭', text: '😭', colorClass: 'hover:border-red-400 hover:shadow-red-500/10' },
-  { emoji: '😑', text: '😑', colorClass: 'hover:border-cyan-400 hover:shadow-cyan-500/10' },
+  { emoji: '💤', text: '💤', colorClass: 'hover:border-slate-400 hover:shadow-slate-500/10' },
   { emoji: '🤡', text: '🤡', colorClass: 'hover:border-purple-400 hover:shadow-purple-500/10' },
+  { emoji: '😑', text: '😑', colorClass: 'hover:border-cyan-400 hover:shadow-cyan-500/10' },
   { emoji: '🥺', text: '🥺', colorClass: 'hover:border-pink-400 hover:shadow-pink-500/10' },
-  { emoji: '🤢', text: '🤢', colorClass: 'hover:border-green-400 hover:shadow-green-500/10' },
-  { emoji: '💤', text: '💤', colorClass: 'hover:border-slate-400 hover:shadow-slate-500/10' }
+  { emoji: '🤢', text: '🤢', colorClass: 'hover:border-green-400 hover:shadow-green-500/10' }
 ];
 
 export const EmojiSelector: React.FC<EmojiSelectorProps> = ({ onSelect, onSkip }) => {
