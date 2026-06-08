@@ -17,12 +17,12 @@ export const CrisisOverlay: React.FC = () => {
         </div>
         
         <h1 className="text-3xl sm:text-4xl font-display font-medium text-on-surface mb-6 leading-snug">
-          世界或许偶尔冰冷，但请相信，<br className="hidden sm:block"/>
-          <span className="text-gemini-blue font-bold">总有人愿意紧紧拥抱你。</span>
+          这世界总有人牵挂着你，<br className="hidden sm:block"/>
+          <span className="text-gemini-blue font-bold">请留下来。</span>
         </h1>
         
         <p className="text-lg text-on-surface-variant mb-12 max-w-xl leading-relaxed">
-          我们检测到您当前可能正经历着难以承受的痛苦。系统出于对您生命安全的最高关切，已暂时停止 AI 疏导。您不需要独自面对黑夜，请立刻拨打下方专业的生命援助热线，他们 24 小时都在等您的电话：
+          你不需要立刻好起来。撑不住了也没关系，请给我们一个陪你的机会，拨打下方热线：
         </p>
         
         <div className="w-full flex flex-col gap-4 mb-12">
