@@ -47,7 +47,7 @@ export function LoginWall() {
             container.innerHTML = ''; // Clear previous instances
             setTurnstileToken(null);
             window.turnstile.render('#turnstile-container', {
-              sitekey: '1x00000000000000000000AA', // Test sitekey
+              sitekey: '0x4AAAAAADgdD3JygbJ4oXZi', // Production Turnstile sitekey
               callback: (token: string) => {
                 setTurnstileToken(token);
               },
