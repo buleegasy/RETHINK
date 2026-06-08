@@ -4,8 +4,8 @@ import { useChatStore } from '../store/chatStore';
 import { useVoiceInput } from '../hooks/useVoiceInput';
 
 const EMOJI_CHIPS = [
-  '🫠', '🤯', '😭', '🥺', '💀', '😡', '😑', '🤡', 
-  '🤢', '💤', '😰', '🧠', '🌧️', '🩹', '🫂', '🖕'
+  '🫠', '😭', '🥺', '🤡', '😑', '😡', 
+  '🤢', '💤', '😰', '🧠', '🌧️', '🫂'
 ];
 
 interface InputBarProps {

@@ -7,21 +7,17 @@ interface EmojiSelectorProps {
 }
 
 const EMOJI_OPTIONS = [
-  { emoji: '🖕', colorClass: 'hover:border-amber-400 hover:shadow-amber-500/10' },
   { emoji: '🫠', colorClass: 'hover:border-blue-400 hover:shadow-blue-500/10' },
   { emoji: '😭', colorClass: 'hover:border-red-400 hover:shadow-red-500/10' },
-  { emoji: '💤', colorClass: 'hover:border-slate-400 hover:shadow-slate-500/10' },
+  { emoji: '🥺', colorClass: 'hover:border-pink-400 hover:shadow-pink-500/10' },
   { emoji: '🤡', colorClass: 'hover:border-purple-400 hover:shadow-purple-500/10' },
   { emoji: '😑', colorClass: 'hover:border-cyan-400 hover:shadow-cyan-500/10' },
-  { emoji: '🥺', colorClass: 'hover:border-pink-400 hover:shadow-pink-500/10' },
-  { emoji: '🤢', colorClass: 'hover:border-green-400 hover:shadow-green-500/10' },
-  { emoji: '🤯', colorClass: 'hover:border-orange-400 hover:shadow-orange-500/10' },
-  { emoji: '💀', colorClass: 'hover:border-gray-400 hover:shadow-gray-500/10' },
   { emoji: '😡', colorClass: 'hover:border-red-600 hover:shadow-red-700/10' },
+  { emoji: '🤢', colorClass: 'hover:border-green-400 hover:shadow-green-500/10' },
+  { emoji: '💤', colorClass: 'hover:border-slate-400 hover:shadow-slate-500/10' },
   { emoji: '😰', colorClass: 'hover:border-teal-400 hover:shadow-teal-500/10' },
   { emoji: '🧠', colorClass: 'hover:border-pink-600 hover:shadow-pink-700/10' },
   { emoji: '🌧️', colorClass: 'hover:border-blue-600 hover:shadow-blue-700/10' },
-  { emoji: '🩹', colorClass: 'hover:border-amber-200 hover:shadow-amber-300/10' },
   { emoji: '🫂', colorClass: 'hover:border-indigo-400 hover:shadow-indigo-500/10' },
 ];
 
@@ -44,7 +40,7 @@ export const EmojiSelector: React.FC<EmojiSelectorProps> = ({ onSelect, onSkip }
       </motion.div>
 
       {/* Grid of Large Cards */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-8 gap-4 w-full max-w-4xl px-2">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 w-full max-w-3xl px-2">
         {EMOJI_OPTIONS.map((item, idx) => (
           <motion.div
             key={item.emoji}
