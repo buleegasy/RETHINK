@@ -72,24 +72,21 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
 
       if (!detection || !isActiveRef.current) return;
 
-      const expressions = detection.expressions;
+      const expressions = detection.expressions as unknown as Record<EmotionLabel, number>;
 
-      // 引入时间平滑（Moving Average）：记录最近 4 帧的数据
-      const history = historyRef.current;
-      history.push(expressions as unknown as Record<EmotionLabel, number>);
-      if (history.length > 4) {
-        history.shift();
-      }
-
-      // 计算过去几帧的平均分数
-      const avgExpressions = {
-        happy: 0, sad: 0, angry: 0, fearful: 0, disgusted: 0, surprised: 0, neutral: 0
-      } as Record<EmotionLabel, number>;
-
-      const len = history.length;
-      for (const hist of history) {
-        for (const k of Object.keys(avgExpressions) as EmotionLabel[]) {
-          avgExpressions[k] += (hist[k] || 0) / len;
+      // 引入指数移动平均（EMA）进行平滑，而不是简单的窗口平均。
+      // ALPHA 越高，对新表情的响应越快；越低，平滑去抖效果越好。
+      const ALPHA = 0.65; 
+      
+      let avgExpressions: Record<EmotionLabel, number>;
+      if (!historyRef.current || historyRef.current.length === 0) {
+        avgExpressions = { ...expressions };
+        // 我们用一个数组的第0个元素存当前的EMA状态，为了不改 useRef 类型
+        historyRef.current = [avgExpressions];
+      } else {
+        avgExpressions = historyRef.current[0];
+        for (const k of Object.keys(expressions) as EmotionLabel[]) {
+          avgExpressions[k] = avgExpressions[k] * (1 - ALPHA) + (expressions[k] || 0) * ALPHA;
         }
       }
 
@@ -99,10 +96,10 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
         ['neutral' as EmotionLabel, 0]
       );
 
-      // 置信度阈值过滤：如果最高情绪不是 neutral 且平均置信度低于 0.45，则强制回退到 neutral，防止误判
-      if (topLabel !== 'neutral' && topScore < 0.45) {
+      // 降低硬阈值：对于微表情，脸部可能并没有夸张变形，0.3 的平均置信度足以说明情绪倾向。
+      if (topLabel !== 'neutral' && topScore < 0.25) {
         topLabel = 'neutral';
-        topScore = avgExpressions['neutral'];
+        topScore = avgExpressions['neutral'] || 0;
       }
 
       const allEmotions: Partial<Record<EmotionLabel, number>> = {};
