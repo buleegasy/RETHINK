@@ -39,7 +39,7 @@ adminRouter.post('/invitations', async (c) => {
     const maxUses = body.maxUses || 1;
 
     await c.env.DB.prepare(
-      'INSERT INTO invitation_codes (code, max_uses, uses) VALUES (?, ?, 0)'
+      'INSERT INTO invitation_codes (code, max_uses, used_count) VALUES (?, ?, 0)'
     ).bind(code, maxUses).run();
 
     return c.json({ success: true, code, max_uses: maxUses, uses: 0 });
