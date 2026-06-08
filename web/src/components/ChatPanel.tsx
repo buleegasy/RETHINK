@@ -65,7 +65,7 @@ export const ChatPanel: React.FC = () => {
             );
           })
         )}
-        <div ref={bottomRef} className="h-28" />
+        <div ref={bottomRef} className="h-56" />
       </div>
     </div>
   );

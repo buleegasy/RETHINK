@@ -23,7 +23,9 @@ function App() {
   const [currentEmotion, setCurrentEmotion] = useState<EmotionResult | null>(null);
 
   const handleSendWithEmotion = useCallback((text: string, profile?: UserProfile) => {
-    const emotionPayload = currentEmotion && currentEmotion.label !== 'neutral' && currentEmotion.confidence > 50
+    // 既然 useFaceEmotion 里已经做了极严格的筛选与微表情放大，
+    // 这里只需确保 label 不是 neutral 即可，不再受到 50% 的硬性拦截。
+    const emotionPayload = currentEmotion && currentEmotion.label !== 'neutral'
       ? {
           label: currentEmotion.label,
           labelZh: EMOTION_MAP[currentEmotion.label].zh,
