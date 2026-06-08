@@ -76,7 +76,7 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
 
       // 引入指数移动平均（EMA）进行平滑，而不是简单的窗口平均。
       // ALPHA 越高，对新表情的响应越快；越低，平滑去抖效果越好。
-      const ALPHA = 0.65; 
+      const ALPHA = 0.85; 
       
       let avgExpressions: Record<EmotionLabel, number>;
       if (!historyRef.current || historyRef.current.length === 0) {
@@ -106,8 +106,8 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
       let topScore = avgExpressions['neutral'] || 0;
 
       // 核心微表情放大器：模型本身极度偏好 neutral (就算轻微皱眉 neutral 也会高达 0.8)
-      // 因此我们只要非 neutral 的最高置信度突破了 0.15，就判定为该情绪。
-      if (maxNonNeutralLabel !== 'neutral' && maxNonNeutralScore > 0.15) {
+      // 因此我们只要非 neutral 的最高置信度突破了 0.05 (极低阈值)，就判定为该情绪。
+      if (maxNonNeutralLabel !== 'neutral' && maxNonNeutralScore > 0.05) {
         topLabel = maxNonNeutralLabel;
         topScore = maxNonNeutralScore;
       }
