@@ -32,7 +32,7 @@ export interface UseFaceEmotionReturn {
   error: string | null;
 }
 
-const MODEL_URL = '/models';
+const MODEL_URL = '/cv-models';
 let modelsLoaded = false;
 
 async function loadModels() {
