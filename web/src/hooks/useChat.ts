@@ -62,6 +62,10 @@ export function useChat() {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          useChatStore.getState().logout();
+          throw new Error('登录凭证已过期，请重新登录');
+        }
         throw new Error(`API Error: ${response.status}`);
       }
 
