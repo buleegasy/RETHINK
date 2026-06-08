@@ -9,6 +9,7 @@ import { useChatStore } from './store/chatStore';
 import type { UserProfile } from './types';
 import type { EmotionResult } from './hooks/useFaceEmotion';
 import { EMOTION_MAP } from './hooks/useFaceEmotion';
+import { CrisisOverlay } from './components/CrisisOverlay';
 
 /** Gemini sparkle SVG icon */
 const GeminiSparkle = ({ className = '' }: { className?: string }) => (
@@ -33,6 +34,7 @@ function App() {
   const isAuthenticated = useChatStore(state => state.isAuthenticated);
   const user = useChatStore(state => state.user);
   const logout = useChatStore(state => state.logout);
+  const fsmState = useChatStore(state => state.fsmState);
 
   const [currentEmotion, setCurrentEmotion] = useState<EmotionResult | null>(null);
 
@@ -128,6 +130,9 @@ function App() {
 
       {/* 登录、验证码墙 */}
       {!isAuthenticated && <LoginWall />}
+
+      {/* 危机干预覆盖层 */}
+      {fsmState === 'Crisis_Escalation' && <CrisisOverlay />}
     </div>
   );
 }

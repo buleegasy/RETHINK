@@ -4,21 +4,8 @@ import { useChatStore } from '../store/chatStore';
 import { useVoiceInput } from '../hooks/useVoiceInput';
 
 const EMOJI_CHIPS = [
-  { emoji: '🫠', text: '🫠' }, // 疲倦/累瘫
-  { emoji: '🤯', text: '🤯' }, // 崩溃/要炸了
-  { emoji: '😭', text: '😭' }, // 痛苦/很难受
-  { emoji: '🥺', text: '🥺' }, // 焦虑/委屈
-  { emoji: '💀', text: '💀' }, // 麻木/无语
-  { emoji: '😡', text: '😡' }, // 愤怒/生气
-  { emoji: '😑', text: '😑' }, // 迷茫/无感
-  { emoji: '🤡', text: '🤡' }, // 尴尬/难为情
-  { emoji: '🤢', text: '🤢' }, // 难受/反感
-  { emoji: '💤', text: '💤' }, // 嗜睡/没精神
-  { emoji: '😰', text: '😰' }, // 慌张/恐慌
-  { emoji: '🧠', text: '🧠' }, // 内耗/想太多
-  { emoji: '🌧️', text: '🌧️' }, // 抑郁/阴郁
-  { emoji: '🩹', text: '🩹' }, // 受伤/需要安慰
-  { emoji: '🫂', text: '🫂' }  // 孤单/想要拥抱
+  '🫠', '🤯', '😭', '🥺', '💀', '😡', '😑', '🤡', 
+  '🤢', '💤', '😰', '🧠', '🌧️', '🩹', '🫂', '🖕'
 ];
 
 interface InputBarProps {
@@ -105,14 +92,14 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
         {/* 表情包破冰快捷气泡 */}
         {fsmState === 'Onboarding' && !isStreaming && (
           <div className="w-full mb-4 flex gap-2.5 overflow-x-auto pb-2 justify-start md:justify-center scrollbar-none animate-fade-in pointer-events-auto">
-            {EMOJI_CHIPS.map((chip) => (
+            {EMOJI_CHIPS.map((emoji) => (
               <button
-                key={chip.emoji}
-                onClick={() => handleSendEmoji(chip.text)}
+                key={emoji}
+                onClick={() => handleSendEmoji(emoji)}
                 type="button"
                 className="flex items-center justify-center w-11 h-11 text-xl rounded-full border border-outline-variant bg-surface-container-high/80 hover:bg-surface-container-highest hover:scale-115 hover:rotate-6 hover:border-gemini-blue active:scale-90 transition-all duration-200 shrink-0 shadow-sm backdrop-blur cursor-pointer"
               >
-                {chip.emoji}
+                {emoji}
               </button>
             ))}
           </div>
