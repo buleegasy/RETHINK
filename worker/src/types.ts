@@ -88,7 +88,7 @@ export interface ChatRequest {
 // 情绪类型与 UI 控制
 // ============================================================
 
-export type EmotionType = 'Anxiety' | 'Depression' | 'Anger' | 'Neutral';
+export type EmotionType = 'Anxiety' | 'LowMood' | 'Anger' | 'Neutral';
 
 export interface UIControl {
   color_theme: string;

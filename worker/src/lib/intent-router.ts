@@ -5,7 +5,7 @@ import type { Env } from '../types';
 // ============================================================
 
 export type IntentType = 'casual' | 'emotional' | 'crisis' | 'ambiguous';
-export type EmotionType = 'Anxiety' | 'Depression' | 'Anger' | 'Neutral';
+export type EmotionType = 'Anxiety' | 'LowMood' | 'Anger' | 'Neutral';
 
 export interface IntentResult {
   type: IntentType;
@@ -328,7 +328,7 @@ async function verifyIntentWithLLM(
 
 2. emotion (主要情绪):
    - 'Anxiety': 焦虑、担忧、害怕、紧张、恐慌。
-   - 'Depression': 抑郁、低落、委屈、无价值感、自卑、悲伤。
+   - 'LowMood': 低落、委屈、无价值感、自卑、悲伤。
    - 'Anger': 愤怒、暴躁、被针对、不满、嫉妒。
    - 'Neutral': 中性、无明显情绪波动。
 
@@ -339,7 +339,7 @@ async function verifyIntentWithLLM(
 【输出 JSON 格式规范】
 {
   "type": "crisis" | "emotional" | "casual" | "ambiguous",
-  "emotion": "Anxiety" | "Depression" | "Anger" | "Neutral",
+  "emotion": "Anxiety" | "LowMood" | "Anger" | "Neutral",
   "confidence": 0.95,
   "justification": "判定理由"
 }
@@ -424,20 +424,20 @@ export async function classifyIntent(userMessage: string, env?: Env): Promise<In
 
 function detectSubEmotion(matches: string[]): EmotionType {
   const ANXIETY_WORDS = ['焦虑', '害怕', '恐慌', '担心', '紧张', '应该', '必须', '绝不能'];
-  const DEPRESSION_WORDS = ['低落', '难受', '没用', '废物', '绝望', '没救', '活着没意思', '我觉得我是', '我感到我是'];
+  const LOWMOOD_WORDS = ['低落', '难受', '没用', '废物', '绝望', '没救', '活着没意思', '我觉得我是', '我感到我是'];
   const ANGER_WORDS = ['生气', '愤怒', '针对我', '讨厌我', '讨厌', '恶心', '烦死了'];
 
-  const counts = { Anxiety: 0, Depression: 0, Anger: 0 };
+  const counts = { Anxiety: 0, LowMood: 0, Anger: 0 };
 
   for (const word of matches) {
     if (ANXIETY_WORDS.some(w => word.includes(w))) counts.Anxiety++;
-    if (DEPRESSION_WORDS.some(w => word.includes(w))) counts.Depression++;
+    if (LOWMOOD_WORDS.some(w => word.includes(w))) counts.LowMood++;
     if (ANGER_WORDS.some(w => word.includes(w))) counts.Anger++;
   }
 
-  const max = Math.max(counts.Anxiety, counts.Depression, counts.Anger);
+  const max = Math.max(counts.Anxiety, counts.LowMood, counts.Anger);
   if (max === 0) return 'Neutral';
   if (counts.Anxiety === max) return 'Anxiety';
-  if (counts.Depression === max) return 'Depression';
+  if (counts.LowMood === max) return 'LowMood';
   return 'Anger';
 }

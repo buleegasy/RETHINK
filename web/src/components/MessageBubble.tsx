@@ -16,7 +16,7 @@ const INTENT_LABEL: Record<string, string> = {
 /** 情绪子类型 → 中文 */
 const EMOTION_LABEL: Record<string, string> = {
   Anxiety:    '焦虑',
-  Depression: '抑郁',
+  LowMood:    '低落',
   Anger:      '愤怒',
   Neutral:    '中性',
 };

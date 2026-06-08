@@ -139,7 +139,7 @@ const CINEMATIC_UI_RULES = `
    - 目的：降低视觉刺激，减缓心率。
    - 参数：color_theme: "#0A1128", lighting_style: "soft_ambient", transition_speed: "5000ms", effect: "slow_breathing"
 
-2. **抑郁/低落 (Depression)** -> 晨光高动态暖色 (Sunrise Gold)
+2. **低落/无力 (LowMood)** -> 晨光高动态暖色 (Sunrise Gold)
    - 目的：行为激活，提升能量感。
    - 参数：color_theme: "#E27D60", lighting_style: "golden_hour_bloom", transition_speed: "3000ms", effect: "warm_glow"
 
