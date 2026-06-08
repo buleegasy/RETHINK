@@ -91,15 +91,25 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
       }
 
       const entries = Object.entries(avgExpressions) as [EmotionLabel, number][];
-      let [topLabel, topScore] = entries.reduce(
-        (best, curr) => (curr[1] > best[1] ? curr : best),
-        ['neutral' as EmotionLabel, 0]
-      );
+      
+      // 寻找非 neutral 的最高分数
+      let maxNonNeutralLabel: EmotionLabel = 'neutral';
+      let maxNonNeutralScore = 0;
+      for (const [k, v] of entries) {
+        if (k !== 'neutral' && v > maxNonNeutralScore) {
+          maxNonNeutralScore = v;
+          maxNonNeutralLabel = k;
+        }
+      }
 
-      // 降低硬阈值：对于微表情，脸部可能并没有夸张变形，0.3 的平均置信度足以说明情绪倾向。
-      if (topLabel !== 'neutral' && topScore < 0.25) {
-        topLabel = 'neutral';
-        topScore = avgExpressions['neutral'] || 0;
+      let topLabel: EmotionLabel = 'neutral';
+      let topScore = avgExpressions['neutral'] || 0;
+
+      // 核心微表情放大器：模型本身极度偏好 neutral (就算轻微皱眉 neutral 也会高达 0.8)
+      // 因此我们只要非 neutral 的最高置信度突破了 0.15，就判定为该情绪。
+      if (maxNonNeutralLabel !== 'neutral' && maxNonNeutralScore > 0.15) {
+        topLabel = maxNonNeutralLabel;
+        topScore = maxNonNeutralScore;
       }
 
       const allEmotions: Partial<Record<EmotionLabel, number>> = {};
