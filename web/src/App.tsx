@@ -11,23 +11,8 @@ import type { EmotionResult } from './hooks/useFaceEmotion';
 import { EMOTION_MAP } from './hooks/useFaceEmotion';
 import { CrisisOverlay } from './components/CrisisOverlay';
 
-/** Gemini sparkle SVG icon */
-const GeminiSparkle = ({ className = '' }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M14 0C14 7.732 7.732 14 0 14C7.732 14 14 20.268 14 28C14 20.268 20.268 14 28 14C20.268 14 14 7.732 14 0Z" fill="url(#gemini-grad)"/>
-    <defs>
-      <linearGradient id="gemini-grad" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#4285F4"/>
-        <stop offset="1" stopColor="#00BCD4"/>
-      </linearGradient>
-    </defs>
-  </svg>
-);
-
 function App() {
   const { sendMessage, error } = useChat();
-  const selectedModel = useChatStore(state => state.selectedModel);
-  const setSelectedModel = useChatStore(state => state.setSelectedModel);
   const hasCompletedOnboarding = useChatStore(state => state.hasCompletedOnboarding);
   
   // Auth state
@@ -56,36 +41,20 @@ function App() {
       {/* 主对话区 */}
       <div className="flex flex-col flex-1 h-full relative">
         {/* ── 移动端顶部 Header ── */}
-        <div className="md:hidden flex items-center justify-between pt-[max(env(safe-area-inset-top),12px)] pb-2.5 px-4 bg-surface shrink-0 z-20 border-b border-outline-variant/50">
+        <div className="md:hidden flex items-center justify-between pt-[max(env(safe-area-inset-top),12px)] pb-2.5 px-4 bg-transparent shrink-0 z-20">
           {/* 左侧：品牌 */}
-          <div className="flex items-center gap-2">
-            <GeminiSparkle className="w-6 h-6" />
-            <h1 className="text-[17px] font-display font-medium text-on-surface">
+          <div className="flex items-center">
+            <h1 className="text-[17px] font-display font-medium text-on-surface opacity-80">
               RE-THINK
             </h1>
           </div>
 
-          {/* 右侧：模型选择 + 退出 */}
-          <div className="flex items-center gap-3">
-            {/* 模型选择器 */}
-            <div className="relative">
-              <select
-                value={selectedModel}
-                onChange={(e) => setSelectedModel(e.target.value)}
-                className="bg-surface-container text-on-surface-variant text-xs font-medium py-1.5 px-3 pr-7 rounded-full border-none outline-none appearance-none cursor-pointer hover:bg-surface-container-high transition-colors duration-200"
-              >
-                <option value="deepseek-v3">DeepSeek V3</option>
-                <option value="llama-3.4">Llama 3.4</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-on-surface-dim">
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
-              </div>
-            </div>
-
+          {/* 右侧：退出 */}
+          <div className="flex items-center">
             {isAuthenticated && (
               <button
                 onClick={logout}
-                className="text-xs text-error font-medium px-2 py-1.5 hover:bg-error-container/20 rounded-full transition-colors duration-200"
+                className="text-xs text-error/80 font-medium px-3 py-1.5 hover:bg-error-container/20 rounded-full transition-colors duration-200"
               >
                 退出
               </button>
