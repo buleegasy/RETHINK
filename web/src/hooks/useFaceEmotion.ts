@@ -56,6 +56,7 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
   const streamRef = useRef<MediaStream | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isActiveRef = useRef(false);
+  const historyRef = useRef<Record<EmotionLabel, number>[]>([]);
 
   // 分析单帧情绪
   const analyzeFrame = useCallback(async () => {
@@ -72,11 +73,37 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
       if (!detection || !isActiveRef.current) return;
 
       const expressions = detection.expressions;
-      const entries = Object.entries(expressions) as [EmotionLabel, number][];
-      const [topLabel, topScore] = entries.reduce(
+
+      // 引入时间平滑（Moving Average）：记录最近 4 帧的数据
+      const history = historyRef.current;
+      history.push(expressions as unknown as Record<EmotionLabel, number>);
+      if (history.length > 4) {
+        history.shift();
+      }
+
+      // 计算过去几帧的平均分数
+      const avgExpressions = {
+        happy: 0, sad: 0, angry: 0, fearful: 0, disgusted: 0, surprised: 0, neutral: 0
+      } as Record<EmotionLabel, number>;
+
+      const len = history.length;
+      for (const hist of history) {
+        for (const k of Object.keys(avgExpressions) as EmotionLabel[]) {
+          avgExpressions[k] += (hist[k] || 0) / len;
+        }
+      }
+
+      const entries = Object.entries(avgExpressions) as [EmotionLabel, number][];
+      let [topLabel, topScore] = entries.reduce(
         (best, curr) => (curr[1] > best[1] ? curr : best),
         ['neutral' as EmotionLabel, 0]
       );
+
+      // 置信度阈值过滤：如果最高情绪不是 neutral 且平均置信度低于 0.45，则强制回退到 neutral，防止误判
+      if (topLabel !== 'neutral' && topScore < 0.45) {
+        topLabel = 'neutral';
+        topScore = avgExpressions['neutral'];
+      }
 
       const allEmotions: Partial<Record<EmotionLabel, number>> = {};
       for (const [k, v] of entries) {
@@ -160,6 +187,7 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
 
     setIsCameraActive(false);
     setCurrentEmotion(null);
+    historyRef.current = [];
   }, []);
 
   useEffect(() => {
