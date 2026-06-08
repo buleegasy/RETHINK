@@ -32,7 +32,7 @@ export interface UseFaceEmotionReturn {
   error: string | null;
 }
 
-const MODEL_URL = '/cv-models';
+const MODEL_URL = '/cv-models/';
 let modelsLoaded = false;
 
 async function loadModels() {
@@ -102,8 +102,8 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
       try {
         await loadModels();
         setIsModelLoaded(true);
-      } catch {
-        setError('情绪识别模型加载失败，请检查网络');
+      } catch (err: any) {
+        setError(`情绪识别模型加载失败: ${err?.message || err}`);
         setIsModelLoading(false);
         return;
       }

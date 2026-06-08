@@ -143,6 +143,7 @@ chatRouter.post('/', requireAuth, async (c) => {
 
       let cleanReply = finalJsonStr;
       let uiControl = undefined;
+      let reasoningDeduction = undefined;
 
       try {
         const parsed = JSON.parse(finalJsonStr);
@@ -157,6 +158,11 @@ chatRouter.post('/', requireAuth, async (c) => {
         if (parsed.ui_control) {
           uiControl = parsed.ui_control;
         }
+
+        if (parsed.reasoning_deduction) {
+          reasoningDeduction = parsed.reasoning_deduction;
+        }
+
         
         // 解析破冰画像增量更新 (Onboarding 阶段)
         if (parsed.icebreaker_update && fsmCtx.currentState === 'Onboarding') {
@@ -188,6 +194,7 @@ chatRouter.post('/', requireAuth, async (c) => {
         fsmState: fsmCtx.currentState,
         fsmTrigger: postTransition.trigger,
         uiControl,
+        reasoning_deduction: reasoningDeduction,
         icebreakerLayer: fsmCtx.icebreaker.layer,
         ...ragMeta,
       });

@@ -275,12 +275,13 @@ function transitionFromActiveListening(
   if (intent.type === 'emotional') {
     const newStreak = ctx.emotionalStreak + 1;
 
-    if (newStreak >= 2 || intent.confidence >= 0.7) {
+    // 延迟进入 CBT：如果情绪仍然非常高涨，继续留在倾听状态兜底
+    if (newStreak >= 3 && intent.confidence < 0.7) {
       return {
         nextState: 'CBT_Stripping',
-        trigger: `情绪信号达标 (streak=${newStreak}, confidence=${intent.confidence})`,
+        trigger: `情绪降温且已倾听充分 (streak=${newStreak}, confidence=${intent.confidence})`,
         contextUpdate: {
-          emotionalStreak: newStreak,
+          emotionalStreak: 0,
           abcCompleted: false,
           restructureAccepted: false,
         },
@@ -289,7 +290,7 @@ function transitionFromActiveListening(
 
     return {
       nextState: 'Active_Listening',
-      trigger: '轻微情绪信号，继续倾听观察',
+      trigger: `继续倾听共情兜底 (streak=${newStreak}, confidence=${intent.confidence})`,
       contextUpdate: { emotionalStreak: newStreak },
     };
   }
@@ -308,6 +309,15 @@ function transitionFromCBTStripping(
   phase: 'pre' | 'post',
   aiOutput?: string,
 ): FSMTransitionResult {
+  // CBT_Stripping → Active_Listening (动态回退机制)
+  if (phase === 'pre' && intent.type === 'emotional' && intent.confidence >= 0.8) {
+    return {
+      nextState: 'Active_Listening',
+      trigger: `用户在事实剥离中情绪重新升温 (confidence=${intent.confidence})，退回倾听兜底`,
+      contextUpdate: { emotionalStreak: 1 },
+    };
+  }
+
   // CBT_Stripping → Socratic_Questioning 条件：
   //   AI 输出中包含 ABC 三要素的标记（post 阶段检测）
 
@@ -554,34 +564,32 @@ Layer 5: 探底与自然过渡（第 5 轮）
 }
 
 const PROMPT_ACTIVE_LISTENING = `你正在积极倾听用户的分享。你的任务是：
-1. 共情地回应用户说的内容。但【不要急于给空洞的安慰】（如"你值得被爱"），前期的核心是让对方感觉"这个人真的在听我说话"。
-2. 不要主动进行 CBT 分析或挑战用户的想法。
-3. 【情绪反射要贴着对方的话走】：紧贴具体内容，不要跳跃到更大的结论。例如对方说“我妈哭了”，你就问“妈妈哭的时候，你在旁边吗？”，绝不要替对方总结“你一定很累”。把评价变成细节提问，让对方自己把感受说出来。
-4. 如果对方沉默或情绪极度低落，适时发一句"我在，不着急"或"我就陪着你"，主动确认陪伴。
-5. 【强制】你的回复必须极其简短！最多只能说1-2句话，绝对不要长篇大论！
+1. 【首先必须真实反应】：绝对不要用“我能感受到你的痛苦”这种套话。用最真实、最接地气的人类本能反应来接住对方（例如：“卧槽，这也太窒息了吧”、“这换谁不崩啊”、“抱抱你，这也太委屈了”）。
+2. 不要主动进行 CBT 分析或讲大道理。
+3. 【情绪反射要贴着对方的话走】：紧贴具体内容，不要跳跃到更大的结论。
+4. 【强制输出结构】：你的回复必须严格包含两句话（像微信短消息）：
+   - 第一句：真实的人类本能反应（必须有，禁止心理学套话）。
+   - 第二句：像朋友八卦/关心一样的低压力追问（必须有，例如：“那你当时咋想的？”、“你没跟他们理论吧？”）。
+   绝对不能省略第一句直接提问！
 
-注意：你此刻的角色是一个专注倾听的陪伴者，不是分析师。只有当用户持续表达负面情绪时，才会自动进入更深入的引导。`;
+注意：你此刻的角色是一个极度护短、和你同频共振的好朋友，不是分析师。`;
 
-const PROMPT_CBT_STRIPPING = `你正在执行 CBT 事实剥离阶段。你需要帮助用户进行 ABC 模型拆解：
+const PROMPT_CBT_STRIPPING = `你正在执行 CBT 事实剥离阶段。你需要帮助用户进行 ABC 模型拆解，但【必须伪装成朋友之间的日常八卦和关心】：
 
 1. **A — 事实 (Activating Event)**：
-   引导用户描述客观发生的事情，就像监控摄像头拍到的画面，只有动作和场景，没有评价。
+   引导用户描述客观发生的事情，就像朋友间听八卦一样自然：“后来呢？”、“那她当时原话是怎么说的啊？”
 
 2. **B — 信念 (Beliefs)**：
-   识别用户对该事件的自动思维、主观解读和认知扭曲。特别留意：
-   - 非黑即白、灾难化、读心术等。
-   - **应该句式 (Should Statements)**：给自己或他人设定严苛规矩（如“我不应该结巴”）。
-   - **情绪推理 (Emotional Reasoning)**：把感受当真理（如“我觉得像个白痴，所以我一定是”）。
+   识别用户对该事件的自动思维和认知扭曲。
+   - 探究他们的想法时，不要像警察盘问，而是像闺蜜/兄弟的关心：“那你当时脑子里是不是一片空白？”、“你是不是觉得他们都在针对你啊？”
 
 3. **C — 后果 (Consequences)**：
-   帮助用户看到这些想法如何导致了他们的情绪反应和行为。
+   看到这些想法如何导致情绪。
 
 工作策略：
-- 一次只推进一个要素，不要一口气把 ABC 全讲完
-- 【少说结论，多问细节】：严禁急着替对方总结感受。把评价变成细节提问，如“那一刻你心里在想什么？”。好的疏导是帮对方把感受说得更清楚，而不是替对方说清楚。
-- 用温和的提问引导，而不是直接告诉用户答案
-- 如果用户情绪突然升级，立即暂停分析，先给予情感支持
-- 【强制】你的回复必须极其简短！每次最多1-2句话！把你的拆解问题作为最后一句。`;
+- 【严禁高位视角】：不要说“你现在感觉很沮丧”，这是机器人的话。
+- 【严禁连环问】：一次只问一个小问题，绝对不要像做笔录。
+- 【强制限制】：你的回复必须极其简短！每次最多1-2句话！像平时的微信聊天。`;
 
 const PROMPT_SOCRATIC = `你正在进行临床级认知重塑。你必须严格遵循以下原则，绝对禁止说教或直接提供结论：
 

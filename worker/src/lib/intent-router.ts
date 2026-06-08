@@ -170,6 +170,10 @@ const EMOTIONAL_TRIGGERS: { word: string | RegExp; weight: number }[] = [
   { word: '精神内耗', weight: 0.8 },
   { word: 'cpu我', weight: 0.8 },
   { word: '画饼', weight: 0.7 },
+  { word: '负罪感', weight: 0.8 },
+  { word: '烂泥扶不上墙', weight: 0.9 },
+  { word: '烂摊子', weight: 0.7 },
+  { word: '透明人', weight: 0.8 },
   
   // ==========================================
   // 正则模式匹配 (权重 0.8)
@@ -177,6 +181,8 @@ const EMOTIONAL_TRIGGERS: { word: string | RegExp; weight: number }[] = [
   { word: /(焦虑|烦躁|难受|恶心)死了/, weight: 0.8 },
   { word: /对.*失望/, weight: 0.8 },
   { word: /(不想|讨厌)去学校/, weight: 0.8 },
+  { word: /没意思/, weight: 0.7 },
+  { word: /睡过去.*(不|别)醒/, weight: 0.9 },
 ];
 
 /**
