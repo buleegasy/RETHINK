@@ -134,17 +134,31 @@ chatRouter.post('/', requireAuth, async (c) => {
       });
 
       const responseText = response.choices[0]?.message?.content || '';
-      
-      // 解析 JSON 响应
-      let cleanReply = responseText;
-      let uiControl = undefined;
-      
-      try {
-        const parsed = JSON.parse(responseText.trim());
-        if (parsed.agent_reply) cleanReply = parsed.agent_reply;
-        if (parsed.ui_control) uiControl = parsed.ui_control;
+      let finalJsonStr = responseText.trim();
+      if (finalJsonStr.startsWith('```json')) {
+        finalJsonStr = finalJsonStr.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
+      } else if (finalJsonStr.startsWith('```')) {
+        finalJsonStr = finalJsonStr.replace(/^```\n?/, '').replace(/\n?```$/, '').trim();
+      }
 
-        // 解析破冰画像增量更新 (Onboarding 状态)
+      let cleanReply = finalJsonStr;
+      let uiControl = undefined;
+
+      try {
+        const parsed = JSON.parse(finalJsonStr);
+        if (parsed.agent_reply) {
+          cleanReply = parsed.agent_reply;
+        } else if (parsed.reply) {
+          cleanReply = parsed.reply;
+        } else if (parsed.message) {
+          cleanReply = parsed.message;
+        }
+        
+        if (parsed.ui_control) {
+          uiControl = parsed.ui_control;
+        }
+        
+        // 解析破冰画像增量更新 (Onboarding 阶段)
         if (parsed.icebreaker_update && fsmCtx.currentState === 'Onboarding') {
           fsmCtx.icebreaker = applyIcebreakerUpdate(fsmCtx.icebreaker, parsed.icebreaker_update);
           console.log(`[Icebreaker Non-Stream] Layer ${fsmCtx.icebreaker.layer}, moodWord=${fsmCtx.icebreaker.moodWord || 'n/a'}`);
@@ -198,6 +212,7 @@ chatRouter.post('/', requireAuth, async (c) => {
       let sentUnescapedLength = 0;
       let isExtracting = false;
       let hasFinishedExtraction = false;
+      let isPlainTextFallback = false;
 
       // 辅助函数：寻找第一个非转义的引号
       const getUnescapedQuoteIndex = (str: string): number => {
@@ -223,14 +238,36 @@ chatRouter.post('/', requireAuth, async (c) => {
             continue; // 已经提取完 agent_reply，后续的 JSON 内容不再发送给前端
           }
 
-          if (!isExtracting) {
-            const match = fullResponse.match(/"agent_reply"\s*:\s*"/);
-            if (match && match.index !== undefined) {
-              isExtracting = true;
+          if (!isExtracting && !isPlainTextFallback) {
+            const trimmed = fullResponse.trim();
+            // 检查是否是非 JSON 纯文本开头
+            if (trimmed.length > 5 && !trimmed.startsWith('{') && !trimmed.startsWith('`')) {
+              isPlainTextFallback = true;
+            } else {
+              const match = fullResponse.match(/"agent_reply"\s*:\s*"/);
+              if (match && match.index !== undefined) {
+                isExtracting = true;
+              }
             }
           }
           
-          if (isExtracting) {
+          if (isPlainTextFallback) {
+            const trueDelta = fullResponse.substring(sentUnescapedLength);
+            if (trueDelta) {
+              sentUnescapedLength = fullResponse.length;
+              await streamEvent.writeSSE({
+                data: JSON.stringify({
+                  delta: trueDelta,
+                  stage: detectStage(fullResponse, currentStageIndex),
+                  done: false,
+                  sessionId,
+                  intent: intentResult.type,
+                  fsmState: fsmCtx.currentState,
+                  ...ragMeta,
+                })
+              });
+            }
+          } else if (isExtracting) {
             const match = fullResponse.match(/"agent_reply"\s*:\s*"/);
             if (match && match.index !== undefined) {
               const startContent = fullResponse.substring(match.index + match[0].length);
@@ -273,10 +310,23 @@ chatRouter.post('/', requireAuth, async (c) => {
       let uiControl = undefined;
       let finalReply = extractedReply;
       
+      let cleanResponse = fullResponse.trim();
+      if (cleanResponse.startsWith('```json')) {
+        cleanResponse = cleanResponse.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
+      } else if (cleanResponse.startsWith('```')) {
+        cleanResponse = cleanResponse.replace(/^```\n?/, '').replace(/\n?```$/, '').trim();
+      }
+      
       try {
-        const parsed = JSON.parse(fullResponse.trim());
+        const parsed = JSON.parse(cleanResponse);
         if (parsed.ui_control) uiControl = parsed.ui_control;
-        if (parsed.agent_reply) finalReply = parsed.agent_reply;
+        if (parsed.agent_reply) {
+          finalReply = parsed.agent_reply;
+        } else if (parsed.reply) {
+          finalReply = parsed.reply;
+        } else if (parsed.message) {
+          finalReply = parsed.message;
+        }
 
         // 解析破冰画像增量更新
         if (parsed.icebreaker_update && fsmCtx.currentState === 'Onboarding') {
@@ -285,6 +335,9 @@ chatRouter.post('/', requireAuth, async (c) => {
         }
       } catch (e) {
         console.warn('Failed to parse final JSON from AI:', e);
+        if (isPlainTextFallback || !finalReply) {
+          finalReply = cleanResponse;
+        }
       }
 
       // ── FSM Post-response 转移 ──
