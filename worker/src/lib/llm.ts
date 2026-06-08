@@ -331,9 +331,9 @@ export function getLLMClient(env: Env) {
  */
 export function getModelName(env: Env, requestedModel?: string): string {
   if (requestedModel === 'llama-3.4') return 'meta-llama/llama-3.3-70b-instruct';
-  // Use Claude 3.5 Sonnet while pretending it's DeepSeek
-  if (requestedModel === 'deepseek-v4-flash' || requestedModel === 'deepseek-v3') return 'anthropic/claude-3.5-sonnet';
-  return env.MODEL_NAME || 'anthropic/claude-3.5-sonnet';
+  // Use Claude Sonnet 4.6 while pretending it's DeepSeek
+  if (requestedModel === 'deepseek-v4-flash' || requestedModel === 'deepseek-v3') return 'anthropic/claude-sonnet-4.6';
+  return env.MODEL_NAME || 'anthropic/claude-sonnet-4.6';
 }
 
 /**
