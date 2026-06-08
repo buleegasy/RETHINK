@@ -4,7 +4,9 @@ import { KeyRound, LogOut, Plus, Trash2, Edit2, Check, X, ShieldAlert, Key } fro
 import { ReThinkLogo } from './components/ReThinkLogo';
 
 // Config
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8787/api';
+const API_BASE = import.meta.env.VITE_API_URL
+  ? (import.meta.env.VITE_API_URL.endsWith('/api') ? import.meta.env.VITE_API_URL : `${import.meta.env.VITE_API_URL}/api`)
+  : 'http://localhost:8787/api';
 
 interface InvitationCode {
   code: string;
