@@ -130,6 +130,7 @@ chatRouter.post('/', requireAuth, async (c) => {
         messages: fullMessages,
         stream: false,
         temperature: 0.6,
+        response_format: { type: 'json_object' },
       });
 
       const responseText = response.choices[0]?.message?.content || '';
@@ -189,10 +190,12 @@ chatRouter.post('/', requireAuth, async (c) => {
         messages: fullMessages,
         stream: true,
         temperature: 0.6,
+        response_format: { type: 'json_object' },
       });
 
       let fullResponse = '';
       let extractedReply = '';
+      let sentUnescapedLength = 0;
       let isExtracting = false;
       let hasFinishedExtraction = false;
 
@@ -221,76 +224,45 @@ chatRouter.post('/', requireAuth, async (c) => {
           }
 
           if (!isExtracting) {
-            const marker = '"agent_reply": "';
-            const markerIndex = fullResponse.indexOf(marker);
-            
-            // 兼容有些模型可能会输出带有空格的情况，比如 "agent_reply":  "
-            // 但为了简单和性能，我们还是用正则匹配开始位置
             const match = fullResponse.match(/"agent_reply"\s*:\s*"/);
-            
             if (match && match.index !== undefined) {
               isExtracting = true;
-              const startContent = fullResponse.substring(match.index + match[0].length);
-              
-              // 检查这个 initial chunk 里是否就已经包含了结束的引号
-              const endIdx = getUnescapedQuoteIndex(startContent);
-              
-              let cleanContent = startContent;
-              if (endIdx !== -1) {
-                cleanContent = startContent.substring(0, endIdx);
-                hasFinishedExtraction = true;
-              }
-              
-              extractedReply = cleanContent;
-              
-              if (cleanContent) {
-                await streamEvent.writeSSE({
-                  data: JSON.stringify({
-                    delta: cleanContent,
-                    stage: detectStage(cleanContent, currentStageIndex),
-                    done: false,
-                    sessionId,
-                    intent: intentResult.type,
-                    fsmState: fsmCtx.currentState,
-                    ...ragMeta,
-                  })
-                });
-              }
             }
-          } else {
-            // 已经在提取中了，检查本次加上 delta 后是否出现结束引号
-            // 需要注意的是，前一个 chunk 的最后一个字符可能是转义符，所以要在拼接后的全量提取串中寻找
-            
-            // 获取从 agent_reply 值开始的所有内容
+          }
+          
+          if (isExtracting) {
             const match = fullResponse.match(/"agent_reply"\s*:\s*"/);
             if (match && match.index !== undefined) {
               const startContent = fullResponse.substring(match.index + match[0].length);
               const endIdx = getUnescapedQuoteIndex(startContent);
               
-              let cleanDelta = delta;
               if (endIdx !== -1) {
-                // 找到了结束点！
-                const correctFullReply = startContent.substring(0, endIdx);
-                // 那么本次应该发送的 delta 就是 正确的完整回复 减去 已经发送的部分
-                cleanDelta = correctFullReply.substring(extractedReply.length);
+                extractedReply = startContent.substring(0, endIdx);
                 hasFinishedExtraction = true;
-                extractedReply = correctFullReply;
               } else {
-                extractedReply += delta;
+                extractedReply = startContent;
               }
 
-              if (cleanDelta) {
-                await streamEvent.writeSSE({
-                  data: JSON.stringify({
-                    delta: cleanDelta,
-                    stage: detectStage(extractedReply, currentStageIndex),
-                    done: false,
-                    sessionId,
-                    intent: intentResult.type,
-                    fsmState: fsmCtx.currentState,
-                    ...ragMeta,
-                  })
-                });
+              // 如果 extractedReply 以单个反斜杠结尾，说明遇到了一个不完整的转义序列（比如刚好截断在 \n 的 \）
+              // 此时我们不立刻发送，等待下一个 chunk 补全
+              if (extractedReply && !extractedReply.endsWith('\\')) {
+                const unescapedFull = extractedReply.replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+                const trueDelta = unescapedFull.substring(sentUnescapedLength);
+                
+                if (trueDelta) {
+                  sentUnescapedLength = unescapedFull.length;
+                  await streamEvent.writeSSE({
+                    data: JSON.stringify({
+                      delta: trueDelta,
+                      stage: detectStage(unescapedFull, currentStageIndex),
+                      done: false,
+                      sessionId,
+                      intent: intentResult.type,
+                      fsmState: fsmCtx.currentState,
+                      ...ragMeta,
+                    })
+                  });
+                }
               }
             }
           }
