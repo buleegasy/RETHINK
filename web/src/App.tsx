@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { ChatPanel } from './components/ChatPanel';
 import { InputBar } from './components/InputBar';
 import { AmbientGlow } from './components/AmbientGlow';
@@ -20,20 +20,57 @@ function App() {
   const logout = useChatStore(state => state.logout);
   const fsmState = useChatStore(state => state.fsmState);
 
-  const [currentEmotion, setCurrentEmotion] = useState<EmotionResult | null>(null);
+  const [, setCurrentEmotion] = useState<EmotionResult | null>(null);
+  
+  // 用于记录每一次对话周期内（从上一次发送到本次发送之间）的所有情绪帧
+  const emotionHistoryRef = useRef<EmotionResult[]>([]);
+
+  const handleEmotionChange = useCallback((emotion: EmotionResult | null) => {
+    setCurrentEmotion(emotion);
+    if (emotion) {
+      emotionHistoryRef.current.push(emotion);
+    }
+  }, []);
 
   const handleSendWithEmotion = useCallback((text: string, profile?: UserProfile) => {
-    // 既然 useFaceEmotion 里已经做了极严格的筛选与微表情放大，
-    // 这里只需确保 label 不是 neutral 即可，不再受到 50% 的硬性拦截。
-    const emotionPayload = currentEmotion && currentEmotion.label !== 'neutral'
-      ? {
-          label: currentEmotion.label,
-          labelZh: EMOTION_MAP[currentEmotion.label].zh,
-          confidence: currentEmotion.confidence,
+    let emotionPayload = undefined;
+
+    if (emotionHistoryRef.current.length > 0) {
+      // 计算这一段时间（周期）内的情绪平均值
+      const avgScores: Record<string, number> = {};
+      for (const e of emotionHistoryRef.current) {
+        for (const [k, v] of Object.entries(e.allEmotions)) {
+          avgScores[k] = (avgScores[k] || 0) + (v as number);
         }
-      : undefined;
+      }
+
+      const len = emotionHistoryRef.current.length;
+      let maxLabel = 'neutral';
+      let maxScore = 0;
+
+      for (const [k, v] of Object.entries(avgScores)) {
+        const avg = v / len;
+        if (k !== 'neutral' && avg > maxScore) {
+          maxScore = avg;
+          maxLabel = k;
+        }
+      }
+
+      // 如果整个周期的非平静情绪平均值超过 3%（0.03），则作为本轮周期的整体情绪发给 AI
+      if (maxScore > 0.03) {
+        emotionPayload = {
+          label: maxLabel,
+          labelZh: EMOTION_MAP[maxLabel as keyof typeof EMOTION_MAP].zh,
+          confidence: Math.round(maxScore * 100),
+        };
+      }
+
+      // 清空周期记录，开始下一轮记录
+      emotionHistoryRef.current = [];
+    }
+
     sendMessage(text, profile, emotionPayload);
-  }, [currentEmotion, sendMessage]);
+  }, [sendMessage]);
 
   return (
     <div className="fixed inset-0 flex w-full overflow-hidden bg-surface-dim">
@@ -79,7 +116,7 @@ function App() {
         {hasCompletedOnboarding && (
           <InputBar 
             onSend={handleSendWithEmotion} 
-            onEmotionChange={setCurrentEmotion} 
+            onEmotionChange={handleEmotionChange} 
           />
         )}
       </div>
