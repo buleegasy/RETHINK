@@ -23,7 +23,7 @@ EMBED_MODEL = os.getenv("EMBED_MODEL", "BAAI/bge-large-zh-v1.5")
 # 使用 300 作为字符数上限，确保不超 512 tokens
 MAX_CHARS = 300
 
-SOURCE_DIR = "/Users/chenhaoran/Documents/New project/data/cleaned"
+SOURCE_DIR = "/Users/chenhaoran/Documents/心理竞赛/data/cleaned"
 
 FAILED_IDS = {
     "cbt_burns_ten_distortions_005":          ("cbt_chunks.jsonl", "cbt"),
