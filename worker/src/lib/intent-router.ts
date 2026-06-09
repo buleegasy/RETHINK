@@ -4,7 +4,17 @@ import type { Env } from '../types';
 // 意图类型
 // ============================================================
 
-export type IntentType = 'casual' | 'emotional' | 'crisis' | 'ambiguous';
+export type IntentType = 
+  | 'casual' 
+  | 'emotional' 
+  | 'crisis' 
+  | 'ambiguous'
+  | 'academic_stress'
+  | 'peer_relationship'
+  | 'family_pressure'
+  | 'ambiguous_risk'
+  | 'source_trace';
+
 export type EmotionType = 'Anxiety' | 'LowMood' | 'Anger' | 'Neutral';
 
 export interface IntentResult {
@@ -20,7 +30,6 @@ export interface IntentResult {
 
 /**
  * 危机信号词 — 最高优先级
- * 出现任何一个即判定为 crisis（后经 LLM 语义校验排除否定句或误判）
  */
 const CRISIS_TRIGGERS: (string | RegExp)[] = [
   '不想活', '自杀', '去死', '想死', '活着没意思', '活不下去',
@@ -28,18 +37,32 @@ const CRISIS_TRIGGERS: (string | RegExp)[] = [
   '伤害自己', '自残', '不如死了', '死了算了',
   '杀', '伤害他人', '报复',
   '消失', '解脱', '没意义', '离开这个世界', '再见这个世界', '解脱自己',
-  // 新增隐式危机与网络缩写表达
   '不想醒来', '重开', '下辈子', '人间蒸发', '世界再见', '去找外公', '去找外婆', '见阎王', '上吊', '安眠药', '烧炭',
   /不想活了?/,
   /不想在这个世界了?/,
   /(死了|走了)算了/,
 ];
 
+const SOURCE_TRACE_TRIGGERS: (string | RegExp)[] = [
+  '依据', '来源', '凭什么', '为什么这么建议', '参考', '证据',
+];
+
+const ACADEMIC_TRIGGERS: (string | RegExp)[] = [
+  '考试', '听写', '成绩', '作业', '排名', '分数', '错题', '不及格', '考砸', '挂科', '退步', '垫底', '落榜'
+];
+
+const PEER_TRIGGERS: (string | RegExp)[] = [
+  '同桌', '同学', '朋友', '笑我', '孤立', '看不起', '背后说', '不合群', '没朋友', '传谣言', '冷落'
+];
+
+const FAMILY_TRIGGERS: (string | RegExp)[] = [
+  '爸妈', '父母', '妈妈', '爸爸', '家里', '不够努力', '骂我'
+];
+
 /**
- * 情绪倾诉触发词 — 来自 SAG 模块二和模块三，已扩充青少年高频与网络词汇
+ * 情绪倾诉触发词
  */
 const EMOTIONAL_TRIGGERS: { word: string | RegExp; weight: number }[] = [
-  // ---- 情绪化形容词 (权重 0.8) ----
   { word: '丢脸', weight: 0.8 },
   { word: '可怕', weight: 0.8 },
   { word: '糟糕', weight: 0.8 },
@@ -55,7 +78,6 @@ const EMOTIONAL_TRIGGERS: { word: string | RegExp; weight: number }[] = [
   { word: '无助', weight: 0.8 },
   { word: '委屈', weight: 0.7 },
 
-  // ---- 自我贬低/评价 (权重 0.9) ----
   { word: '我很差', weight: 0.9 },
   { word: '我没用', weight: 0.9 },
   { word: '我不配', weight: 0.9 },
@@ -67,7 +89,6 @@ const EMOTIONAL_TRIGGERS: { word: string | RegExp; weight: number }[] = [
   { word: '我完了', weight: 0.9 },
   { word: '彻底完了', weight: 0.9 },
 
-  // ---- 他人心理推断 (权重 0.7) ----
   { word: '讨厌我', weight: 0.7 },
   { word: '看不起我', weight: 0.7 },
   { word: '都在笑我', weight: 0.7 },
@@ -79,7 +100,6 @@ const EMOTIONAL_TRIGGERS: { word: string | RegExp; weight: number }[] = [
   { word: '排挤我', weight: 0.7 },
   { word: '孤立我', weight: 0.7 },
 
-  // ---- 未来负面预测 (权重 0.7) ----
   { word: '肯定失败', weight: 0.7 },
   { word: '不会好', weight: 0.7 },
   { word: '完蛋了', weight: 0.7 },
@@ -87,7 +107,6 @@ const EMOTIONAL_TRIGGERS: { word: string | RegExp; weight: number }[] = [
   { word: '没希望', weight: 0.8 },
   { word: '一辈子', weight: 0.5 },
 
-  // ---- 绝对化表达 (权重 0.6) ----
   { word: '总是', weight: 0.6 },
   { word: '从来', weight: 0.6 },
   { word: '所有人', weight: 0.6 },
@@ -97,19 +116,16 @@ const EMOTIONAL_TRIGGERS: { word: string | RegExp; weight: number }[] = [
   { word: '一定', weight: 0.5 },
   { word: '肯定是', weight: 0.5 },
 
-  // ---- 应该句式 (Should Statements) (权重 0.7) ----
   { word: 'should', weight: 0.6 },
   { word: '应该', weight: 0.6 },
   { word: '必须', weight: 0.7 },
   { word: '绝不能', weight: 0.7 },
   { word: '不准', weight: 0.6 },
 
-  // ---- 情绪推理 (Emotional Reasoning) (权重 0.8) ----
   { word: '我觉得我是', weight: 0.8 },
   { word: '我感到我是', weight: 0.8 },
   { word: '感觉就像是', weight: 0.7 },
 
-  // ---- 表情包直接输入 (权重 0.9) ----
   { word: '🫠', weight: 0.9 },
   { word: '💥', weight: 0.9 },
   { word: '😭', weight: 0.9 },
@@ -119,44 +135,6 @@ const EMOTIONAL_TRIGGERS: { word: string | RegExp; weight: number }[] = [
   { word: '🤢', weight: 0.9 },
   { word: '💤', weight: 0.9 },
 
-  // ==========================================
-  // 新增：学业压力词汇 (权重 0.7 - 0.8)
-  // ==========================================
-  { word: '不及格', weight: 0.8 },
-  { word: '考砸', weight: 0.8 },
-  { word: '挂科', weight: 0.8 },
-  { word: '退步', weight: 0.7 },
-  { word: '名次', weight: 0.6 },
-  { word: '垫底', weight: 0.8 },
-  { word: '落榜', weight: 0.8 },
-  { word: '写不完', weight: 0.6 },
-  { word: '作业多', weight: 0.6 },
-  { word: '前途', weight: 0.7 },
-  { word: '高考', weight: 0.7 },
-  { word: '中考', weight: 0.7 },
-  { word: '学不进去', weight: 0.8 },
-  { word: '听不懂', weight: 0.7 },
-
-  // ==========================================
-  // 新增：人际交往/家庭冲突 (权重 0.7 - 0.8)
-  // ==========================================
-  { word: '冷暴力', weight: 0.8 },
-  { word: '不合群', weight: 0.7 },
-  { word: '没朋友', weight: 0.8 },
-  { word: '传谣言', weight: 0.8 },
-  { word: '说闲话', weight: 0.7 },
-  { word: '冷落', weight: 0.7 },
-  { word: '不理我', weight: 0.7 },
-  { word: '不带我玩', weight: 0.7 },
-  { word: '欺负', weight: 0.8 },
-  { word: '掌控欲', weight: 0.8 },
-  { word: '道德绑架', weight: 0.8 },
-  { word: '被当成透明人', weight: 0.8 },
-  { word: '多余的', weight: 0.8 },
-
-  // ==========================================
-  // 新增：青少年网络流行语/Emo词 (权重 0.7 - 0.9)
-  // ==========================================
   { word: '摆烂', weight: 0.8 },
   { word: '内卷', weight: 0.7 },
   { word: 'emo', weight: 0.8 },
@@ -175,9 +153,6 @@ const EMOTIONAL_TRIGGERS: { word: string | RegExp; weight: number }[] = [
   { word: '烂摊子', weight: 0.7 },
   { word: '透明人', weight: 0.8 },
   
-  // ==========================================
-  // 正则模式匹配 (权重 0.8)
-  // ==========================================
   { word: /(焦虑|烦躁|难受|恶心)死了/, weight: 0.8 },
   { word: /对.*失望/, weight: 0.8 },
   { word: /(不想|讨厌)去学校/, weight: 0.8 },
@@ -219,20 +194,16 @@ function matchPattern(text: string, pattern: string | RegExp): string | null {
 export function classifyIntentRules(userMessage: string): IntentResult {
   const text = userMessage.trim();
   
-  // 空消息
   if (!text) {
     return { type: 'casual', emotion: 'Neutral', confidence: 1.0, triggers: [] };
   }
 
-  // ---- 1. 最高优先级：危机信号检测 ----
+  // 1. 危机信号检测
   const crisisMatches: string[] = [];
   for (const pattern of CRISIS_TRIGGERS) {
     const matched = matchPattern(text, pattern);
-    if (matched) {
-      crisisMatches.push(matched);
-    }
+    if (matched) crisisMatches.push(matched);
   }
-
   if (crisisMatches.length > 0) {
     return {
       type: 'crisis',
@@ -242,7 +213,43 @@ export function classifyIntentRules(userMessage: string): IntentResult {
     };
   }
 
-  // ---- 2. 情绪倾诉检测（加权评分） ----
+  // 2. 溯源追踪检测
+  const sourceTraceMatches: string[] = [];
+  for (const pattern of SOURCE_TRACE_TRIGGERS) {
+    const matched = matchPattern(text, pattern);
+    if (matched) sourceTraceMatches.push(matched);
+  }
+  if (sourceTraceMatches.length > 0) {
+    return {
+      type: 'source_trace',
+      emotion: 'Neutral',
+      confidence: 0.9,
+      triggers: sourceTraceMatches,
+    };
+  }
+
+  // 3. 细分压力场景检测 (Family/Peer/Academic)
+  let specificIntent: IntentType | null = null;
+  const specificMatches: string[] = [];
+  
+  for (const pattern of FAMILY_TRIGGERS) {
+    const matched = matchPattern(text, pattern);
+    if (matched) { specificIntent = 'family_pressure'; specificMatches.push(matched); }
+  }
+  if (!specificIntent) {
+    for (const pattern of PEER_TRIGGERS) {
+      const matched = matchPattern(text, pattern);
+      if (matched) { specificIntent = 'peer_relationship'; specificMatches.push(matched); }
+    }
+  }
+  if (!specificIntent) {
+    for (const pattern of ACADEMIC_TRIGGERS) {
+      const matched = matchPattern(text, pattern);
+      if (matched) { specificIntent = 'academic_stress'; specificMatches.push(matched); }
+    }
+  }
+
+  // 4. 情绪倾诉检测（加权评分）
   let emotionalScore = 0;
   const emotionalMatches: string[] = [];
 
@@ -254,21 +261,21 @@ export function classifyIntentRules(userMessage: string): IntentResult {
     }
   }
 
-  // 文本长度归一化：短文本中出现情绪词权重更高
   const lengthFactor = text.length < 20 ? 1.3 : text.length < 50 ? 1.0 : 0.8;
   emotionalScore *= lengthFactor;
 
-  // 阈值判定
-  if (emotionalScore >= 0.6) {
+  const combinedMatches = [...emotionalMatches, ...specificMatches];
+
+  if (emotionalScore >= 0.6 || specificIntent) {
     return {
-      type: 'emotional',
-      emotion: detectSubEmotion(emotionalMatches),
-      confidence: Math.min(emotionalScore / 2.0, 1.0),
-      triggers: emotionalMatches,
+      type: specificIntent || 'emotional',
+      emotion: detectSubEmotion(combinedMatches),
+      confidence: Math.min((emotionalScore / 2.0) || 0.8, 1.0),
+      triggers: combinedMatches,
     };
   }
 
-  // ---- 3. 日常闲聊检测 ----
+  // 5. 日常闲聊检测
   const isCasual = CASUAL_PATTERNS.some(pattern => pattern.test(text));
   if (isCasual && emotionalScore < 0.3) {
     return {
@@ -279,17 +286,16 @@ export function classifyIntentRules(userMessage: string): IntentResult {
     };
   }
 
-  // ---- 4. 兜底：模糊意图 ----
+  // 6. 兜底：模糊意图
   if (emotionalScore > 0) {
     return {
       type: 'ambiguous',
-      emotion: detectSubEmotion(emotionalMatches),
+      emotion: detectSubEmotion(combinedMatches),
       confidence: 0.5,
-      triggers: emotionalMatches,
+      triggers: combinedMatches,
     };
   }
 
-  // 完全无情绪信号的中性输入
   return {
     type: 'ambiguous',
     emotion: 'Neutral',
@@ -302,9 +308,6 @@ export function classifyIntentRules(userMessage: string): IntentResult {
 // 意图分类函数 — 语义/LLM 校验通道 (异步)
 // ============================================================
 
-/**
- * 使用 LLM 进行意图和情绪双重校验，处理否定句和隐性语义
- */
 async function verifyIntentWithLLM(
   text: string,
   initial: IntentResult,
@@ -322,15 +325,14 @@ async function verifyIntentWithLLM(
 
 【分类规则】
 1. type (意图类型):
-   - 'crisis': 适用于【主动性自杀/自残/伤害他人意念】（Active Suicidal/Self-harm Ideation）或已在进行中的危机行为。
-     * 特征包含：明确表达想要自杀/自伤的想法、提及具体方式或工具（如跳楼、吞药、割腕）、流露强烈且即时的寻死企图，或表达虽然害怕但仍有强烈的寻死想法（如“我很怕跳楼，但我真的想解脱”）。
-     * ⚠️ 必须排除以下情况（判为 'emotional' 或 'ambiguous'）：
-       a) 被动消极意念（Passive Ideation）：若用户仅表达“生存意愿丧失/觉得活着没意思/希望自己消失/睡过去别醒来”等被动想法，因无需进入物理危机救援，不能判为 'crisis'，而应判定为 'emotional'（由普通引导程序进行共情疏导）。
-       b) 否定表达：明确表达没有自杀/自伤想法或行为（如“我不想自杀”、“我并没有想自残，别担心”）。
-       c) 过去经历/他人经历/探讨作品：提及他人经历（如“我同学想吃药轻生”）、过去的历史（如“我去年想过跳楼”）或讨论文艺作品/新闻（如“电影里有自杀情节”）。
-   - 'emotional': 适用于任何普通的负面情绪倾诉、学业/同伴/家庭压力、自负/自卑，或上述被动消极意念（如“觉得活着没意思”）。
-   - 'casual': 纯粹的打招呼、闲聊、日常问答或无负面情绪的客观陈述（如“你好”、“你吃了吗”、“今天天气不错”）。
-   - 'ambiguous': 表达含义模糊，无法立刻判定是否有心理情绪困扰，或轻微偏中性的日常分享。
+   - 'crisis': 明确表达想要自杀/自伤的想法、流露强烈寻死企图，或表达虽然害怕但仍想解脱。排除被动消极意念（活着没意思）或否定表达（我不想自杀）。
+   - 'source_trace': 用户主动询问 AI 的回复依据、来源、证据。
+   - 'academic_stress': 明确关于考试、成绩、听写、作业等学业压力。
+   - 'peer_relationship': 关于同学、同桌、朋友之间的矛盾、嘲笑、孤立。
+   - 'family_pressure': 关于父母、家长、家庭环境的压力和指责。
+   - 'emotional': 适用于普通的负面情绪倾诉、自负/自卑或被动消极意念（如“觉得活着没意思”）。
+   - 'casual': 纯粹的打招呼、闲聊、日常问答或无负面情绪的客观陈述（如“今天天气不错”）。
+   - 'ambiguous': 表达含义模糊，轻微偏中性。
 
 2. emotion (主要情绪):
    - 'Anxiety': 焦虑、担忧、害怕、紧张、恐慌。
@@ -340,17 +342,15 @@ async function verifyIntentWithLLM(
 
 3. confidence: 0.0 到 1.0 的判定置信度。
 
-4. justification: 简短说明你分类的依据，特别是你如何识别否定句、转折关系、被动消极意念或主动倾向。
+4. justification: 简短说明你分类的依据。
 
 【输出 JSON 格式规范】
 {
-  "type": "crisis" | "emotional" | "casual" | "ambiguous",
+  "type": "crisis" | "source_trace" | "academic_stress" | "peer_relationship" | "family_pressure" | "emotional" | "casual" | "ambiguous",
   "emotion": "Anxiety" | "LowMood" | "Anger" | "Neutral",
   "confidence": 0.95,
   "justification": "判定理由"
-}
-
-注意：只输出合法的 JSON 对象本身，不要输出任何额外的 Markdown 标记（如 \`\`\`json）或文字！`;
+}`;
 
   const messages = [
     { role: 'system', content: systemPrompt },
@@ -389,22 +389,13 @@ async function verifyIntentWithLLM(
   };
 }
 
-/**
- * 主入口：对用户消息进行意图分类 (异步，支持规则 + LLM 校验)
- * 
- * 优先级：crisis > emotional > casual > ambiguous
- */
 export async function classifyIntent(userMessage: string, env?: Env): Promise<IntentResult> {
   const ruleResult = classifyIntentRules(userMessage);
 
-  // 如果没有传入 env 绑定，无法调用大模型，直接返回规则结果
   if (!env) {
     return ruleResult;
   }
 
-  // 以下情况触发 LLM 语义校验：
-  // 1. 规则命中了危机词 (type === 'crisis') — 需要通过 LLM 过滤否定句/误判，防范误报。
-  // 2. 规则未判定明确意图 (type === 'ambiguous') 且用户有输入 — 需要通过 LLM 识别隐式倾诉，防范漏报。
   const userMessageTrim = userMessage.trim();
   const needsLLMVerify = 
     ruleResult.type === 'crisis' || 
@@ -413,7 +404,6 @@ export async function classifyIntent(userMessage: string, env?: Env): Promise<In
   if (needsLLMVerify) {
     try {
       const verifiedResult = await verifyIntentWithLLM(userMessageTrim, ruleResult, env);
-      console.log(`[Intent Router LLM] Verified result: type=${verifiedResult.type}, emotion=${verifiedResult.emotion}, confidence=${verifiedResult.confidence.toFixed(2)}`);
       return verifiedResult;
     } catch (e) {
       console.warn('[Intent Router LLM] Verification failed, falling back to rule result:', e);
@@ -424,14 +414,10 @@ export async function classifyIntent(userMessage: string, env?: Env): Promise<In
   return ruleResult;
 }
 
-// ============================================================
-// 细分情绪类型
-// ============================================================
-
 function detectSubEmotion(matches: string[]): EmotionType {
-  const ANXIETY_WORDS = ['焦虑', '害怕', '恐慌', '担心', '紧张', '应该', '必须', '绝不能'];
-  const LOWMOOD_WORDS = ['低落', '难受', '没用', '废物', '绝望', '没救', '活着没意思', '我觉得我是', '我感到我是'];
-  const ANGER_WORDS = ['生气', '愤怒', '针对我', '讨厌我', '讨厌', '恶心', '烦死了'];
+  const ANXIETY_WORDS = ['焦虑', '害怕', '恐慌', '担心', '紧张', '应该', '必须', '绝不能', '考试', '成绩', '挂科'];
+  const LOWMOOD_WORDS = ['低落', '难受', '没用', '废物', '绝望', '没救', '活着没意思', '我觉得我是', '我感到我是', '垫底', '孤立'];
+  const ANGER_WORDS = ['生气', '愤怒', '针对我', '讨厌我', '讨厌', '恶心', '烦死了', '骂我'];
 
   const counts = { Anxiety: 0, LowMood: 0, Anger: 0 };
 

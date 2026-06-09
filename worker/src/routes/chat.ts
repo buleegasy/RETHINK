@@ -144,6 +144,7 @@ chatRouter.post('/', requireAuth, async (c) => {
       let cleanReply = finalJsonStr;
       let uiControl = undefined;
       let reasoningDeduction = undefined;
+      let retrievedEvidence = undefined;
 
       try {
         const parsed = JSON.parse(finalJsonStr);
@@ -161,6 +162,10 @@ chatRouter.post('/', requireAuth, async (c) => {
 
         if (parsed.reasoning_deduction) {
           reasoningDeduction = parsed.reasoning_deduction;
+        }
+
+        if (parsed.retrieved_evidence) {
+          retrievedEvidence = parsed.retrieved_evidence;
         }
 
         
@@ -195,6 +200,7 @@ chatRouter.post('/', requireAuth, async (c) => {
         fsmTrigger: postTransition.trigger,
         uiControl,
         reasoning_deduction: reasoningDeduction,
+        retrieved_evidence: retrievedEvidence,
         icebreakerLayer: fsmCtx.icebreaker.layer,
         ...ragMeta,
       });
@@ -315,6 +321,7 @@ chatRouter.post('/', requireAuth, async (c) => {
 
       // ── 流结束：尝试解析完整 JSON ──
       let uiControl = undefined;
+      let retrievedEvidence = undefined;
       let finalReply = extractedReply;
       
       let cleanResponse = fullResponse.trim();
@@ -327,6 +334,7 @@ chatRouter.post('/', requireAuth, async (c) => {
       try {
         const parsed = JSON.parse(cleanResponse);
         if (parsed.ui_control) uiControl = parsed.ui_control;
+        if (parsed.retrieved_evidence) retrievedEvidence = parsed.retrieved_evidence;
         if (parsed.agent_reply) {
           finalReply = parsed.agent_reply;
         } else if (parsed.reply) {
@@ -370,6 +378,7 @@ chatRouter.post('/', requireAuth, async (c) => {
           fsmState: fsmCtx.currentState,
           fsmTrigger: postTransition.trigger,
           uiControl,
+          retrieved_evidence: retrievedEvidence,
           icebreakerLayer: fsmCtx.icebreaker.layer,
           ...ragMeta,
         })
