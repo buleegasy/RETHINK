@@ -34,6 +34,10 @@ const INTENT_COLOR: Record<string, string> = {
   ambiguous: 'text-slate-400',
 };
 
+function safeArray<T>(value: T[] | undefined | null): T[] {
+  return Array.isArray(value) ? value : [];
+}
+
 interface MessageBubbleProps {
   message: ChatMessage;
   isStreaming?: boolean;
@@ -79,6 +83,11 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   }, [message.content, isUser]);
 
   const tc = message.techChain as any;
+  const ragSources = safeArray<string>(tc?.ragSources);
+  const ragSnippets = safeArray<string>(tc?.ragSnippets);
+  const ragScores = safeArray<number>(tc?.ragScores);
+  const retrievedChunks = safeArray<{ source_type?: string; title?: string; use?: string }>(tc?.retrievedEvidence?.retrieved_chunks);
+  const usedFrameworks = safeArray<string>(tc?.retrievedEvidence?.used_framework);
 
   // WhatsApp bubble corner radius logic:
   // First in group: standard rounded, tail corner is less rounded
@@ -219,15 +228,57 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 )}
 
                 {/* ─── 知识检索 ─── */}
-                {tc.ragChunks > 0 && (
-                  <div className="space-y-2.5 pt-0.5 border-t border-outline-variant/20">
+                <div className="space-y-2.5 pt-0.5 border-t border-outline-variant/20">
                     <p className="text-[10px] uppercase tracking-widest text-on-surface-variant/50 font-semibold flex items-center gap-1">
                       <span>🔍</span> 知识库检索
-                      <span className="ml-1 bg-surface-container-high text-stage-green px-1.5 py-0 rounded font-bold normal-case tracking-normal">
-                        {tc.ragChunks} 条
+                      <span className={`ml-1 bg-surface-container-high px-1.5 py-0 rounded font-bold normal-case tracking-normal ${tc.ragChunks > 0 ? 'text-stage-green' : 'text-on-surface-variant/60'}`}>
+                        {tc.ragChunks > 0 ? `${tc.ragChunks} 条` : '未命中'}
                       </span>
                     </p>
-                    {tc.ragSnippets && tc.ragSnippets.length > 0 && tc.ragSnippets.map((snippet: string, i: number) => (
+                    {tc.ragQueried !== undefined && (
+                      <div className="space-y-1.5">
+                        <div className="flex items-start gap-2">
+                          <span className="text-on-surface-variant/60 w-14 shrink-0 pt-0.5">查询</span>
+                          <p className="text-[11.5px] leading-relaxed text-on-surface-variant">
+                            {tc.ragQueried ? '已触发知识库查询' : '本轮未触发知识库查询'}
+                          </p>
+                        </div>
+                        {tc.ragQuery && (
+                          <div className="flex items-start gap-2">
+                            <span className="text-on-surface-variant/60 w-14 shrink-0 pt-0.5">查询词</span>
+                            <p className="text-[11.5px] leading-relaxed text-on-surface">
+                              {tc.ragQuery}
+                            </p>
+                          </div>
+                        )}
+                        {tc.ragDecisionReason && (
+                          <div className="flex items-start gap-2">
+                            <span className="text-on-surface-variant/60 w-14 shrink-0 pt-0.5">原因</span>
+                            <p className="text-[11.5px] leading-relaxed text-on-surface-variant">
+                              {tc.ragDecisionReason}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {usedFrameworks.length > 0 && (
+                      <div className="flex items-start gap-2">
+                        <span className="text-on-surface-variant/60 w-14 shrink-0 pt-0.5">框架</span>
+                        <div className="flex flex-wrap gap-1">
+                          {usedFrameworks.map((framework, i) => (
+                            <span key={i} className="bg-surface-container-high px-1.5 py-0.5 rounded text-[11px] text-on-surface-variant">
+                              {framework}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {tc.ragChunks <= 0 && (
+                      <p className="text-[11.5px] leading-relaxed text-on-surface-variant">
+                        这一轮没有命中可注入的知识库片段，回复主要依据当前会话状态、意图识别和系统规则生成。
+                      </p>
+                    )}
+                    {ragSnippets.length > 0 && ragSnippets.map((snippet: string, i: number) => (
                       <div key={i} className="rounded-xl border border-outline-variant/30 overflow-hidden">
                         <button
                           onClick={() => setExpandedRag(expandedRag === i ? null : i)}
@@ -236,18 +287,18 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                           <div
                             className="mt-1 w-1.5 h-1.5 rounded-full shrink-0 self-center"
                             style={{
-                              background: tc.ragScores?.[i] >= 0.8 ? '#4ade80'
-                                : tc.ragScores?.[i] >= 0.6 ? '#facc15' : '#94a3b8',
+                              background: ragScores[i] >= 0.8 ? '#4ade80'
+                                : ragScores[i] >= 0.6 ? '#facc15' : '#94a3b8',
                             }}
                           />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5 mb-0.5">
                               <span className="text-[10px] text-stage-green font-medium truncate max-w-[120px]">
-                                {tc.ragSources?.[i] ?? '知识库'}
+                                {ragSources[i] ?? retrievedChunks[i]?.title ?? '知识库'}
                               </span>
-                              {tc.ragScores?.[i] !== undefined && (
+                              {ragScores[i] !== undefined && (
                                 <span className="text-[10px] text-on-surface-variant/50">
-                                  {Math.round(tc.ragScores[i] * 100)}% 相关
+                                  {Math.round(ragScores[i] * 100)}% 相关
                                 </span>
                               )}
                               <span className="ml-auto text-on-surface-variant/30 text-[10px]">
@@ -265,12 +316,16 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                               {snippet}
                               <span className="text-on-surface-variant/40 italic">…（摘要截至前80字）</span>
                             </p>
+                            {retrievedChunks[i]?.use && (
+                              <p className="text-[11px] leading-relaxed text-on-surface-variant/70 mt-2">
+                                用途：{retrievedChunks[i].use}
+                              </p>
+                            )}
                           </div>
                         )}
                       </div>
                     ))}
-                  </div>
-                )}
+                </div>
               </div>
             )}
           </div>

@@ -58,10 +58,41 @@ export const CBT_STAGES: CBTStage[] = [
   '重构认知',
 ];
 
+export interface MessageTechChain {
+  intent?: string;
+  ragQueried?: boolean;
+  ragQuery?: string;
+  ragDecisionReason?: string;
+  ragChunks?: number;
+  ragSources?: string[];
+  ragScores?: number[];
+  ragSnippets?: string[];
+  retrievedEvidence?: {
+    used_framework?: string[];
+    retrieved_chunks?: Array<{
+      source_type?: string;
+      title?: string;
+      use?: string;
+    }>;
+  };
+  reasoningDeduction?: {
+    cognitive_distortion?: string;
+    emotional_core?: string;
+    intervention_strategy?: string;
+  };
+  model?: string;
+  intentConfidence?: number;
+  intentTriggers?: string[];
+  intentEmotion?: string;
+  fsmState?: FSMState;
+  fsmTrigger?: string;
+}
+
 // 聊天消息
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
+  techChain?: MessageTechChain;
 }
 
 export interface UserProfile {

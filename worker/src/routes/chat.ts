@@ -3,7 +3,7 @@ import { streamSSE } from 'hono/streaming';
 import { getLLMClient, getModelName, buildSystemPromptFSM } from '../lib/llm';
 import { detectStage, stageToIndex } from '../lib/cbt-stages';
 import { classifyIntent } from '../lib/intent-router';
-import { retrieveContext } from '../lib/rag';
+import { decideRAGRetrieval, retrieveContext } from '../lib/rag';
 import {
   transition,
   applyTransition,
@@ -84,15 +84,29 @@ chatRouter.post('/', requireAuth, async (c) => {
 
   console.log(`[FSM] pre-transition: ${preTransition.trigger} → state=${fsmCtx.currentState}`);
 
-  // ── 4. RAG 检索（仅 CBT_Stripping 和 Socratic_Questioning 状态触发） ──
+  // ── 4. RAG 检索（由模型自行决定是否需要查询知识库） ──
   let ragContext = undefined;
-  if (
-    fsmCtx.currentState === 'CBT_Stripping' ||
-    fsmCtx.currentState === 'Socratic_Questioning'
-  ) {
+  let ragDecision = {
+    shouldRetrieve: false,
+    query: userLastMessage,
+    reason: '默认未触发知识库查询。',
+  };
+  try {
+    ragDecision = await decideRAGRetrieval(c.env, {
+      userMessage: userLastMessage,
+      intent: intentResult.type,
+      fsmState: fsmCtx.currentState,
+      recentMessages: messages.slice(-4).map((m) => `${m.role}: ${m.content}`),
+    });
+    console.log(`[RAG Decision] shouldRetrieve=${ragDecision.shouldRetrieve}, query=${ragDecision.query}, reason=${ragDecision.reason}`);
+  } catch (e) {
+    console.warn('[RAG Decision] failed, proceeding without retrieval:', e);
+  }
+
+  if (ragDecision.shouldRetrieve) {
     try {
-      ragContext = await retrieveContext(c.env, userLastMessage, 5, 0.5);
-      console.log(`[RAG] Retrieved ${ragContext.chunks.length} chunks for ${fsmCtx.currentState}`);
+      ragContext = await retrieveContext(c.env, ragDecision.query, 5, 0.45);
+      console.log(`[RAG] Retrieved ${ragContext.chunks.length} chunks for query="${ragDecision.query}"`);
     } catch (e) {
       console.warn('[RAG] Retrieval failed, proceeding without knowledge context:', e);
     }
@@ -106,6 +120,9 @@ chatRouter.post('/', requireAuth, async (c) => {
 
   // 准备 RAG 元数据（含片段摘要，前80字）
   const ragMeta = {
+    ragQueried: ragDecision.shouldRetrieve,
+    ragQuery: ragDecision.query,
+    ragDecisionReason: ragDecision.reason,
     ragChunks: ragContext?.chunks?.length || 0,
     ragSources: ragContext?.sourceDocuments || [],
     ragScores: ragContext?.scores?.map(s => Math.round(s * 100) / 100) || [],
@@ -188,7 +205,15 @@ chatRouter.post('/', requireAuth, async (c) => {
       console.log(`[FSM] post-transition: ${postTransition.trigger} → state=${fsmCtx.currentState}`);
 
       // 保存回 D1（存入干净的对话内容而非原始 JSON）
-      const updatedMessages: ChatMessage[] = [...messages, { role: 'assistant', content: cleanReply }];
+      const finalTechChain = {
+        ...ragMeta,
+        intent: intentResult.type,
+        fsmState: fsmCtx.currentState,
+        fsmTrigger: postTransition.trigger,
+        retrievedEvidence,
+        reasoningDeduction,
+      };
+      const updatedMessages: ChatMessage[] = [...messages, { role: 'assistant', content: cleanReply, techChain: finalTechChain as any }];
       await saveToD1(c.env.DB, sessionId, updatedMessages, stageToIndex(stage) + 1, fsmCtx, user.uid);
 
       return c.json({
@@ -322,6 +347,7 @@ chatRouter.post('/', requireAuth, async (c) => {
       // ── 流结束：尝试解析完整 JSON ──
       let uiControl = undefined;
       let retrievedEvidence = undefined;
+      let reasoningDeduction = undefined;
       let finalReply = extractedReply;
       
       let cleanResponse = fullResponse.trim();
@@ -335,6 +361,7 @@ chatRouter.post('/', requireAuth, async (c) => {
         const parsed = JSON.parse(cleanResponse);
         if (parsed.ui_control) uiControl = parsed.ui_control;
         if (parsed.retrieved_evidence) retrievedEvidence = parsed.retrieved_evidence;
+        if (parsed.reasoning_deduction) reasoningDeduction = parsed.reasoning_deduction;
         if (parsed.agent_reply) {
           finalReply = parsed.agent_reply;
         } else if (parsed.reply) {
@@ -364,7 +391,15 @@ chatRouter.post('/', requireAuth, async (c) => {
 
       // 计算最终 CBT 阶段（向后兼容）
       const finalStage = detectStage(finalReply, currentStageIndex);
-      const updatedMessages: ChatMessage[] = [...messages, { role: 'assistant', content: finalReply }];
+      const finalTechChain = {
+        ...ragMeta,
+        intent: intentResult.type,
+        fsmState: fsmCtx.currentState,
+        fsmTrigger: postTransition.trigger,
+        retrievedEvidence,
+        reasoningDeduction,
+      };
+      const updatedMessages: ChatMessage[] = [...messages, { role: 'assistant', content: finalReply, techChain: finalTechChain as any }];
       await saveToD1(c.env.DB, sessionId, updatedMessages, stageToIndex(finalStage) + 1, fsmCtx, user.uid);
 
       // 发送结束标志（含 FSM 状态转移信息 + UI 控制参数 + 破冰层级）
@@ -378,6 +413,7 @@ chatRouter.post('/', requireAuth, async (c) => {
           fsmState: fsmCtx.currentState,
           fsmTrigger: postTransition.trigger,
           uiControl,
+          reasoning_deduction: reasoningDeduction,
           retrieved_evidence: retrievedEvidence,
           icebreakerLayer: fsmCtx.icebreaker.layer,
           ...ragMeta,

@@ -82,10 +82,26 @@ export const CBT_STAGES: CBTStage[] = [
 /** 技术链元数据 — 每条 AI 回复附带的处理信息 */
 export interface TechChain {
   intent: 'casual' | 'emotional' | 'crisis' | 'ambiguous';
+  ragQueried?: boolean;
+  ragQuery?: string;
+  ragDecisionReason?: string;
   ragChunks: number;         // RAG 检索命中的知识片段数
   ragSources: string[];      // 来源文档名列表
   ragScores: number[];       // 相似度分数
   ragSnippets?: string[];    // 片段内容摘要（前80字）
+  retrievedEvidence?: {
+    used_framework?: string[];
+    retrieved_chunks?: Array<{
+      source_type?: string;
+      title?: string;
+      use?: string;
+    }>;
+  };
+  reasoningDeduction?: {
+    cognitive_distortion?: string;
+    emotional_core?: string;
+    intervention_strategy?: string;
+  };
   model: string;             // 使用的模型
   latencyMs?: number;        // 响应耗时
   intentConfidence?: number; // 意图识别置信度（0-100）
@@ -138,10 +154,15 @@ export interface SSEChunk {
   error?: string;
   // 技术链字段（仅在 done=true 的最终 chunk 中发送）
   intent?: string;
+  ragQueried?: boolean;
+  ragQuery?: string;
+  ragDecisionReason?: string;
   ragChunks?: number;
   ragSources?: string[];
   ragScores?: number[];
   ragSnippets?: string[];    // RAG 片段内容摘要
+  retrieved_evidence?: TechChain['retrievedEvidence'];
+  reasoning_deduction?: TechChain['reasoningDeduction'];
   intentConfidence?: number; // 意图置信度（0-100）
   intentTriggers?: string[]; // 命中的触发词
   intentEmotion?: string;    // 情绪子类型

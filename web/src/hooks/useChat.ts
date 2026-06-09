@@ -125,10 +125,15 @@ export function useChat() {
                 if (parsed.done && (parsed.intent || parsed.model)) {
                   const techChain = {
                     intent: parsed.intent || 'ambiguous',
+                    ragQueried: parsed.ragQueried,
+                    ragQuery: parsed.ragQuery,
+                    ragDecisionReason: parsed.ragDecisionReason,
                     ragChunks: parsed.ragChunks || 0,
                     ragSources: parsed.ragSources || [],
                     ragScores: parsed.ragScores || [],
                     ragSnippets: parsed.ragSnippets || [],
+                    retrievedEvidence: parsed.retrieved_evidence,
+                    reasoningDeduction: parsed.reasoning_deduction,
                     intentConfidence: parsed.intentConfidence,
                     intentTriggers: parsed.intentTriggers || [],
                     intentEmotion: parsed.intentEmotion,

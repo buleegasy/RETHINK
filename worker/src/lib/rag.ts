@@ -19,6 +19,12 @@ export interface RAGContext {
   chunkIds: string[];         // chunk ID 列表
 }
 
+export interface RAGRetrievalDecision {
+  shouldRetrieve: boolean;
+  query: string;
+  reason: string;
+}
+
 export interface DocumentMetadata {
   title: string;
   sourceFile?: string;
@@ -146,6 +152,102 @@ export async function retrieveContext(
   }
 
   return context;
+}
+
+/**
+ * 由模型自行决定当前轮是否需要查询知识库，并在需要时给出更适合检索的 query。
+ */
+export async function decideRAGRetrieval(
+  env: Env,
+  input: {
+    userMessage: string;
+    intent: string;
+    fsmState: string;
+    recentMessages?: string[];
+  }
+): Promise<RAGRetrievalDecision> {
+  const apiBaseUrl = env.API_BASE_URL || 'https://openrouter.ai/api/v1';
+  const apiKey = env.API_KEY;
+
+  if (!apiKey) {
+    return {
+      shouldRetrieve: false,
+      query: input.userMessage,
+      reason: 'API_KEY 未配置，跳过知识库决策。',
+    };
+  }
+
+  const model = env.MODEL_NAME || 'google/gemini-3.1-flash-lite';
+  const recentContext = (input.recentMessages || []).slice(-4).join('\n');
+  const systemPrompt = `你是 RAG 检索决策器。你的任务不是回答用户，而是决定当前轮是否应该查询心理支持知识库。
+
+返回 JSON：
+{
+  "should_retrieve": true 或 false,
+  "query": "如果需要检索，这里给出更适合向量检索的中文查询词或短句；不需要时也保留用户问题核心短语",
+  "reason": "一句简短说明为什么查或为什么不查"
+}
+
+判断原则：
+1. 当用户涉及心理技巧、应对建议、危机处置、认知偏差、家校沟通、睡眠/焦虑/低落/创伤/欺凌等具体问题时，优先检索。
+2. 当用户只是纯闲聊、轻问候、无实际困扰时，不检索。
+3. 如果用户问题需要更专业、更具体、更可执行的支持，优先检索。
+4. query 要去掉口语赘述，保留核心场景、风险、技术关键词。
+5. 只返回 JSON，不要返回解释性文本。`;
+
+  const userPrompt = `用户最后一句：
+${input.userMessage}
+
+意图：
+${input.intent}
+
+FSM 状态：
+${input.fsmState}
+
+最近上下文：
+${recentContext || '无'}
+`;
+
+  try {
+    const res = await fetch(`${apiBaseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://re-think-agent.pages.dev',
+        'X-Title': 'RE-THINK Agent',
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.1,
+        response_format: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`RAG decision request failed: ${res.status}`);
+    }
+
+    const data = await res.json() as any;
+    const content = (data.choices?.[0]?.message?.content || '{}').trim();
+    const parsed = JSON.parse(content);
+    return {
+      shouldRetrieve: Boolean(parsed.should_retrieve),
+      query: String(parsed.query || input.userMessage).trim(),
+      reason: String(parsed.reason || '').trim() || '模型建议检索。',
+    };
+  } catch (error) {
+    console.warn('[RAG Decision] fallback to heuristic:', error);
+    return {
+      shouldRetrieve: input.intent !== 'casual' && input.intent !== 'ambiguous',
+      query: input.userMessage,
+      reason: '决策模型失败，回退到意图启发式规则。',
+    };
+  }
 }
 
 /**
