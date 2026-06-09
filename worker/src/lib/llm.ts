@@ -245,6 +245,7 @@ export function buildSystemPrompt(
  */
 export function buildSystemPromptFSM(
   fsmState: FSMState,
+  intent: IntentType,
   ragContext?: RAGContext,
   profile?: UserProfile,
   facialEmotion?: { label: string; labelZh: string; confidence: number },
@@ -254,6 +255,18 @@ export function buildSystemPromptFSM(
 
   // 1. FSM 状态专属角色定义 + 任务指令
   parts.push(getPromptForState(fsmState, icebreaker?.layer));
+
+  // 1.0 针对日常闲聊的动态降级（非常重要，防止日常对话搞得太沉重）
+  if (intent === 'casual') {
+    parts.push(`\n【⚠️ 当前检测到用户意图为：日常闲聊】
+请立刻卸下所有“心理辅导”的包袱！不要强行共情（绝不要说“太窒息了”、“抱抱你”之类沉重的话）。
+像普通朋友一样轻松、平淡地回应对方的闲聊即可，绝对不要把气氛搞得很严重。`);
+  } else if (intent === 'ambiguous') {
+    parts.push(`\n【⚠️ 当前检测到用户意图为：模糊/平淡】
+用户当前的话语比较平淡、中性，或者只是有些轻微的疲惫（如“有点累但没大事”）。
+请自然、轻快地回应，顺着话茬聊，千万不要脑补过度的悲伤或焦虑，保持轻松的交流节奏。`);
+  }
+
 
   // 1.1 注入破冰已收集的画像数据（多轮记忆）
   if (fsmState === 'Onboarding' && icebreaker && icebreaker.layer > 1) {

@@ -99,7 +99,7 @@ chatRouter.post('/', requireAuth, async (c) => {
   }
 
   // ── 5. 构建 System Prompt（基于 FSM 状态） ──
-  const systemPrompt = buildSystemPromptFSM(fsmCtx.currentState, ragContext, profile, facialEmotion, fsmCtx.icebreaker);
+  const systemPrompt = buildSystemPromptFSM(fsmCtx.currentState, intentResult.type, ragContext, profile, facialEmotion, fsmCtx.icebreaker);
 
   const client = getLLMClient(c.env);
   const model = getModelName(c.env, requestedModel);
