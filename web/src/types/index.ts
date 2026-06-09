@@ -168,3 +168,17 @@ export interface AuthResponse {
   token: string;
   error?: string;
 }
+
+export interface ChatSessionSummary {
+  id: string;
+  title: string;
+  current_stage: number;
+  fsm_state?: FSMState;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface ChatSessionDetail extends ChatSessionSummary {
+  messages: ChatMessage[];
+  fsm_context?: Record<string, unknown>;
+}

@@ -251,7 +251,7 @@ authRouter.get('/sessions', requireAuth, async (c) => {
     const user = c.get('user') as AuthUser;
 
     const { results } = await c.env.DB.prepare(
-      'SELECT id, title, current_stage, created_at, updated_at FROM sessions WHERE user_id = ? ORDER BY updated_at DESC'
+      'SELECT id, title, current_stage, fsm_state, created_at, updated_at FROM sessions WHERE user_id = ? ORDER BY updated_at DESC'
     )
     .bind(user.uid)
     .all<any>();
@@ -262,6 +262,53 @@ authRouter.get('/sessions', requireAuth, async (c) => {
     });
   } catch (err: any) {
     console.error('Fetch user sessions error:', err);
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+/**
+ * Get a single session with messages for current User
+ * GET /api/auth/sessions/:id
+ */
+authRouter.get('/sessions/:id', requireAuth, async (c) => {
+  try {
+    const user = c.get('user') as AuthUser;
+    const sessionId = c.req.param('id');
+
+    const session = await c.env.DB.prepare(
+      'SELECT id, title, messages, current_stage, fsm_state, fsm_context, created_at, updated_at FROM sessions WHERE id = ? AND user_id = ?'
+    )
+      .bind(sessionId, user.uid)
+      .first<any>();
+
+    if (!session) {
+      return c.json({ error: 'Session not found' }, 404);
+    }
+
+    let messages = [];
+    try {
+      messages = JSON.parse(session.messages || '[]');
+    } catch {
+      messages = [];
+    }
+
+    let fsmContext = {};
+    try {
+      fsmContext = JSON.parse(session.fsm_context || '{}');
+    } catch {
+      fsmContext = {};
+    }
+
+    return c.json({
+      success: true,
+      session: {
+        ...session,
+        messages,
+        fsm_context: fsmContext,
+      },
+    });
+  } catch (err: any) {
+    console.error('Fetch session detail error:', err);
     return c.json({ error: err.message }, 500);
   }
 });

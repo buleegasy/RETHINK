@@ -3,6 +3,7 @@ import { ChatPanel } from './components/ChatPanel';
 import { InputBar } from './components/InputBar';
 import { AmbientGlow } from './components/AmbientGlow';
 import { LoginWall } from './components/LoginWall';
+import { SessionSidebar } from './components/SessionSidebar';
 import { useChat } from './hooks/useChat';
 import { useChatStore } from './store/chatStore';
 import type { UserProfile } from './types';
@@ -120,6 +121,9 @@ function App() {
           />
         )}
       </div>
+
+      {/* ── Session History ── */}
+      {isAuthenticated && <SessionSidebar />}
 
       {/* ── Desktop Profile Pill ── */}
       {isAuthenticated && user && (

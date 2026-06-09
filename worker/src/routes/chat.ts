@@ -414,6 +414,7 @@ async function saveToD1(
       INSERT INTO sessions (id, title, messages, current_stage, fsm_state, fsm_context, user_id, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())
       ON CONFLICT(id) DO UPDATE SET 
+        title = CASE WHEN sessions.title = '新对话' THEN excluded.title ELSE sessions.title END,
         messages = excluded.messages,
         current_stage = excluded.current_stage,
         fsm_state = excluded.fsm_state,

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { ChatMessage, CBTStage, FSMState, TechChain, UIControl, User } from '../types';
+import type { ChatMessage, CBTStage, ChatSessionSummary, FSMState, TechChain, UIControl, User } from '../types';
 
 interface ChatState {
   // Auth state
@@ -10,6 +10,8 @@ interface ChatState {
   // Chat state
   sessionId: string | null;
   messages: ChatMessage[];
+  sessions: ChatSessionSummary[];
+  isLoadingSessions: boolean;
   currentStage: CBTStage;
   fsmState: FSMState;
   /** UI 电影级控制参数 */
@@ -24,6 +26,14 @@ interface ChatState {
   login: (user: User, token: string) => void;
   logout: () => void;
   setSessionId: (id: string) => void;
+  setSessions: (sessions: ChatSessionSummary[]) => void;
+  setIsLoadingSessions: (isLoading: boolean) => void;
+  loadSession: (session: {
+    id: string;
+    messages: ChatMessage[];
+    current_stage?: number;
+    fsm_state?: FSMState;
+  }) => void;
   addMessage: (msg: ChatMessage) => void;
   updateLastMessage: (delta: string) => void;
   setLastMessageTechChain: (techChain: TechChain) => void;
@@ -60,6 +70,8 @@ export const useChatStore = create<ChatState>((set) => {
     // Chat initial state
     sessionId: null,
     messages: [],
+    sessions: [],
+    isLoadingSessions: false,
     currentStage: '剥离事实',
     fsmState: 'Onboarding',
     uiControl: null,
@@ -83,6 +95,8 @@ export const useChatStore = create<ChatState>((set) => {
         isAuthenticated: false, 
         sessionId: null, 
         messages: [], 
+        sessions: [],
+        isLoadingSessions: false,
         hasCompletedOnboarding: false,
         uiControl: null,
         icebreakerLayer: 1,
@@ -93,6 +107,21 @@ export const useChatStore = create<ChatState>((set) => {
 
     // Chat Actions
     setSessionId: (id) => set({ sessionId: id }),
+
+    setSessions: (sessions) => set({ sessions }),
+
+    setIsLoadingSessions: (isLoadingSessions) => set({ isLoadingSessions }),
+
+    loadSession: (session) => set({
+      sessionId: session.id,
+      messages: session.messages.map((msg) => ({ ...msg, id: msg.id || crypto.randomUUID() })),
+      currentStage: session.current_stage ? CBT_STAGE_BY_INDEX[session.current_stage] || '剥离事实' : '剥离事实',
+      fsmState: session.fsm_state || 'Onboarding',
+      hasCompletedOnboarding: session.messages.length > 0,
+      uiControl: null,
+      isStreaming: false,
+      icebreakerLayer: 1,
+    }),
     
     addMessage: (msg) => set((state) => ({ 
       messages: [...state.messages, { ...msg, id: crypto.randomUUID() }] 
@@ -153,3 +182,11 @@ export const useChatStore = create<ChatState>((set) => {
     }),
   };
 });
+
+const CBT_STAGE_BY_INDEX: Record<number, CBTStage> = {
+  1: '剥离事实',
+  2: '捕获想法',
+  3: '扫描漏洞',
+  4: '证据质询',
+  5: '重构认知',
+};
