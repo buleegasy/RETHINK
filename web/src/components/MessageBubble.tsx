@@ -42,6 +42,20 @@ const EMOTION_LABEL: Record<string, string> = {
   Neutral:    '中性',
 };
 
+const RISK_LABEL: Record<string, string> = {
+  low: '低风险',
+  medium: '中风险',
+  high: '高风险',
+  crisis: '危机',
+};
+
+const RISK_COLOR: Record<string, string> = {
+  low: 'text-emerald-400',
+  medium: 'text-amber-400',
+  high: 'text-orange-400',
+  crisis: 'text-red-400',
+};
+
 /** 将 FSMState 键转换为中文标签（回退为原始值） */
 function fsmLabel(state: string): string {
   return FSM_STATE_META[state as FSMState]?.label ?? state;
@@ -154,6 +168,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   const ragScores = safeArray<number>(tc?.ragScores);
   const retrievedChunks = safeArray<{ source_type?: string; title?: string; use?: string }>(tc?.retrievedEvidence?.retrieved_chunks);
   const usedFrameworks = safeArray<string>(tc?.retrievedEvidence?.used_framework);
+  const riskLevel = tc?.riskLevel || 'low';
 
   // WhatsApp bubble corner radius logic:
   // First in group: standard rounded, tail corner is less rounded
@@ -238,6 +253,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                       <h3 className="mt-0.5 text-[13px] font-semibold text-on-surface">后台推演链路</h3>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
+                      <AuditBadge tone={RISK_COLOR[riskLevel] || 'text-on-surface-variant'}>
+                        {RISK_LABEL[riskLevel] ?? riskLevel}
+                      </AuditBadge>
                       <AuditBadge tone={tc.ragRetrievalMode === 'forced_safety' ? 'text-red-400' : 'text-sky-400'}>
                         {tc.ragRetrievalMode === 'forced_safety' ? '安全优先' : '常规路由'}
                       </AuditBadge>
@@ -327,6 +345,28 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                         </div>
                       </AuditRow>
                     )}
+                  </AuditSection>
+
+                  <AuditSection icon={<ShieldAlert className="w-3.5 h-3.5" />} title="Risk Layer">
+                    <AuditRow label="等级">
+                      <AuditBadge tone={RISK_COLOR[riskLevel] || 'text-on-surface-variant'}>
+                        {RISK_LABEL[riskLevel] ?? riskLevel}
+                      </AuditBadge>
+                    </AuditRow>
+                    {tc.riskReason && (
+                      <AuditRow label="判定">{tc.riskReason}</AuditRow>
+                    )}
+                    <AuditRow label="含义">
+                      <span className="text-on-surface-variant/80">
+                        {riskLevel === 'crisis'
+                          ? '进入危机路径，优先安全与现实求助。'
+                          : riskLevel === 'high'
+                          ? '存在明显安全敏感线索，需要提高关注强度。'
+                          : riskLevel === 'medium'
+                          ? '需要持续关注与温和引导。'
+                          : '当前轮风险较低。'}
+                      </span>
+                    </AuditRow>
                   </AuditSection>
 
                   <AuditSection icon={<GitBranch className="w-3.5 h-3.5" />} title="State Machine">

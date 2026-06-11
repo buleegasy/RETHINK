@@ -83,6 +83,8 @@ export const CBT_STAGES: CBTStage[] = [
 export interface TechChain {
   intent: 'casual' | 'emotional' | 'crisis' | 'ambiguous';
   ragRetrievalMode?: 'ai_decision' | 'forced_safety';
+  riskLevel?: 'low' | 'medium' | 'high' | 'crisis';
+  riskReason?: string;
   ragQueried?: boolean;
   ragQuery?: string;
   ragDecisionReason?: string;
@@ -156,6 +158,8 @@ export interface SSEChunk {
   // 技术链字段（仅在 done=true 的最终 chunk 中发送）
   intent?: string;
   ragRetrievalMode?: 'ai_decision' | 'forced_safety';
+  riskLevel?: 'low' | 'medium' | 'high' | 'crisis';
+  riskReason?: string;
   ragQueried?: boolean;
   ragQuery?: string;
   ragDecisionReason?: string;

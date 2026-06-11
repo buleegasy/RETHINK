@@ -61,6 +61,8 @@ export const CBT_STAGES: CBTStage[] = [
 export interface MessageTechChain {
   intent?: string;
   ragRetrievalMode?: 'ai_decision' | 'forced_safety';
+  riskLevel?: 'low' | 'medium' | 'high' | 'crisis';
+  riskReason?: string;
   ragQueried?: boolean;
   ragQuery?: string;
   ragDecisionReason?: string;

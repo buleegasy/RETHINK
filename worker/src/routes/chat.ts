@@ -3,6 +3,7 @@ import { streamSSE } from 'hono/streaming';
 import { getLLMClient, getModelName, buildSystemPromptFSM } from '../lib/llm';
 import { detectStage, stageToIndex } from '../lib/cbt-stages';
 import { classifyIntent } from '../lib/intent-router';
+import { assessRisk } from '../lib/risk';
 import { decideRAGRetrieval, retrieveContext } from '../lib/rag';
 import {
   transition,
@@ -130,6 +131,16 @@ chatRouter.post('/', requireAuth, async (c) => {
     }
   }
 
+  const riskAssessment = assessRisk({
+    intent: intentResult.type,
+    intentConfidence: Math.round(intentResult.confidence * 100),
+    fsmState: fsmCtx.currentState,
+    ragRetrievalMode,
+    ragQueried: ragDecision.shouldRetrieve,
+    triggers: intentResult.triggers,
+    userMessage: userLastMessage,
+  });
+
   // ── 5. 构建 System Prompt（基于 FSM 状态） ──
   const systemPrompt = buildSystemPromptFSM(fsmCtx.currentState, intentResult.type, ragContext, profile, facialEmotion, fsmCtx.icebreaker);
 
@@ -146,6 +157,8 @@ chatRouter.post('/', requireAuth, async (c) => {
     ragSources: ragContext?.sourceDocuments || [],
     ragScores: ragContext?.scores?.map(s => Math.round(s * 100) / 100) || [],
     ragSnippets: ragContext?.chunks?.map(c => c.substring(0, 80).replace(/\n/g, ' ').trim()) || [],
+    riskLevel: riskAssessment.level,
+    riskReason: riskAssessment.reason,
     // 意图识别详细数据
     intentConfidence: Math.round(intentResult.confidence * 100),
     intentTriggers: intentResult.triggers,
@@ -224,7 +237,7 @@ chatRouter.post('/', requireAuth, async (c) => {
       console.log(`[FSM] post-transition: ${postTransition.trigger} → state=${fsmCtx.currentState}`);
 
       // 保存回 D1（存入干净的对话内容而非原始 JSON）
-      const finalTechChain = {
+        const finalTechChain = {
         ...ragMeta,
         intent: intentResult.type,
         fsmState: fsmCtx.currentState,
