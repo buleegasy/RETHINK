@@ -82,6 +82,17 @@ re-think-agent/
 
 ---
 
+## 📄 Walkthrough & Submission Docs
+
+For competition review, demo recording, and final packaging, see:
+
+- [`WALKTHROUGH.md`](./WALKTHROUGH.md): end-to-end evaluator walkthrough and demo path.
+- [`docs/demo_script.md`](./docs/demo_script.md): video narration script for the project introduction.
+- [`docs/testing_and_verification.md`](./docs/testing_and_verification.md): smoke tests, manual checks, and deployment verification.
+- [`docs/submission_checklist.md`](./docs/submission_checklist.md): PDF packaging, plagiarism report, video link, and final submission checklist.
+
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites
