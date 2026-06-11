@@ -125,6 +125,7 @@ export function useChat() {
                 if (parsed.done && (parsed.intent || parsed.model)) {
                   const techChain = {
                     intent: parsed.intent || 'ambiguous',
+                    ragRetrievalMode: parsed.ragRetrievalMode,
                     ragQueried: parsed.ragQueried,
                     ragQuery: parsed.ragQuery,
                     ragDecisionReason: parsed.ragDecisionReason,

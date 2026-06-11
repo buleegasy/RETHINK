@@ -82,6 +82,7 @@ export const CBT_STAGES: CBTStage[] = [
 /** 技术链元数据 — 每条 AI 回复附带的处理信息 */
 export interface TechChain {
   intent: 'casual' | 'emotional' | 'crisis' | 'ambiguous';
+  ragRetrievalMode?: 'ai_decision' | 'forced_safety';
   ragQueried?: boolean;
   ragQuery?: string;
   ragDecisionReason?: string;
@@ -154,6 +155,7 @@ export interface SSEChunk {
   error?: string;
   // 技术链字段（仅在 done=true 的最终 chunk 中发送）
   intent?: string;
+  ragRetrievalMode?: 'ai_decision' | 'forced_safety';
   ragQueried?: boolean;
   ragQuery?: string;
   ragDecisionReason?: string;

@@ -91,21 +91,38 @@ chatRouter.post('/', requireAuth, async (c) => {
     query: userLastMessage,
     reason: '默认未触发知识库查询。',
   };
-  try {
-    ragDecision = await decideRAGRetrieval(c.env, {
-      userMessage: userLastMessage,
-      intent: intentResult.type,
-      fsmState: fsmCtx.currentState,
-      recentMessages: messages.slice(-4).map((m) => `${m.role}: ${m.content}`),
-    });
-    console.log(`[RAG Decision] shouldRetrieve=${ragDecision.shouldRetrieve}, query=${ragDecision.query}, reason=${ragDecision.reason}`);
-  } catch (e) {
-    console.warn('[RAG Decision] failed, proceeding without retrieval:', e);
+  let ragRetrievalMode: 'ai_decision' | 'forced_safety' = 'ai_decision';
+
+  const safetyQuery = buildSafetyRetrievalQuery(userLastMessage, intentResult.type, fsmCtx.currentState);
+  if (safetyQuery) {
+    ragRetrievalMode = 'forced_safety';
+    ragDecision = {
+      shouldRetrieve: true,
+      query: safetyQuery,
+      reason: '检测到危机或校园安全相关线索，强制优先查询安全边界与求助类知识。',
+    };
+  } else {
+    try {
+      ragDecision = await decideRAGRetrieval(c.env, {
+        userMessage: userLastMessage,
+        intent: intentResult.type,
+        fsmState: fsmCtx.currentState,
+        recentMessages: messages.slice(-4).map((m) => `${m.role}: ${m.content}`),
+      });
+      console.log(`[RAG Decision] shouldRetrieve=${ragDecision.shouldRetrieve}, query=${ragDecision.query}, reason=${ragDecision.reason}`);
+    } catch (e) {
+      console.warn('[RAG Decision] failed, proceeding without retrieval:', e);
+    }
   }
 
   if (ragDecision.shouldRetrieve) {
     try {
-      ragContext = await retrieveContext(c.env, ragDecision.query, 5, 0.45);
+      ragContext = await retrieveContext(c.env, ragDecision.query, 24, ragRetrievalMode === 'forced_safety' ? 0.35 : 0.42, {
+        intent: intentResult.type,
+        fsmState: fsmCtx.currentState,
+        userMessage: userLastMessage,
+        finalTopK: 5,
+      });
       console.log(`[RAG] Retrieved ${ragContext.chunks.length} chunks for query="${ragDecision.query}"`);
     } catch (e) {
       console.warn('[RAG] Retrieval failed, proceeding without knowledge context:', e);
@@ -120,6 +137,7 @@ chatRouter.post('/', requireAuth, async (c) => {
 
   // 准备 RAG 元数据（含片段摘要，前80字）
   const ragMeta = {
+    ragRetrievalMode,
     ragQueried: ragDecision.shouldRetrieve,
     ragQuery: ragDecision.query,
     ragDecisionReason: ragDecision.reason,
@@ -501,4 +519,33 @@ function applyIcebreakerUpdate(
   }
 
   return result;
+}
+
+function buildSafetyRetrievalQuery(
+  userMessage: string,
+  intent: string,
+  fsmState: string,
+): string | null {
+  const text = userMessage.trim();
+  const safetySignals = [
+    '不想活', '想死', '自杀', '自伤', '自残', '割腕', '吞药', '跳楼',
+    '伤害自己', '不想醒', '活不下去', '结束生命',
+  ];
+  const schoolSafetySignals = [
+    '欺凌', '霸凌', '排挤', '孤立', '威胁', '勒索', '打我', '辱骂',
+    '传谣', '偷拍视频', '校园暴力',
+  ];
+
+  const hasSafetySignal = safetySignals.some(signal => text.includes(signal));
+  const hasSchoolSafetySignal = schoolSafetySignals.some(signal => text.includes(signal));
+
+  if (intent === 'crisis' || fsmState === 'Crisis_Escalation' || hasSafetySignal) {
+    return `${text} 自伤自杀危机识别 安全计划 现实求助 热线 监护人 未成年人`;
+  }
+
+  if (hasSchoolSafetySignal) {
+    return `${text} 校园欺凌 同伴排挤 安全评估 求助老师家长 证据保留 未成年人保护`;
+  }
+
+  return null;
 }

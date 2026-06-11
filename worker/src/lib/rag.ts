@@ -35,6 +35,13 @@ interface EmbeddingResponse {
   data: number[][];
 }
 
+export interface RAGRetrievalOptions {
+  intent?: string;
+  fsmState?: string;
+  userMessage?: string;
+  finalTopK?: number;
+}
+
 // BGE-M3 模型标识（多语言，支持中文）
 const EMBEDDING_MODEL = '@cf/baai/bge-m3';
 
@@ -119,7 +126,8 @@ export async function retrieveContext(
   env: Env,
   userQuery: string,
   topK: number = 5,
-  minScore: number = 0.5
+  minScore: number = 0.5,
+  options?: RAGRetrievalOptions
 ): Promise<RAGContext> {
   // 1. 将用户查询向量化
   const queryEmbeddings = await generateEmbeddings(env, [userQuery]);
@@ -131,8 +139,15 @@ export async function retrieveContext(
     returnMetadata: 'all',
   });
 
-  // 3. 过滤低分结果并提取文本
-  const filteredMatches = results.matches.filter(m => m.score >= minScore);
+  // 3. 过滤低分结果，并结合场景做轻量重排
+  const filteredMatches = results.matches
+    .filter(m => m.score >= minScore)
+    .map(match => ({
+      match,
+      adjustedScore: scoreRAGMatch(match, userQuery, options),
+    }))
+    .sort((a, b) => b.adjustedScore - a.adjustedScore)
+    .slice(0, options?.finalTopK ?? topK);
 
   const context: RAGContext = {
     chunks: [],
@@ -141,17 +156,88 @@ export async function retrieveContext(
     chunkIds: [],
   };
 
-  for (const match of filteredMatches) {
+  for (const { match, adjustedScore } of filteredMatches) {
     const metadata = match.metadata as Record<string, string> | undefined;
     if (metadata) {
       context.chunks.push(metadata.text || '');
-      context.scores.push(match.score);
+      context.scores.push(Math.min(0.99, Math.max(0, adjustedScore)));
       context.sourceDocuments.push(metadata.documentTitle || 'unknown');
       context.chunkIds.push(match.id);
     }
   }
 
   return context;
+}
+
+function scoreRAGMatch(
+  match: VectorizeMatch,
+  userQuery: string,
+  options?: RAGRetrievalOptions
+): number {
+  const metadata = match.metadata as Record<string, unknown> | undefined;
+  const title = String(metadata?.documentTitle || '');
+  const text = String(metadata?.text || '');
+  const id = String(match.id || '');
+  const haystack = `${title}\n${text}\n${id}`.toLowerCase();
+  const query = `${userQuery}\n${options?.userMessage || ''}`.toLowerCase();
+  const intent = options?.intent || '';
+  const fsmState = options?.fsmState || '';
+
+  let score = match.score;
+
+  if (isSafetySensitive(query, intent, fsmState)) {
+    score += keywordBoost(haystack, [
+      'safety', '危机', '安全', '自杀', '自伤', '自残', '伤害自己', '不想活',
+      '热线', '12355', '求助', '转介', '监护人', '急救', '未成年人',
+    ], 0.26);
+    score += keywordBoost(haystack, ['who', 'nice', 'guideline', '指南', '权威', 'clinical'], 0.08);
+    if (hasAny(haystack, ['行为激活', '微习惯']) && !hasAny(haystack, ['危机', '安全', '自伤', '自杀', '求助'])) {
+      score -= 0.12;
+    }
+  }
+
+  if (hasAny(query, ['欺凌', '霸凌', '排挤', '孤立', '威胁', '勒索', '打我', '辱骂', '传谣'])) {
+    score += keywordBoost(haystack, [
+      '欺凌', '霸凌', '校园', '同伴', '同学', '排挤', '孤立', '威胁',
+      '证据', '老师', '家长', '求助', '安全', '保护',
+    ], 0.22);
+    if (hasAny(haystack, ['行为激活', '微习惯']) && !hasAny(haystack, ['同伴', '校园', '欺凌', '霸凌', '安全'])) {
+      score -= 0.08;
+    }
+  }
+
+  if (intent === 'academic_stress') {
+    score += keywordBoost(haystack, ['考试', '成绩', '学业', '压力', '反刍', '睡眠', '认知重构', '行为激活'], 0.12);
+  }
+
+  if (intent === 'family_pressure') {
+    score += keywordBoost(haystack, ['家庭', '父母', '家长', '沟通', '边界', '压力', '支持'], 0.12);
+  }
+
+  if (intent === 'source_trace') {
+    score += keywordBoost(haystack, ['来源', '证据', '指南', '权威', '规则', 'clinical', 'policy'], 0.1);
+  }
+
+  return score;
+}
+
+function isSafetySensitive(query: string, intent: string, fsmState: string): boolean {
+  return intent === 'crisis'
+    || fsmState === 'Crisis_Escalation'
+    || hasAny(query, [
+      '不想活', '想死', '自杀', '自伤', '自残', '割腕', '吞药', '跳楼',
+      '伤害自己', '不想醒', '欺凌', '霸凌', '威胁', '勒索',
+    ]);
+}
+
+function keywordBoost(text: string, keywords: string[], amount: number): number {
+  const hits = keywords.filter(keyword => text.includes(keyword.toLowerCase())).length;
+  if (hits === 0) return 0;
+  return Math.min(amount, hits * (amount / 3));
+}
+
+function hasAny(text: string, keywords: string[]): boolean {
+  return keywords.some(keyword => text.includes(keyword.toLowerCase()));
 }
 
 /**

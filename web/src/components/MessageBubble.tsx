@@ -243,6 +243,14 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                             {tc.ragQueried ? '已触发知识库查询' : '本轮未触发知识库查询'}
                           </p>
                         </div>
+                        {tc.ragRetrievalMode && (
+                          <div className="flex items-start gap-2">
+                            <span className="text-on-surface-variant/60 w-14 shrink-0 pt-0.5">模式</span>
+                            <p className="text-[11.5px] leading-relaxed text-on-surface-variant">
+                              {tc.ragRetrievalMode === 'forced_safety' ? '安全强制检索' : 'AI 自主判断'}
+                            </p>
+                          </div>
+                        )}
                         {tc.ragQuery && (
                           <div className="flex items-start gap-2">
                             <span className="text-on-surface-variant/60 w-14 shrink-0 pt-0.5">查询词</span>

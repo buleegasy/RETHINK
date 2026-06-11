@@ -52,7 +52,8 @@ const ACADEMIC_TRIGGERS: (string | RegExp)[] = [
 ];
 
 const PEER_TRIGGERS: (string | RegExp)[] = [
-  '同桌', '同学', '朋友', '笑我', '孤立', '看不起', '背后说', '不合群', '没朋友', '传谣言', '冷落'
+  '同桌', '同学', '朋友', '笑我', '孤立', '看不起', '背后说', '不合群', '没朋友', '传谣言', '冷落',
+  '欺凌', '霸凌', '排挤', '威胁', '勒索', '打我', '辱骂', '校园暴力', '偷拍视频'
 ];
 
 const FAMILY_TRIGGERS: (string | RegExp)[] = [
