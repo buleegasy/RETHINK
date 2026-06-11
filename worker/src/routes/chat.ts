@@ -122,6 +122,7 @@ chatRouter.post('/', requireAuth, async (c) => {
         fsmState: fsmCtx.currentState,
         userMessage: userLastMessage,
         finalTopK: 5,
+        safetyFirst: ragRetrievalMode === 'forced_safety',
       });
       console.log(`[RAG] Retrieved ${ragContext.chunks.length} chunks for query="${ragDecision.query}"`);
     } catch (e) {

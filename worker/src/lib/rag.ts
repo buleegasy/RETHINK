@@ -40,6 +40,7 @@ export interface RAGRetrievalOptions {
   fsmState?: string;
   userMessage?: string;
   finalTopK?: number;
+  safetyFirst?: boolean;
 }
 
 // BGE-M3 模型标识（多语言，支持中文）
@@ -140,14 +141,18 @@ export async function retrieveContext(
   });
 
   // 3. 过滤低分结果，并结合场景做轻量重排
-  const filteredMatches = results.matches
+  const rankedMatches = results.matches
     .filter(m => m.score >= minScore)
     .map(match => ({
       match,
       adjustedScore: scoreRAGMatch(match, userQuery, options),
     }))
-    .sort((a, b) => b.adjustedScore - a.adjustedScore)
-    .slice(0, options?.finalTopK ?? topK);
+    .sort((a, b) => b.adjustedScore - a.adjustedScore);
+
+  const finalTopK = options?.finalTopK ?? topK;
+  const filteredMatches = options?.safetyFirst
+    ? pickSafetyFirstMatches(rankedMatches, finalTopK)
+    : rankedMatches.slice(0, finalTopK);
 
   const context: RAGContext = {
     chunks: [],
@@ -219,6 +224,38 @@ function scoreRAGMatch(
   }
 
   return score;
+}
+
+function pickSafetyFirstMatches(
+  rankedMatches: Array<{ match: VectorizeMatch; adjustedScore: number }>,
+  finalTopK: number
+): Array<{ match: VectorizeMatch; adjustedScore: number }> {
+  const safetyMatches = rankedMatches.filter(({ match }) => isSafetyKnowledgeMatch(match));
+  const selected = [...safetyMatches.slice(0, finalTopK)];
+
+  for (const candidate of rankedMatches) {
+    if (selected.length >= finalTopK) break;
+    if (!selected.some(item => item.match.id === candidate.match.id)) {
+      selected.push(candidate);
+    }
+  }
+
+  return selected;
+}
+
+function isSafetyKnowledgeMatch(match: VectorizeMatch): boolean {
+  const metadata = match.metadata as Record<string, unknown> | undefined;
+  const title = String(metadata?.documentTitle || '');
+  const text = String(metadata?.text || '');
+  const id = String(match.id || '');
+  const haystack = `${title}\n${text}\n${id}`.toLowerCase();
+
+  return hasAny(haystack, [
+    'safety_chunks', '危机', '安全', '自伤', '自杀', '自残', '伤害自己',
+    '热线', '12355', '求助', '转介', '监护人', '未成年人', '校园',
+    '欺凌', '霸凌', '威胁', '勒索', '保护', '证据', '老师', '家长',
+    'c-ssrs',
+  ]);
 }
 
 function isSafetySensitive(query: string, intent: string, fsmState: string): boolean {
