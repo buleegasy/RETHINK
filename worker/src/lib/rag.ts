@@ -43,6 +43,13 @@ export interface RAGRetrievalOptions {
   safetyFirst?: boolean;
 }
 
+interface RankedMatch {
+  match: VectorizeMatch;
+  adjustedScore: number;
+  sourceKey: string;
+  sourceTitle: string;
+}
+
 // BGE-M3 模型标识（多语言，支持中文）
 const EMBEDDING_MODEL = '@cf/baai/bge-m3';
 
@@ -143,16 +150,24 @@ export async function retrieveContext(
   // 3. 过滤低分结果，并结合场景做轻量重排
   const rankedMatches = results.matches
     .filter(m => m.score >= minScore)
-    .map(match => ({
-      match,
-      adjustedScore: scoreRAGMatch(match, userQuery, options),
-    }))
+    .map(match => {
+      const metadata = match.metadata as Record<string, unknown> | undefined;
+      return {
+        match,
+        adjustedScore: scoreRAGMatch(match, userQuery, options),
+        sourceKey: getSourceKey(metadata),
+        sourceTitle: String(metadata?.documentTitle || 'unknown'),
+      };
+    })
     .sort((a, b) => b.adjustedScore - a.adjustedScore);
 
   const finalTopK = options?.finalTopK ?? topK;
-  const filteredMatches = options?.safetyFirst
-    ? pickSafetyFirstMatches(rankedMatches, finalTopK)
-    : rankedMatches.slice(0, finalTopK);
+  const filteredMatches = diversifyRankedMatches(
+    rankedMatches,
+    finalTopK,
+    options?.safetyFirst ? 1 : 2,
+    options?.safetyFirst ?? false,
+  );
 
   const context: RAGContext = {
     chunks: [],
@@ -172,6 +187,41 @@ export async function retrieveContext(
   }
 
   return context;
+}
+
+function diversifyRankedMatches(
+  rankedMatches: RankedMatch[],
+  finalTopK: number,
+  maxPerSource: number,
+  safetyFirst: boolean,
+): RankedMatch[] {
+  const orderedCandidates = safetyFirst
+    ? [
+        ...rankedMatches.filter(({ match }) => isSafetyKnowledgeMatch(match)),
+        ...rankedMatches.filter(({ match }) => !isSafetyKnowledgeMatch(match)),
+      ]
+    : rankedMatches;
+
+  const selected: RankedMatch[] = [];
+  const sourceCounts = new Map<string, number>();
+
+  for (const candidate of orderedCandidates) {
+    if (selected.length >= finalTopK) break;
+    const count = sourceCounts.get(candidate.sourceKey) || 0;
+    if (count >= maxPerSource) continue;
+    selected.push(candidate);
+    sourceCounts.set(candidate.sourceKey, count + 1);
+  }
+
+  if (selected.length < finalTopK) {
+    for (const candidate of orderedCandidates) {
+      if (selected.length >= finalTopK) break;
+      if (selected.some(item => item.match.id === candidate.match.id)) continue;
+      selected.push(candidate);
+    }
+  }
+
+  return selected;
 }
 
 function scoreRAGMatch(
@@ -226,23 +276,6 @@ function scoreRAGMatch(
   return score;
 }
 
-function pickSafetyFirstMatches(
-  rankedMatches: Array<{ match: VectorizeMatch; adjustedScore: number }>,
-  finalTopK: number
-): Array<{ match: VectorizeMatch; adjustedScore: number }> {
-  const safetyMatches = rankedMatches.filter(({ match }) => isSafetyKnowledgeMatch(match));
-  const selected = [...safetyMatches.slice(0, finalTopK)];
-
-  for (const candidate of rankedMatches) {
-    if (selected.length >= finalTopK) break;
-    if (!selected.some(item => item.match.id === candidate.match.id)) {
-      selected.push(candidate);
-    }
-  }
-
-  return selected;
-}
-
 function isSafetyKnowledgeMatch(match: VectorizeMatch): boolean {
   const metadata = match.metadata as Record<string, unknown> | undefined;
   const title = String(metadata?.documentTitle || '');
@@ -256,6 +289,13 @@ function isSafetyKnowledgeMatch(match: VectorizeMatch): boolean {
     '欺凌', '霸凌', '威胁', '勒索', '保护', '证据', '老师', '家长',
     'c-ssrs',
   ]);
+}
+
+function getSourceKey(metadata?: Record<string, unknown>): string {
+  const title = String(metadata?.documentTitle || '').trim();
+  const documentId = String(metadata?.documentId || '').trim();
+  const headingPath = String(metadata?.headingPath || '').trim();
+  return title || documentId || headingPath || 'unknown';
 }
 
 function isSafetySensitive(query: string, intent: string, fsmState: string): boolean {
