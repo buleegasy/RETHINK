@@ -195,26 +195,53 @@ export function LoginWall() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-dim/80 backdrop-blur-md px-4 overflow-y-auto">
-      {/* Background Decorative Glows */}
-      <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full bg-indigo-500/10 blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-cyan-500/10 blur-[100px] pointer-events-none" />
-
-      {/* Main Glassmorphic Card Container */}
-      <div className="relative w-full max-w-md bg-surface/65 border border-outline-variant/30 backdrop-blur-2xl rounded-[32px] shadow-2xl p-8 md:p-10 transition-all duration-300">
+    <div className="fixed inset-0 z-50 flex bg-surface-dim/80 backdrop-blur-md overflow-hidden">
+      
+      {/* Left Section (Visuals/Branding) - Hidden on mobile, visible on lg screens */}
+      <div className="hidden lg:flex flex-col flex-1 relative items-center justify-center overflow-hidden bg-surface">
+        {/* Abstract animated background elements */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-500/20 blur-[120px] animate-pulse" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-cyan-500/20 blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+          <div className="absolute top-[40%] left-[30%] w-[40%] h-[40%] rounded-full bg-blue-500/10 blur-[100px] animate-pulse" style={{ animationDelay: '4s' }} />
+        </div>
         
-        {/* Sparkle Header */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-surface-container rounded-[22px] flex items-center justify-center border border-outline-variant/30 shadow-sm mb-4 transform hover:scale-105 transition-transform duration-300">
-            <LoginSparkle className="w-9 h-9" />
+        {/* Large Decorative Graphic or Typography */}
+        <div className="relative z-10 flex flex-col items-center text-center px-12 max-w-2xl">
+          <div className="w-24 h-24 bg-surface-container rounded-[28px] flex items-center justify-center border border-outline-variant/30 shadow-xl mb-8 transform hover:scale-105 transition-transform duration-500">
+            <LoginSparkle className="w-12 h-12" />
           </div>
-          <h2 className="text-2xl font-display font-semibold text-on-surface">
-            RE-THINK
-          </h2>
-          <p className="text-sm text-on-surface-variant mt-1.5 text-center px-4 leading-relaxed">
-            基于 CBT 心理辅导的青少年认知重塑空间
+          <h1 className="text-[44px] leading-tight font-display font-bold text-transparent bg-clip-text bg-gradient-to-br from-indigo-400 to-cyan-400 mb-6 tracking-tight">
+            重塑认知<br />遇见更好的自己
+          </h1>
+          <p className="text-lg text-on-surface-variant leading-relaxed max-w-md">
+            RE-THINK 是一个基于认知行为疗法 (CBT) 的智能干预空间，帮助青少年在安全的数字化环境中完成情绪疏导与认知重建。
           </p>
         </div>
+      </div>
+
+      {/* Right Section (Login Form) - Full width on mobile, fixed width on lg screens */}
+      <div className="w-full lg:w-[480px] xl:w-[540px] flex items-center justify-center px-4 py-8 lg:px-12 bg-transparent lg:bg-surface-container-low/50 lg:border-l border-outline-variant/30 overflow-y-auto relative shadow-2xl">
+        
+        {/* Mobile-only background glows */}
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full bg-indigo-500/10 blur-[100px] pointer-events-none lg:hidden" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-cyan-500/10 blur-[100px] pointer-events-none lg:hidden" />
+
+        {/* Form Container */}
+        <div className="relative w-full max-w-md bg-surface/65 lg:bg-transparent lg:border-none lg:shadow-none lg:backdrop-blur-none border border-outline-variant/30 backdrop-blur-2xl rounded-[32px] shadow-2xl p-8 md:p-10 transition-all duration-300">
+          
+          {/* Header */}
+          <div className="flex flex-col items-center mb-8">
+            <div className="lg:hidden w-16 h-16 bg-surface-container rounded-[22px] flex items-center justify-center border border-outline-variant/30 shadow-sm mb-4 transform hover:scale-105 transition-transform duration-300">
+              <LoginSparkle className="w-9 h-9" />
+            </div>
+            <h2 className="text-2xl lg:text-3xl font-display font-semibold text-on-surface text-center">
+              欢迎回来
+            </h2>
+            <p className="text-sm text-on-surface-variant mt-2 text-center px-2 leading-relaxed">
+              请登录或注册以继续您的旅程
+            </p>
+          </div>
 
         {/* Custom Tab Selector */}
         <div className="flex bg-surface-container-high/60 rounded-full p-1.5 border border-outline-variant/20 mb-6 relative z-10">
@@ -352,6 +379,7 @@ export function LoginWall() {
           如果遇到问题，请联系系统管理员。
         </p>
 
+        </div>
       </div>
     </div>
   );
