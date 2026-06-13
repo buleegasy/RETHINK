@@ -17,6 +17,9 @@
   "devDependencies": {
     "concurrently": "^8.2.2"
   },
+  "overrides": {
+    "postcss-selector-parser": "^6.1.2"
+  },
   "dependencies": {
     "postcss": "^8.4.31"
   }
