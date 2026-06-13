@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { History, Loader2, MessageSquareText, Plus, RefreshCw } from 'lucide-react';
+import { Loader2, MessageSquareText, Plus, RefreshCw } from 'lucide-react';
 import { useChatStore } from '../../store/chatStore';
 import { useAuthStore } from '../../store/authStore';
 import { useSessionStore } from '../../store/sessionStore';
