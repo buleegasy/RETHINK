@@ -215,26 +215,44 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', bounce: 0.3, duration: 0.6 }}
-            className="relative w-full max-w-md bg-[#0d1117]/90 border border-white/10 backdrop-blur-2xl rounded-[32px] shadow-2xl p-8 md:p-10"
+            className="relative w-full max-w-md md:max-w-4xl bg-[#0d1117]/90 border border-white/10 backdrop-blur-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col md:flex-row"
           >
-            <button
-              onClick={onClose}
-              className="absolute top-6 right-6 p-2 text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex flex-col items-center mb-8">
-              <div className="w-16 h-16 bg-white/5 rounded-[22px] flex items-center justify-center border border-white/10 shadow-sm mb-4">
-                <LoginSparkle className="w-9 h-9" />
+            {/* Left side: Branding / Graphic (Hidden on mobile) */}
+            <div className="hidden md:flex flex-col justify-between w-1/2 p-10 lg:p-12 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-r border-white/5 relative">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-blue-400/20 via-transparent to-transparent opacity-50" />
+              <div className="relative z-10">
+                <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 shadow-sm mb-8">
+                  <LoginSparkle className="w-8 h-8" />
+                </div>
+                <h2 className="text-3xl lg:text-4xl font-semibold text-white mb-4 leading-[1.3] tracking-tight">
+                  重新连接<br />你的<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-cyan-300">内在力量</span>
+                </h2>
+                <p className="text-white/60 text-sm leading-relaxed max-w-[280px]">
+                  专属的 AI 心理陪伴。采用军工级加密保护您的对话隐私，随时随地开启心灵重塑。
+                </p>
               </div>
-              <h2 className="text-2xl lg:text-3xl font-serif font-semibold text-white text-center">
-                欢迎回来
-              </h2>
-              <p className="text-sm text-white/60 mt-2 text-center px-2 leading-relaxed">
-                请登录或注册以继续您的旅程
-              </p>
+              <div className="relative z-10 text-xs text-white/30">
+                © 2026 RETHINK.
+              </div>
             </div>
+
+            {/* Right side: Form */}
+            <div className="w-full md:w-1/2 p-8 md:p-10 lg:p-12 relative flex flex-col justify-center">
+              <button
+                onClick={onClose}
+                className="absolute top-6 right-6 p-2 text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-colors z-20"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="md:hidden flex flex-col items-center mb-8">
+                <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 shadow-sm mb-4">
+                  <LoginSparkle className="w-7 h-7" />
+                </div>
+                <h2 className="text-2xl font-semibold text-white text-center">
+                  欢迎回来
+                </h2>
+              </div>
 
             <div className="flex bg-white/5 rounded-full p-1.5 border border-white/10 mb-6 relative z-10">
               <button
@@ -347,6 +365,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-70"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 免密一键体验测试账号
               </button>
+              </div>
             </div>
           </motion.div>
         </div>
