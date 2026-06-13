@@ -17,9 +17,9 @@ import {
   ShieldAlert,
   XCircle,
 } from 'lucide-react';
-import type { ChatMessage, FSMState } from '../types';
-import { FSM_STATE_META } from '../types';
-import { ReThinkLogo } from './ReThinkLogo';
+import type { ChatMessage, FSMState } from '../../types';
+import { FSM_STATE_META } from '../../types';
+import { ReThinkLogo } from '../layout/ReThinkLogo';
 
 /** 意图分类 → 中文学术术语映射 */
 const INTENT_LABEL: Record<string, string> = {

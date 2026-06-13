@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useChatStore } from '../store/chatStore';
+import { useChatStore } from '../../store/chatStore';
 import { MessageBubble } from './MessageBubble';
 import { GeminiWelcome } from './GeminiWelcome';
 import { EmojiSelector } from './EmojiSelector';
-import { useChat } from '../hooks/useChat';
+import { useChat } from '../../hooks/useChat';
 
 export const ChatPanel: React.FC = () => {
   const { messages, isStreaming, hasCompletedOnboarding } = useChatStore();

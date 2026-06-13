@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import type { KeyboardEvent } from 'react';
-import { useChatStore } from '../store/chatStore';
-import { useVoiceInput } from '../hooks/useVoiceInput';
+import { useChatStore } from '../../store/chatStore';
+import { useVoiceInput } from '../../hooks/useVoiceInput';
 import { CameraPanel } from './CameraPanel';
-import type { EmotionResult } from '../hooks/useFaceEmotion';
+import type { EmotionResult } from '../../hooks/useFaceEmotion';
 
 const EMOJI_CHIPS = [
   '🫠', '😭', '🥺', '🤡', '😑', '😡', 
@@ -99,7 +99,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) =
 
         {/* 表情包破冰快捷气泡 */}
         {fsmState === 'Onboarding' && !isStreaming && (
-          <div className="w-full mb-4 flex gap-2.5 overflow-x-auto pb-2 justify-start md:justify-center scrollbar-none animate-fade-in pointer-events-auto">
+          <div className="w-full mb-4 flex gap-2.5 overflow-x-auto pb-2 justify-start md:justify-center animate-fade-in pointer-events-auto [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {EMOJI_CHIPS.map((emoji) => (
               <button
                 key={emoji}

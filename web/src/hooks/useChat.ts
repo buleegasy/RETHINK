@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useChatStore } from '../store/chatStore';
 import type { ChatMessage, SSEChunk, FSMState, UserProfile } from '../types';
-
+import { chatApi } from '../api/chat';
 export function useChat() {
   const [error, setError] = useState<string | null>(null);
   
@@ -44,36 +44,15 @@ export function useChat() {
       // 准备请求体
       const payloadMessages = [...messages, userMsg].map(({ role, content }) => ({ role, content }));
 
-      const apiUrl = import.meta.env.VITE_API_URL || '';
-      const response = await fetch(`${apiUrl}/api/chat`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify({
-          messages: payloadMessages,
-          stream: true,
-          sessionId: sessionId || undefined,
-          profile,
-          model: selectedModel,
-          ...(facialEmotion ? { facialEmotion } : {}),
-        }),
+      const streamBody = await chatApi.sendMessageStream({
+        messages: payloadMessages,
+        sessionId: sessionId || undefined,
+        profile,
+        model: selectedModel,
+        facialEmotion,
       });
 
-      if (!response.ok) {
-        if (response.status === 401) {
-          useChatStore.getState().logout();
-          throw new Error('登录凭证已过期，请重新登录');
-        }
-        throw new Error(`API Error: ${response.status}`);
-      }
-
-      if (!response.body) {
-        throw new Error('ReadableStream not supported');
-      }
-
-      const reader = response.body.getReader();
+      const reader = streamBody.getReader();
       const decoder = new TextDecoder('utf-8');
       let done = false;
 
@@ -107,6 +86,11 @@ export function useChat() {
                 // 更新 FSM 状态
                 if (parsed.fsmState) {
                   setFSMState(parsed.fsmState as FSMState);
+                  if (parsed.fsmState === 'Crisis_Escalation') {
+                    done = true;
+                    reader.cancel().catch(e => console.warn(e));
+                    break;
+                  }
                 }
                 // 更新 UI 控制参数
                 if (parsed.uiControl) {

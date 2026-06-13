@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useChatStore } from '../store/chatStore';
+import { useChatStore } from '../../store/chatStore';
 
 export const AmbientGlow: React.FC = () => {
   const isStreaming = useChatStore(state => state.isStreaming);

@@ -85,6 +85,37 @@ chatRouter.post('/', requireAuth, async (c) => {
 
   console.log(`[FSM] pre-transition: ${preTransition.trigger} → state=${fsmCtx.currentState}`);
 
+  // ── 阻断AI答复（危机覆盖层） ──
+  if (fsmCtx.currentState === 'Crisis_Escalation') {
+    // 不再调用大模型，直接返回并停止后续生成
+    await saveToD1(c.env.DB, sessionId, messages, currentStageIndex + 1, fsmCtx, user.uid);
+
+    if (!stream) {
+      return c.json({
+        content: '',
+        stage: currentStageIndex + 1,
+        sessionId,
+        intent: intentResult.type,
+        fsmState: fsmCtx.currentState,
+        fsmTrigger: preTransition.trigger,
+      });
+    }
+
+    return streamSSE(c, async (streamEvent) => {
+      await streamEvent.writeSSE({
+        data: JSON.stringify({
+          delta: '',
+          stage: currentStageIndex + 1,
+          done: true,
+          sessionId,
+          intent: intentResult.type,
+          fsmState: fsmCtx.currentState,
+          fsmTrigger: preTransition.trigger,
+        })
+      });
+    });
+  }
+
   // ── 4. RAG 检索（由模型自行决定是否需要查询知识库） ──
   let ragContext = undefined;
   let ragDecision = {

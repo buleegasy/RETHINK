@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useChatStore } from '../store/chatStore';
-import { FSM_STATE_META } from '../types';
-import type { FSMState } from '../types';
+import { useChatStore } from '../../store/chatStore';
+import { FSM_STATE_META } from '../../types';
+import type { FSMState } from '../../types';
 
 /** 破冰五层 */
 const ICEBREAKER_LAYERS = [

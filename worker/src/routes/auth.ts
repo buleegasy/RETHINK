@@ -195,6 +195,32 @@ authRouter.post('/login', async (c) => {
 });
 
 /**
+ * Test Account Login
+ * POST /api/auth/test-login
+ */
+authRouter.post('/test-login', async (c) => {
+  try {
+    const username = 'test_guest';
+    const email = 'test_guest@rethink.local';
+    const localId = 'test_guest_fixed_uid';
+    const idToken = 'mock-token-test-guest';
+
+    return c.json({
+      success: true,
+      user: {
+        uid: localId,
+        username,
+        email,
+      },
+      token: idToken
+    });
+  } catch (err: any) {
+    console.error('Test Login error:', err);
+    return c.json({ error: err.message || 'Test Login failed' }, 500);
+  }
+});
+
+/**
  * Bind Anonymous Session to Account
  * POST /api/auth/bind-session
  */

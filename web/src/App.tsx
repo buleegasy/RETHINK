@@ -1,27 +1,36 @@
 import { useState, useCallback, useRef } from 'react';
-import { ChatPanel } from './components/ChatPanel';
-import { InputBar } from './components/InputBar';
-import { AmbientGlow } from './components/AmbientGlow';
-import { LoginWall } from './components/LoginWall';
-import { SessionSidebar } from './components/SessionSidebar';
+import { History, Menu } from 'lucide-react';
+import { ChatPanel } from './components/chat/ChatPanel';
+import { InputBar } from './components/chat/InputBar';
+import { AmbientGlow } from './components/layout/AmbientGlow';
+import { LoginWall } from './components/auth/LoginWall';
+import { SessionSidebar } from './components/layout/SessionSidebar';
 import { useChat } from './hooks/useChat';
 import { useChatStore } from './store/chatStore';
-import type { UserProfile } from './types';
+import { useAuthStore } from './store/authStore';
+import type { UserProfile, FSMState } from './types';
 import type { EmotionResult } from './hooks/useFaceEmotion';
 import { EMOTION_MAP } from './hooks/useFaceEmotion';
-import { CrisisOverlay } from './components/CrisisOverlay';
+import { CrisisOverlay } from './components/crisis/CrisisOverlay';
+
+const FSM_ORDER: FSMState[] = ['Active_Listening', 'CBT_Stripping', 'Socratic_Questioning', 'Crisis_Escalation'];
 
 function App() {
   const { sendMessage, error } = useChat();
   const hasCompletedOnboarding = useChatStore(state => state.hasCompletedOnboarding);
   
-  // Auth state
-  const isAuthenticated = useChatStore(state => state.isAuthenticated);
-  const user = useChatStore(state => state.user);
-  const logout = useChatStore(state => state.logout);
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+  const user = useAuthStore(state => state.user);
+  const logout = useAuthStore(state => state.logout);
   const fsmState = useChatStore(state => state.fsmState);
 
   const [, setCurrentEmotion] = useState<EmotionResult | null>(null);
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  
+  // 计算进度
+  const stageIndex = fsmState === 'Onboarding' ? 0 : FSM_ORDER.indexOf(fsmState as FSMState) + 1;
+  const stageColor = stageIndex === 0 ? '' : stageIndex === 1 ? 'bg-stage-blue' : stageIndex === 2 ? 'bg-stage-green' : stageIndex === 3 ? 'bg-stage-orange' : 'bg-stage-red';
+  const stageTextColor = stageIndex === 0 ? '' : stageIndex === 1 ? 'text-stage-blue' : stageIndex === 2 ? 'text-stage-green' : stageIndex === 3 ? 'text-stage-orange' : 'text-stage-red';
   
   // 用于记录每一次对话周期内（从上一次发送到本次发送之间）的所有情绪帧
   const emotionHistoryRef = useRef<EmotionResult[]>([]);
@@ -80,20 +89,39 @@ function App() {
       {/* 主对话区 */}
       <div className="flex flex-col flex-1 h-full relative">
         {/* ── 移动端顶部 Header ── */}
-        <div className="md:hidden flex items-center justify-between pt-[max(env(safe-area-inset-top),12px)] pb-2.5 px-4 bg-transparent shrink-0 z-20">
-          {/* 左侧：品牌 */}
-          <div className="flex items-center">
-            <h1 className="text-[17px] font-display font-medium text-on-surface opacity-80">
+        <div className="md:hidden flex items-center justify-between pt-[max(env(safe-area-inset-top),12px)] pb-2.5 px-4 bg-surface shrink-0 z-20 border-b border-outline-variant/50">
+          {/* 左侧：Hamburger 菜单 */}
+          <div className="flex items-center w-[80px] justify-start">
+            {isAuthenticated && (
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="p-1.5 -ml-1.5 text-on-surface-variant hover:bg-surface-container rounded-full"
+                aria-label="打开侧边栏"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+            )}
+          </div>
+
+          {/* 中间：品牌 */}
+          <div className="flex items-center justify-center flex-1">
+            <h1 className="text-[17px] font-display font-medium text-on-surface">
               RE-THINK
             </h1>
           </div>
 
-          {/* 右侧：退出 */}
-          <div className="flex items-center">
+          {/* 右侧：阶段药丸 + 退出 */}
+          <div className="flex items-center w-[80px] justify-end gap-2">
+            {stageIndex > 0 && (
+              <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container text-[10px] font-medium ${stageTextColor}`}>
+                <div className={`w-1.5 h-1.5 rounded-full ${stageColor} animate-pulse`} />
+                {stageIndex}/4
+              </div>
+            )}
             {isAuthenticated && (
               <button
                 onClick={logout}
-                className="text-xs text-error/80 font-medium px-3 py-1.5 hover:bg-error-container/20 rounded-full transition-colors duration-200"
+                className="text-xs text-error/80 font-medium px-2 py-1 hover:bg-error-container/20 rounded-full"
               >
                 退出
               </button>
@@ -122,8 +150,20 @@ function App() {
         )}
       </div>
 
-      {/* ── Session History ── */}
-      {isAuthenticated && <SessionSidebar />}
+      {/* ── Session History Sidebar ── */}
+      {isAuthenticated && <SessionSidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />}
+      
+      {/* ── Desktop History Button ── */}
+      {isAuthenticated && (
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          aria-label="历史对话"
+          className="absolute top-4 left-4 z-40 hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-surface/65 backdrop-blur-md border border-outline-variant/30 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high shadow-sm transition-colors"
+        >
+          <History className="w-4 h-4" />
+        </button>
+      )}
 
       {/* ── Desktop Profile Pill ── */}
       {isAuthenticated && user && (

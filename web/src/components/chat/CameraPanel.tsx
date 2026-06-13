@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { useFaceEmotion, EMOTION_MAP } from '../hooks/useFaceEmotion';
-import type { EmotionResult } from '../hooks/useFaceEmotion';
+import { useFaceEmotion, EMOTION_MAP } from '../../hooks/useFaceEmotion';
+import type { EmotionResult } from '../../hooks/useFaceEmotion';
 
 interface CameraPanelProps {
   onEmotionChange?: (emotion: EmotionResult | null) => void;
@@ -33,10 +33,10 @@ export const CameraPanel: React.FC<CameraPanelProps> = ({ onEmotionChange }) => 
 
   return (
     <div className="w-full flex items-center justify-start pointer-events-auto">
-      <div className="relative overflow-hidden rounded-2xl bg-surface-container-high border border-outline-variant/30 shadow-sm flex items-center gap-3 p-2 backdrop-blur-md">
+      <div className="relative overflow-hidden rounded-2xl bg-surface-container-high border border-outline-variant/30 shadow-sm flex items-center gap-2 md:gap-3 p-1.5 md:p-2 backdrop-blur-md">
         
         {/* 摄像头视图区域 (小圆形/胶囊状) */}
-        <div className="relative w-16 h-16 md:w-20 md:h-20 shrink-0 rounded-full overflow-hidden bg-surface-dim shadow-inner ring-2 ring-surface/50">
+        <div className="relative w-14 h-14 md:w-16 md:h-16 shrink-0 rounded-full overflow-hidden bg-surface-dim shadow-inner ring-2 ring-surface/50">
           <video
             ref={videoRef}
             autoPlay
@@ -62,7 +62,7 @@ export const CameraPanel: React.FC<CameraPanelProps> = ({ onEmotionChange }) => 
         </div>
 
         {/* 情绪信息区域 */}
-        <div className="flex flex-col justify-center pr-3 min-w-[120px]">
+        <div className="flex flex-col justify-center pr-2 md:pr-3 min-w-[100px] md:min-w-[120px]">
           {error ? (
             <p className="text-[11px] text-error leading-tight">{error}</p>
           ) : isModelLoading ? (

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useChatStore } from '../store/chatStore';
-import type { AuthResponse } from '../types';
+import { useChatStore } from '../../store/chatStore';
+import { useAuthStore } from '../../store/authStore';
+import type { AuthResponse } from '../../types';
 
 declare global {
   interface Window {
@@ -22,7 +23,7 @@ const LoginSparkle = ({ className = '' }: { className?: string }) => (
 );
 
 export function LoginWall() {
-  const login = useChatStore(state => state.login);
+  const login = useAuthStore(state => state.login);
   const sessionId = useChatStore(state => state.sessionId);
 
   const [isSignUp, setIsSignUp] = useState(false);
@@ -145,6 +146,49 @@ export function LoginWall() {
       setError('网络请求失败，请检查连接');
       if (window.turnstile) window.turnstile.reset('#turnstile-container');
       setTurnstileToken(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTestLogin = async () => {
+    setLoading(true);
+    setError(null);
+    const API_BASE = import.meta.env.VITE_API_URL || '';
+
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/test-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const data: AuthResponse = await res.json();
+
+      if (!res.ok || !data.success) {
+        setError(data.error || '测试账号登录失败');
+        setLoading(false);
+        return;
+      }
+
+      login(data.user, data.token);
+
+      if (sessionId) {
+        try {
+          await fetch(`${API_BASE}/api/auth/bind-session`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${data.token}`
+            },
+            body: JSON.stringify({ sessionId })
+          });
+        } catch (bindErr) {
+          console.warn('Failed to bind active session on test login:', bindErr);
+        }
+      }
+    } catch (err: any) {
+      console.error('Test login error:', err);
+      setError('网络请求失败，请检查连接');
     } finally {
       setLoading(false);
     }
@@ -288,6 +332,19 @@ export function LoginWall() {
             )}
           </button>
         </form>
+
+        {/* Test Account Button */}
+        <div className="mt-4">
+          <button
+            type="button"
+            onClick={handleTestLogin}
+            disabled={loading}
+            className="w-full bg-surface-container/60 hover:bg-surface-container-high/80 text-on-surface-variant font-medium text-sm py-3.5 rounded-2xl transition-all duration-300 border border-outline-variant/30 hover:border-outline-variant/60 flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-70"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            免密一键体验测试账号
+          </button>
+        </div>
 
         {/* Beta Notice Footer */}
         <p className="text-[11px] text-on-surface-dim mt-6 text-center leading-relaxed">

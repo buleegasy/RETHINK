@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ReThinkLogo } from './ReThinkLogo';
+import { ReThinkLogo } from '../layout/ReThinkLogo';
 
 interface GeminiWelcomeProps {
   onStart?: () => void;
