@@ -49,11 +49,11 @@ export function SunlightBackground() {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        radius: Math.random() * 2 + 0.5,
-        vx: (Math.random() - 0.5) * 0.3 + 0.2, // Drifting right
-        vy: (Math.random() - 0.5) * 0.3 - 0.2, // Drifting up
+        radius: Math.random() * 3 + 1, // Increased size for visibility
+        vx: (Math.random() - 0.5) * 0.4 + 0.2, // Drifting right faster
+        vy: (Math.random() - 0.5) * 0.4 - 0.2, // Drifting up faster
         alpha: 0,
-        baseAlpha: Math.random() * 0.6 + 0.1,
+        baseAlpha: Math.random() * 0.7 + 0.2, // Increased base opacity
         swirl: Math.random() * Math.PI * 2,
       });
     }
@@ -170,18 +170,14 @@ export function SunlightBackground() {
         if (p.x < -50) p.x = width + 50;
         if (p.y > height + 50) p.y = -50;
 
-        // Draw particle (Golden / Warm White)
+        // Draw particle (Rich Amber / Gold for high contrast on light background)
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 240, 200, ${p.alpha})`;
+        ctx.fillStyle = `rgba(245, 140, 40, ${p.alpha})`; // Deep amber
         
-        // Add a slight glow to larger particles
-        if (p.radius > 1.5) {
-          ctx.shadowBlur = 10;
-          ctx.shadowColor = 'rgba(255, 210, 100, 0.5)';
-        } else {
-          ctx.shadowBlur = 0;
-        }
+        // Add a slight glow to all particles so they pop
+        ctx.shadowBlur = p.radius > 2 ? 12 : 4;
+        ctx.shadowColor = `rgba(245, 140, 40, ${p.alpha * 0.8})`;
         
         ctx.fill();
       });
