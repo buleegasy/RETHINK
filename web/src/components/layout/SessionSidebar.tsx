@@ -74,8 +74,10 @@ export function SessionSidebar({ isOpen, onClose }: SessionSidebarProps) {
 
   useEffect(() => {
     if (token) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       void fetchSessions(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   if (!token) return null;

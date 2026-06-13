@@ -141,8 +141,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   isFirstInGroup = true,
   isLastInGroup = true,
 }) => {
-  if (message.isHidden) return null;
-
   const isUser = message.role === 'user';
   const [showTechChain, setShowTechChain] = useState(false);
   const [expandedRag, setExpandedRag] = useState<number | null>(null);
@@ -155,7 +153,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     const isComplexMarkdown = /```|^[*-]\s|^\d+\.\s|#/m.test(message.content);
     if (isComplexMarkdown || !message.content) return [message.content];
 
-    const rawChunks = message.content.match(/[^。！？!\?\n]+[。！？!\?\n]*/g);
+    const rawChunks = message.content.match(/[^。！？!?\n]+[。！？!?\n]*/g);
     if (rawChunks) {
       return rawChunks.map(s => s.trim()).filter(Boolean);
     }
@@ -184,6 +182,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   };
 
   const userBubbleRadius = 'rounded-2xl rounded-br-sm';
+
+  if (message.isHidden) return null;
 
   return (
     <div className={`flex items-end gap-2 w-full animate-message-in ${isUser ? 'justify-end' : 'justify-start'}`}>
