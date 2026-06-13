@@ -34,12 +34,6 @@ export function LoginWall() {
         <div className="flex items-center gap-3">
           <ReThinkLogo />
         </div>
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-white/70">
-          <a href="#" className="hover:text-white transition-colors">核心服务</a>
-          <a href="#" className="hover:text-white transition-colors">AI 咨询师</a>
-          <a href="#" className="hover:text-white transition-colors">情绪日记</a>
-          <a href="#" className="hover:text-white transition-colors">订阅方案</a>
-        </nav>
         <button 
           onClick={() => setIsLoginModalOpen(true)}
           className="px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-sm font-medium transition-all backdrop-blur-md"
@@ -104,11 +98,8 @@ export function LoginWall() {
                 className="group relative px-8 py-4 bg-white text-black rounded-full font-semibold text-sm hover:scale-105 transition-all flex items-center gap-2 overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-100 to-cyan-100 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <span className="relative z-10">立即开启</span>
+                <span className="relative z-10">开启心灵重塑之旅</span>
                 <ChevronRight className="relative z-10 w-4 h-4" />
-              </button>
-              <button className="px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-full font-medium text-sm transition-all backdrop-blur-md">
-                了解更多
               </button>
             </div>
           </motion.div>
@@ -183,15 +174,8 @@ export function LoginWall() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="relative z-10 border-t border-white/10 py-8 text-center text-xs text-white/40">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between">
-          <div className="flex items-center gap-4 mb-4 md:mb-0">
-            <a href="#" className="hover:text-white transition-colors">服务协议</a>
-            <a href="#" className="hover:text-white transition-colors">隐私政策</a>
-            <a href="#" className="hover:text-white transition-colors">关于我们</a>
-            <a href="#" className="hover:text-white transition-colors">帮助中心</a>
-          </div>
+        <div className="max-w-7xl mx-auto px-6 flex justify-center">
           <p>© 2026 RETHINK. 保留所有权利。</p>
         </div>
       </footer>
