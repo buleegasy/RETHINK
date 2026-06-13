@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { LoginModal } from './LoginModal';
 import { ReThinkLogo } from '../layout/ReThinkLogo';
+import { ParticleBackground } from '../layout/ParticleBackground';
 import { ChevronRight } from 'lucide-react';
 
 export function LoginWall() {
@@ -10,13 +11,16 @@ export function LoginWall() {
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-[#030712] text-white overflow-y-auto overflow-x-hidden selection:bg-indigo-500/30">
       
-      {/* Absolute Ambient Background - Minimalist Horizon Style */}
-      <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0 flex flex-col justify-center items-center">
-        {/* Deep blue horizon glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vw] h-[80vh] max-h-[800px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-600/20 via-slate-900/10 to-transparent blur-[100px]" />
+      {/* Absolute Ambient Background - Minimalist Horizon Style + Particles */}
+      <div className="fixed top-0 left-0 w-full h-full overflow-hidden z-0 flex flex-col justify-center items-center">
+        {/* Interactive Particle Background */}
+        <ParticleBackground />
+
+        {/* Deep blue horizon glow (pointer-events-none so it doesn't block particles) */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vw] h-[80vh] max-h-[800px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-600/20 via-slate-900/10 to-transparent blur-[100px] pointer-events-none" />
         
         {/* Subtle grid pattern overlay for texture */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black_10%,transparent_80%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black_10%,transparent_80%)] pointer-events-none" />
       </div>
 
       {/* Header */}
