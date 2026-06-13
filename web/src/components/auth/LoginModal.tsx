@@ -211,28 +211,25 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           />
           
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: 'spring', bounce: 0.3, duration: 0.6 }}
-            className="relative w-full max-w-md md:max-w-4xl bg-white/80 border border-white backdrop-blur-3xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col md:flex-row"
+            initial={{ opacity: 0, scale: 0.95, filter: 'blur(20px)' }}
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, scale: 0.95, filter: 'blur(20px)' }}
+            transition={{ duration: 1.2, ease: [0.19, 1.0, 0.22, 1.0] }}
+            className="relative w-full max-w-md md:max-w-4xl bg-white/40 border border-white/60 backdrop-blur-3xl rounded-[40px] shadow-[0_30px_100px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col md:flex-row"
           >
             {/* Left side: Branding / Graphic (Hidden on mobile) */}
-            <div className="hidden md:flex flex-col justify-between w-1/2 p-10 lg:p-12 bg-gradient-to-br from-orange-50 to-amber-50 border-r border-orange-100/50 relative">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-white/40 via-transparent to-transparent opacity-80" />
+            <div className="hidden md:flex flex-col justify-between w-1/2 p-10 lg:p-14 relative bg-black/5">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent opacity-80 mix-blend-overlay" />
               <div className="relative z-10">
-                <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center border border-orange-100 shadow-sm mb-8">
-                  <LoginSparkle className="w-8 h-8" />
-                </div>
-                <h2 className="text-3xl lg:text-4xl font-semibold text-slate-800 mb-4 leading-[1.3] tracking-tight">
-                  重新连接<br />你的<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">内在力量</span>
+                <h2 className="text-4xl font-serif text-slate-800 mb-6 leading-[1.3] tracking-wider drop-shadow-sm">
+                  Reconnect<br />with your<br /><span className="text-slate-900 font-medium">Inner Self</span>
                 </h2>
-                <p className="text-slate-500 text-sm leading-relaxed max-w-[280px]">
-                  在这个温暖、无评判的空间里，整理思绪，重获内心的平静与从容。
+                <p className="text-slate-600/80 text-sm leading-relaxed max-w-[280px] font-light tracking-wide">
+                  A sanctuary designed without borders. Step into a space of complete psychological safety and let your thoughts flow naturally.
                 </p>
               </div>
-              <div className="relative z-10 text-xs text-slate-400">
-                © 2026 RETHINK.
+              <div className="relative z-10 text-[10px] tracking-widest uppercase text-slate-500/60 font-medium">
+                © 2026 Interactive Art Installation
               </div>
             </div>
 
@@ -245,33 +242,30 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="md:hidden flex flex-col items-center mb-8">
-                <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center border border-orange-100 shadow-sm mb-4">
-                  <LoginSparkle className="w-7 h-7" />
-                </div>
-                <h2 className="text-2xl font-semibold text-slate-800 text-center">
-                  欢迎回来
+              <div className="md:hidden flex flex-col items-center mb-10">
+                <h2 className="text-2xl font-serif text-slate-800 tracking-wider">
+                  Sanctuary
                 </h2>
               </div>
 
-              <div className="flex bg-slate-100/50 rounded-full p-1.5 border border-slate-200/50 mb-6 relative z-10">
+              <div className="flex bg-white/20 rounded-full p-1 border border-white/40 mb-8 relative z-10 backdrop-blur-md shadow-inner">
                 <button
                   type="button"
-                  className={`flex-1 text-center py-2 text-[14px] font-medium rounded-full transition-all duration-300 ${
-                    !isSignUp ? 'bg-white shadow-sm text-slate-800 border border-slate-200/50' : 'text-slate-500 hover:text-slate-700'
+                  className={`flex-1 text-center py-2.5 text-xs tracking-widest uppercase font-medium rounded-full transition-all duration-500 ${
+                    !isSignUp ? 'bg-white/70 shadow-sm text-slate-900 border border-white/50' : 'text-slate-600/70 hover:text-slate-900 hover:bg-white/30'
                   }`}
                   onClick={() => { setIsSignUp(false); setError(null); }}
                 >
-                  登录已有账号
+                  Sign In
                 </button>
                 <button
                   type="button"
-                  className={`flex-1 text-center py-2 text-[14px] font-medium rounded-full transition-all duration-300 ${
-                    isSignUp ? 'bg-white shadow-sm text-slate-800 border border-slate-200/50' : 'text-slate-500 hover:text-slate-700'
+                  className={`flex-1 text-center py-2.5 text-xs tracking-widest uppercase font-medium rounded-full transition-all duration-500 ${
+                    isSignUp ? 'bg-white/70 shadow-sm text-slate-900 border border-white/50' : 'text-slate-600/70 hover:text-slate-900 hover:bg-white/30'
                   }`}
                   onClick={() => { setIsSignUp(true); setError(null); }}
                 >
-                  新用户注册
+                  Enter Code
                 </button>
               </div>
 
@@ -284,86 +278,72 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label className="block text-[13px] font-medium text-slate-600 mb-1.5 pl-1">
-                    用户名
-                  </label>
                   <input
                     type="text"
                     required
                     disabled={loading}
-                    placeholder="请输入内测用户名"
+                    placeholder="Username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full bg-white hover:bg-slate-50 focus:bg-white border border-slate-200 focus:border-orange-400/50 text-slate-800 placeholder-slate-400 text-sm rounded-2xl py-3.5 px-4 outline-none transition-all duration-200 shadow-sm"
+                    className="w-full bg-white/30 focus:bg-white/60 border-b border-white/50 focus:border-slate-800/40 text-slate-900 placeholder-slate-500/60 text-sm py-4 px-2 outline-none transition-all duration-500 shadow-none rounded-none font-light tracking-wide"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[13px] font-medium text-slate-600 mb-1.5 pl-1">
-                    密码
-                  </label>
                   <input
                     type="password"
                     required
                     disabled={loading}
-                    placeholder="请输入密码（最少 6 位）"
+                    placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-white hover:bg-slate-50 focus:bg-white border border-slate-200 focus:border-orange-400/50 text-slate-800 placeholder-slate-400 text-sm rounded-2xl py-3.5 px-4 outline-none transition-all duration-200 shadow-sm"
+                    className="w-full bg-white/30 focus:bg-white/60 border-b border-white/50 focus:border-slate-800/40 text-slate-900 placeholder-slate-500/60 text-sm py-4 px-2 outline-none transition-all duration-500 shadow-none rounded-none font-light tracking-wide"
                   />
                 </div>
 
                 {isSignUp && (
-                  <div className="animate-slide-down">
-                    <label className="block text-[13px] font-medium text-slate-600 mb-1.5 pl-1">
-                      内测邀请密钥
-                    </label>
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                     <input
                       type="text"
                       required
                       disabled={loading}
-                      placeholder="请输入您的内测邀请码"
+                      placeholder="Invitation Key"
                       value={invitationCode}
                       onChange={(e) => setInvitationCode(e.target.value)}
-                      className="w-full bg-white hover:bg-slate-50 focus:bg-white border border-slate-200 focus:border-orange-400/50 text-slate-800 placeholder-slate-400 text-sm rounded-2xl py-3.5 px-4 outline-none transition-all duration-200 shadow-sm"
+                      className="w-full bg-white/30 focus:bg-white/60 border-b border-white/50 focus:border-slate-800/40 text-slate-900 placeholder-slate-500/60 text-sm py-4 px-2 outline-none transition-all duration-500 shadow-none rounded-none font-light tracking-wide"
                     />
-                  </div>
+                  </motion.div>
                 )}
 
-                <div className="flex justify-center py-2.5">
-                  <div id="turnstile-container-modal" className="relative overflow-hidden min-h-[65px] flex items-center justify-center"></div>
+                <div className="flex justify-center py-2">
+                  <div id="turnstile-container-modal" className="relative overflow-hidden min-h-[65px] flex items-center justify-center opacity-80 mix-blend-multiply filter grayscale"></div>
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-medium text-sm py-4 rounded-2xl transition-all duration-300 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="group relative w-full bg-slate-900/90 hover:bg-slate-900 text-white font-light tracking-widest text-xs uppercase py-5 rounded-full transition-all duration-700 disabled:opacity-40 overflow-hidden"
                 >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
                   {loading ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      <span>验证处理中...</span>
-                    </>
+                    <span className="animate-pulse">Authenticating...</span>
                   ) : (
-                    <span>{isSignUp ? '立即推开门进入' : '安全验证并登录'}</span>
+                    <span>{isSignUp ? 'Materialize' : 'Enter Sanctuary'}</span>
                   )}
                 </button>
               </form>
 
-              <div className="mt-4">
+              <div className="mt-6 text-center">
                 <button
                   type="button"
                   onClick={handleTestLogin}
                   disabled={loading}
-                  className="w-full bg-white hover:bg-slate-50 text-slate-600 font-medium text-sm py-3.5 rounded-2xl transition-all duration-300 border border-slate-200 hover:border-slate-300 flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm"
+                  className="text-[11px] tracking-widest uppercase text-slate-600/60 hover:text-slate-900 transition-colors font-medium relative group"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-70"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                  免密一键体验测试账号
+                  <span className="relative z-10">Guest Access</span>
+                  <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-slate-900/40 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500" />
                 </button>
               </div>
             </div>
