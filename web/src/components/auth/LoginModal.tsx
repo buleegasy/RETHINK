@@ -228,7 +228,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   重新连接<br />你的<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-cyan-300">内在力量</span>
                 </h2>
                 <p className="text-white/60 text-sm leading-relaxed max-w-[280px]">
-                  专属的 AI 心理陪伴。采用军工级加密保护您的对话隐私，随时随地开启心灵重塑。
+                  在这个安全、无评判的空间里，整理思绪，重获内心的平静与力量。
                 </p>
               </div>
               <div className="relative z-10 text-xs text-white/30">
