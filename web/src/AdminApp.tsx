@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { KeyRound, LogOut, Plus, Trash2, Edit2, Check, X, ShieldAlert, Key } from 'lucide-react';
-import { ReThinkLogo } from './components/ReThinkLogo';
+import { ReThinkLogo } from './components/layout/ReThinkLogo';
 
 // Config
 const API_BASE = import.meta.env.VITE_API_URL

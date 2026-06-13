@@ -15,7 +15,6 @@ export function useChat() {
     setIsStreaming,
     setSessionId,
     selectedModel,
-    
   } = useChatStore();
 
   const sendMessage = async (
