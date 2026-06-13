@@ -52,6 +52,7 @@ export default {
       fontFamily: {
         sans: ['"Google Sans Text"', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
         display: ['"Google Sans"', '"Google Sans Text"', 'Inter', 'system-ui', 'sans-serif'],
+        serif: ['"Playfair Display"', 'serif'],
       },
       borderRadius: {
         'bubble': '32px',

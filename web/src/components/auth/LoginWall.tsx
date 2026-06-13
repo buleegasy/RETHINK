@@ -1,442 +1,215 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useChatStore } from '../../store/chatStore';
-import { useAuthStore } from '../../store/authStore';
-import type { AuthResponse } from '../../types';
-
-declare global {
-  interface Window {
-    turnstile?: any;
-  }
-}
-
-/** Sparkle SVG logo matching Gemini Welcome */
-const LoginSparkle = ({ className = '' }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M14 0C14 7.732 7.732 14 0 14C7.732 14 14 20.268 14 28C14 20.268 20.268 14 28 14C20.268 14 14 7.732 14 0Z" fill="url(#login-grad)"/>
-    <defs>
-      <linearGradient id="login-grad" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#6366F1"/>
-        <stop offset="1" stopColor="#06B6D4"/>
-      </linearGradient>
-    </defs>
-  </svg>
-);
+import { LoginModal } from './LoginModal';
+import { ReThinkLogo } from '../layout/ReThinkLogo';
+import { ShieldCheck, Brain, Clock, ChevronRight } from 'lucide-react';
 
 export function LoginWall() {
-  const login = useAuthStore(state => state.login);
-  const sessionId = useChatStore(state => state.sessionId);
-
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [invitationCode, setInvitationCode] = useState('');
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Dynamically load Cloudflare Turnstile script & initialize
-  useEffect(() => {
-    let active = true;
-    
-    const initTurnstile = () => {
-      if (!active) return;
-      if (window.turnstile) {
-        try {
-          const container = document.getElementById('turnstile-container');
-          if (container) {
-            container.innerHTML = ''; // Clear previous instances
-            setTurnstileToken(null);
-            window.turnstile.render('#turnstile-container', {
-              sitekey: '0x4AAAAAADgdD3JygbJ4oXZi', // Production Turnstile sitekey
-              callback: (token: string) => {
-                setTurnstileToken(token);
-              },
-              'error-callback': () => {
-                console.error('Turnstile widget failed to render.');
-              }
-            });
-          }
-        } catch (e) {
-          console.warn('Turnstile rendering deferred', e);
-        }
-      }
-    };
-
-    if (!window.turnstile) {
-      const script = document.createElement('script');
-      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-      script.async = true;
-      script.defer = true;
-      document.body.appendChild(script);
-      script.onload = initTurnstile;
-    } else {
-      setTimeout(initTurnstile, 50); // Small timeout to ensure DOM mounted
-    }
-
-    return () => {
-      active = false;
-    };
-  }, [isSignUp]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!username.trim() || !password.trim()) {
-      setError('请输入用户名和密码');
-      return;
-    }
-
-    if (isSignUp && !invitationCode.trim()) {
-      setError('请输入内测邀请密钥');
-      return;
-    }
-
-    if (!turnstileToken) {
-      setError('请完成人机安全校验');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    const API_BASE = import.meta.env.VITE_API_URL || '';
-    const url = isSignUp ? `${API_BASE}/api/auth/register` : `${API_BASE}/api/auth/login`;
-    const payload = isSignUp
-      ? { username: username.trim(), password, invitationCode: invitationCode.trim(), turnstileToken }
-      : { username: username.trim(), password, turnstileToken };
-
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      const data: AuthResponse = await res.json();
-
-      if (!res.ok || !data.success) {
-        setError(data.error || '身份验证失败');
-        setLoading(false);
-        // Reset turnstile to force a new check on failure
-        if (window.turnstile) window.turnstile.reset('#turnstile-container');
-        setTurnstileToken(null);
-        return;
-      }
-
-      // Login success
-      login(data.user, data.token);
-
-      // Perform session binding if a session already exists locally
-      if (sessionId) {
-        try {
-          await fetch(`${API_BASE}/api/auth/bind-session`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${data.token}`
-            },
-            body: JSON.stringify({ sessionId })
-          });
-        } catch (bindErr) {
-          console.warn('Failed to bind active session on login:', bindErr);
-        }
-      }
-    } catch (err: any) {
-      console.error('Submit auth error:', err);
-      setError('网络请求失败，请检查连接');
-      if (window.turnstile) window.turnstile.reset('#turnstile-container');
-      setTurnstileToken(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleTestLogin = async () => {
-    setLoading(true);
-    setError(null);
-    const API_BASE = import.meta.env.VITE_API_URL || '';
-
-    try {
-      const res = await fetch(`${API_BASE}/api/auth/test-login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      const data: AuthResponse = await res.json();
-
-      if (!res.ok || !data.success) {
-        setError(data.error || '测试账号登录失败');
-        setLoading(false);
-        return;
-      }
-
-      login(data.user, data.token);
-
-      if (sessionId) {
-        try {
-          await fetch(`${API_BASE}/api/auth/bind-session`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${data.token}`
-            },
-            body: JSON.stringify({ sessionId })
-          });
-        } catch (bindErr) {
-          console.warn('Failed to bind active session on test login:', bindErr);
-        }
-      }
-    } catch (err: any) {
-      console.error('Test login error:', err);
-      setError('网络请求失败，请检查连接');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   return (
-    <div className="fixed inset-0 z-50 flex bg-surface-dim/80 backdrop-blur-md overflow-hidden">
+    <div className="fixed inset-0 z-50 flex flex-col bg-[#050505] text-white overflow-y-auto overflow-x-hidden selection:bg-indigo-500/30">
       
-      {/* Left Section (Visuals/Branding) - Hidden on mobile, visible on lg screens */}
-      <div className="hidden lg:flex flex-col flex-1 relative items-center justify-center overflow-hidden bg-surface">
-        {/* Abstract animated background elements (AmbientGlow inspired) */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-          {/* Cloud 1: Deep Sky Blue */}
-          <motion.div
-            className="absolute top-[-10%] left-[5%] w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] rounded-full"
-            style={{
-              background: 'radial-gradient(circle, rgba(66, 133, 244, 0.25) 0%, rgba(66, 133, 244, 0) 70%)',
-              filter: 'blur(70px)',
-            }}
-            animate={{
-              x: [0, 150, -100, 0],
-              y: [0, -80, 100, 0],
-              scale: [1, 1.3, 0.8, 1],
-            }}
-            transition={{
-              duration: 12,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
+      {/* Absolute Ambient Background Glows */}
+      <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <motion.div
+          className="absolute top-[-10%] left-[10%] w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0) 70%)',
+            filter: 'blur(90px)',
+          }}
+          animate={{ x: [0, 100, -50, 0], y: [0, -50, 50, 0], scale: [1, 1.1, 0.9, 1] }}
+          transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute bottom-[-10%] right-[5%] w-[55vw] h-[55vw] max-w-[700px] max-h-[700px] rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(6, 182, 212, 0.12) 0%, rgba(6, 182, 212, 0) 70%)',
+            filter: 'blur(90px)',
+          }}
+          animate={{ x: [0, -80, 60, 0], y: [0, 50, -40, 0], scale: [1, 0.85, 1.15, 1] }}
+          transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+        />
+        <motion.div
+          className="absolute top-[30%] left-[40%] w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(168, 85, 247, 0.10) 0%, rgba(168, 85, 247, 0) 70%)',
+            filter: 'blur(80px)',
+          }}
+          animate={{ x: [0, 50, -50, 0], y: [0, 50, -50, 0], scale: [1, 1.2, 0.8, 1] }}
+          transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+        />
+      </div>
 
-          {/* Cloud 2: Mint Cyan */}
-          <motion.div
-            className="absolute top-[5%] right-[0%] w-[55vw] h-[55vw] max-w-[700px] max-h-[700px] rounded-full"
-            style={{
-              background: 'radial-gradient(circle, rgba(0, 188, 212, 0.20) 0%, rgba(0, 188, 212, 0) 70%)',
-              filter: 'blur(70px)',
-            }}
-            animate={{
-              x: [0, -120, 90, 0],
-              y: [0, 100, -80, 0],
-              scale: [1, 0.8, 1.25, 1],
-            }}
-            transition={{
-              duration: 15,
-              repeat: Infinity,
-              ease: 'easeInOut',
-              delay: 0.5,
-            }}
-          />
-
-          {/* Cloud 3: Coral Peach */}
-          <motion.div
-            className="absolute top-[15%] left-[25%] w-[65vw] h-[65vw] max-w-[900px] max-h-[900px] rounded-full"
-            style={{
-              background: 'radial-gradient(circle, rgba(234, 67, 53, 0.15) 0%, rgba(234, 67, 53, 0) 70%)',
-              filter: 'blur(90px)',
-            }}
-            animate={{
-              x: [0, 100, -130, 0],
-              y: [0, -90, 110, 0],
-              scale: [1, 1.2, 0.85, 1],
-            }}
-            transition={{
-              duration: 18,
-              repeat: Infinity,
-              ease: 'easeInOut',
-              delay: 1,
-            }}
-          />
+      {/* Header */}
+      <header className="relative z-10 w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <ReThinkLogo />
         </div>
+        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-white/70">
+          <a href="#" className="hover:text-white transition-colors">Services</a>
+          <a href="#" className="hover:text-white transition-colors">Therapists</a>
+          <a href="#" className="hover:text-white transition-colors">Journal</a>
+          <a href="#" className="hover:text-white transition-colors">Pricing</a>
+        </nav>
+        <button 
+          onClick={() => setIsLoginModalOpen(true)}
+          className="px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-sm font-medium transition-all backdrop-blur-md"
+        >
+          Login
+        </button>
+      </header>
+
+      {/* Hero Section */}
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 mt-12 md:mt-24 mb-32">
         
-        {/* Large Decorative Graphic or Typography */}
-        <div className="relative z-10 flex flex-col items-center text-center px-12 max-w-2xl">
-          <div className="w-24 h-24 bg-surface-container rounded-[28px] flex items-center justify-center border border-outline-variant/30 shadow-xl mb-8 transform hover:scale-105 transition-transform duration-500">
-            <LoginSparkle className="w-12 h-12" />
+        {/* Floating Progress Card (Left) */}
+        <motion.div 
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2, duration: 0.8, ease: "easeOut" }}
+          className="hidden lg:block absolute left-[5%] top-[20%] w-[260px] bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xl shadow-2xl"
+        >
+          <h3 className="text-sm font-medium text-white/80 mb-4">Your Progress</h3>
+          <div className="space-y-3 text-xs text-white/60">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center"><Clock className="w-3 h-3 text-indigo-300" /></div>
+              <span>Session 8: <span className="text-white">Resilience</span></span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full bg-cyan-500/20 flex items-center justify-center"><Brain className="w-3 h-3 text-cyan-300" /></div>
+              <span>Therapist: <span className="text-white">AI Agent</span></span>
+            </div>
+            <div className="pt-3 border-t border-white/10 mt-2">
+              <div className="flex justify-between mb-1.5">
+                <span>Weekly Goal</span>
+                <span className="text-indigo-300">80%</span>
+              </div>
+              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 w-[80%] rounded-full" />
+              </div>
+            </div>
           </div>
-          <h1 className="text-[44px] leading-tight font-display font-bold text-transparent bg-clip-text bg-gradient-to-br from-indigo-400 to-cyan-400 mb-6 tracking-tight">
-            重塑认知<br />遇见更好的自己
+        </motion.div>
+
+        {/* Floating Insights Card (Right) */}
+        <motion.div 
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
+          className="hidden lg:block absolute right-[5%] top-[15%] w-[280px] bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xl shadow-2xl"
+        >
+          <h3 className="text-sm font-medium text-white/80 mb-4">AI-Powered Insights</h3>
+          <div className="mb-4">
+            <div className="text-xs text-white/60 mb-1">Mood Trend: <span className="text-cyan-300">Stabilizing</span></div>
+            {/* Mock Chart Area */}
+            <div className="h-16 mt-2 flex items-end gap-1">
+              {[40, 30, 50, 45, 60, 55, 70].map((h, i) => (
+                <div key={i} className="flex-1 bg-gradient-to-t from-cyan-500/20 to-cyan-400/80 rounded-sm" style={{ height: `${h}%` }} />
+              ))}
+            </div>
+            <div className="flex justify-between text-[10px] text-white/40 mt-1">
+              <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-green-400 bg-green-400/10 px-3 py-2 rounded-lg">
+            <ShieldCheck className="w-4 h-4" /> Daily Check-in completed
+          </div>
+        </motion.div>
+
+        {/* Central Hero Typography */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="text-center max-w-4xl mx-auto"
+        >
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-bold leading-[1.1] tracking-tight mb-8">
+            <span className="block text-white">RETHINK.</span>
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-white to-cyan-300">RECONNECT.</span>
+            <span className="block text-white">RESTORE.</span>
           </h1>
-          <p className="text-lg text-on-surface-variant leading-relaxed max-w-md">
-            RE-THINK 是一个基于认知行为疗法 (CBT) 的智能干预空间，帮助青少年在安全的数字化环境中完成情绪疏导与认知重建。
-          </p>
-        </div>
-      </div>
-
-      {/* Right Section (Login Form) - Full width on mobile, fixed width on lg screens */}
-      <div className="w-full lg:w-[480px] xl:w-[540px] flex items-center justify-center px-4 py-8 lg:px-12 bg-transparent lg:bg-surface-container-low/50 lg:border-l border-outline-variant/30 overflow-y-auto relative shadow-2xl">
-        
-        {/* Mobile-only background glows */}
-        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full bg-indigo-500/10 blur-[100px] pointer-events-none lg:hidden" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-cyan-500/10 blur-[100px] pointer-events-none lg:hidden" />
-
-        {/* Form Container */}
-        <div className="relative w-full max-w-md bg-surface/65 lg:bg-transparent lg:border-none lg:shadow-none lg:backdrop-blur-none border border-outline-variant/30 backdrop-blur-2xl rounded-[32px] shadow-2xl p-8 md:p-10 transition-all duration-300">
           
-          {/* Header */}
-          <div className="flex flex-col items-center mb-8">
-            <div className="lg:hidden w-16 h-16 bg-surface-container rounded-[22px] flex items-center justify-center border border-outline-variant/30 shadow-sm mb-4 transform hover:scale-105 transition-transform duration-300">
-              <LoginSparkle className="w-9 h-9" />
+          <p className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto leading-relaxed mb-10 font-sans">
+            Empowering your journey with personalized, AI-driven mental health counseling based on Cognitive Behavioral Therapy (CBT).
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button 
+              onClick={() => setIsLoginModalOpen(true)}
+              className="group relative px-8 py-4 bg-white text-black rounded-full font-semibold text-sm hover:scale-105 transition-all flex items-center gap-2 overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-100 to-cyan-100 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <span className="relative z-10">Get Started Now</span>
+              <ChevronRight className="relative z-10 w-4 h-4" />
+            </button>
+            <button className="px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-full font-medium text-sm transition-all backdrop-blur-md">
+              Learn More
+            </button>
+          </div>
+        </motion.div>
+      </main>
+
+      {/* Features Section */}
+      <section className="relative z-10 border-t border-white/5 bg-black/20 backdrop-blur-lg py-24">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-serif font-semibold mb-4">Why RETHINK AI Counseling?</h2>
+            <p className="text-white/50 max-w-2xl mx-auto">Experience personalized care with advanced AI analysis and CBT methodologies. Available 24/7.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white/5 border border-white/5 p-8 rounded-[32px] text-center hover:bg-white/[0.07] transition-colors">
+              <div className="w-14 h-14 mx-auto bg-indigo-500/20 rounded-2xl flex items-center justify-center mb-6 border border-indigo-500/30 shadow-[0_0_30px_rgba(99,102,241,0.2)]">
+                <Clock className="w-6 h-6 text-indigo-300" />
+              </div>
+              <h3 className="text-lg font-semibold mb-3">24/7 AI Support</h3>
+              <p className="text-sm text-white/50 leading-relaxed">
+                Your AI companion is always available, providing immediate emotional support and guided CBT exercises whenever you need them.
+              </p>
             </div>
-            <h2 className="text-2xl lg:text-3xl font-display font-semibold text-on-surface text-center">
-              欢迎回来
-            </h2>
-            <p className="text-sm text-on-surface-variant mt-2 text-center px-2 leading-relaxed">
-              请登录或注册以继续您的旅程
-            </p>
-          </div>
-
-        {/* Custom Tab Selector */}
-        <div className="flex bg-surface-container-high/60 rounded-full p-1.5 border border-outline-variant/20 mb-6 relative z-10">
-          <button
-            type="button"
-            className={`flex-1 text-center py-2 text-[14px] font-medium rounded-full transition-all duration-300 ${
-              !isSignUp
-                ? 'bg-surface shadow-sm text-on-surface'
-                : 'text-on-surface-variant hover:text-on-surface'
-            }`}
-            onClick={() => {
-              setIsSignUp(false);
-              setError(null);
-            }}
-          >
-            登录已有账号
-          </button>
-          <button
-            type="button"
-            className={`flex-1 text-center py-2 text-[14px] font-medium rounded-full transition-all duration-300 ${
-              isSignUp
-                ? 'bg-surface shadow-sm text-on-surface'
-                : 'text-on-surface-variant hover:text-on-surface'
-            }`}
-            onClick={() => {
-              setIsSignUp(true);
-              setError(null);
-            }}
-          >
-            新用户注册
-          </button>
-        </div>
-
-        {/* Error Alert Panel */}
-        {error && (
-          <div className="mb-5 bg-error-container/40 border border-error/20 text-error text-[13px] px-4 py-3 rounded-2xl flex items-start gap-2.5 animate-slide-up">
-            <svg className="w-4 h-4 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <span className="leading-relaxed">{error}</span>
-          </div>
-        )}
-
-        {/* Credentials Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-[13px] font-medium text-on-surface-variant mb-1.5 pl-1">
-              用户名
-            </label>
-            <input
-              type="text"
-              required
-              disabled={loading}
-              placeholder="请输入内测用户名"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full bg-surface-container/60 hover:bg-surface-container-high/60 focus:bg-surface-container-high border border-outline-variant/30 focus:border-primary/50 text-on-surface text-sm rounded-2xl py-3.5 px-4 outline-none transition-all duration-200"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[13px] font-medium text-on-surface-variant mb-1.5 pl-1">
-              密码
-            </label>
-            <input
-              type="password"
-              required
-              disabled={loading}
-              placeholder="请输入密码（最少 6 位）"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-surface-container/60 hover:bg-surface-container-high/60 focus:bg-surface-container-high border border-outline-variant/30 focus:border-primary/50 text-on-surface text-sm rounded-2xl py-3.5 px-4 outline-none transition-all duration-200"
-            />
-          </div>
-
-          {/* Invitation Code (Signup Only) */}
-          {isSignUp && (
-            <div className="animate-slide-down">
-              <label className="block text-[13px] font-medium text-on-surface-variant mb-1.5 pl-1">
-                内测邀请密钥
-              </label>
-              <input
-                type="text"
-                required
-                disabled={loading}
-                placeholder="请输入您的内测邀请码"
-                value={invitationCode}
-                onChange={(e) => setInvitationCode(e.target.value)}
-                className="w-full bg-surface-container/60 hover:bg-surface-container-high/60 focus:bg-surface-container-high border border-outline-variant/30 focus:border-primary/50 text-on-surface text-sm rounded-2xl py-3.5 px-4 outline-none transition-all duration-200"
-              />
+            
+            <div className="bg-white/5 border border-white/5 p-8 rounded-[32px] text-center hover:bg-white/[0.07] transition-colors">
+              <div className="w-14 h-14 mx-auto bg-cyan-500/20 rounded-2xl flex items-center justify-center mb-6 border border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.2)]">
+                <Brain className="w-6 h-6 text-cyan-300" />
+              </div>
+              <h3 className="text-lg font-semibold mb-3">Expert CBT Framework</h3>
+              <p className="text-sm text-white/50 leading-relaxed">
+                Built on proven Cognitive Behavioral Therapy principles, helping you identify, challenge, and restructure negative thought patterns.
+              </p>
             </div>
-          )}
 
-          {/* Cloudflare Turnstile Challenge Container */}
-          <div className="flex justify-center py-2.5">
-            <div id="turnstile-container" className="relative overflow-hidden min-h-[65px] flex items-center justify-center"></div>
+            <div className="bg-white/5 border border-white/5 p-8 rounded-[32px] text-center hover:bg-white/[0.07] transition-colors">
+              <div className="w-14 h-14 mx-auto bg-purple-500/20 rounded-2xl flex items-center justify-center mb-6 border border-purple-500/30 shadow-[0_0_30px_rgba(168,85,247,0.2)]">
+                <ShieldCheck className="w-6 h-6 text-purple-300" />
+              </div>
+              <h3 className="text-lg font-semibold mb-3">Secure & Confidential</h3>
+              <p className="text-sm text-white/50 leading-relaxed">
+                Your conversations are completely private. We employ enterprise-grade encryption and privacy sandboxing to protect your data.
+              </p>
+            </div>
           </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white font-medium text-sm py-4 rounded-2xl transition-all duration-300 shadow-md shadow-indigo-500/10 hover:shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <>
-                <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                <span>验证处理中...</span>
-              </>
-            ) : (
-              <span>{isSignUp ? '立即注册并进入' : '安全验证并登录'}</span>
-            )}
-          </button>
-        </form>
-
-        {/* Test Account Button */}
-        <div className="mt-4">
-          <button
-            type="button"
-            onClick={handleTestLogin}
-            disabled={loading}
-            className="w-full bg-surface-container/60 hover:bg-surface-container-high/80 text-on-surface-variant font-medium text-sm py-3.5 rounded-2xl transition-all duration-300 border border-outline-variant/30 hover:border-outline-variant/60 flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-70"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            免密一键体验测试账号
-          </button>
         </div>
+      </section>
 
-        {/* Beta Notice Footer */}
-        <p className="text-[11px] text-on-surface-dim mt-6 text-center leading-relaxed">
-          内测阶段，系统数据采用 Cloudflare D1 隐私沙盒托管。<br />
-          如果遇到问题，请联系系统管理员。
-        </p>
-
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-white/10 py-8 text-center text-xs text-white/40">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between">
+          <div className="flex items-center gap-4 mb-4 md:mb-0">
+            <a href="#" className="hover:text-white transition-colors">Services</a>
+            <a href="#" className="hover:text-white transition-colors">Therapists</a>
+            <a href="#" className="hover:text-white transition-colors">Pricing</a>
+            <a href="#" className="hover:text-white transition-colors">Resources</a>
+          </div>
+          <p>© 2026 RETHINK. All Rights Reserved.</p>
         </div>
-      </div>
+      </footer>
+
+      {/* Auth Modal */}
+      <LoginModal 
+        isOpen={isLoginModalOpen} 
+        onClose={() => setIsLoginModalOpen(false)} 
+      />
     </div>
   );
 }
