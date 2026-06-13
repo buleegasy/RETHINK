@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { LoginModal } from './LoginModal';
 import { ReThinkLogo } from '../layout/ReThinkLogo';
-import { LiquidBackground } from '../layout/LiquidBackground';
+import { SunlightBackground } from '../layout/SunlightBackground';
 import { ChevronRight } from 'lucide-react';
 
 export function LoginWall() {
@@ -37,7 +37,7 @@ export function LoginWall() {
     <div className="fixed inset-0 z-50 flex flex-col bg-[#FAF9F6] text-slate-800 overflow-y-auto overflow-x-hidden selection:bg-orange-500/20">
       
       {/* Background */}
-      <LiquidBackground />
+      <SunlightBackground />
 
       {/* Header */}
       <header className="relative z-10 w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
