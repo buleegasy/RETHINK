@@ -8,6 +8,31 @@ import { ChevronRight } from 'lucide-react';
 export function LoginWall() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
+  const titleText = "重塑认知 遇见更好的自己";
+  const titleLetters = Array.from(titleText);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.04, delayChildren: 0.3 },
+    },
+  };
+
+  const letterVariants = {
+    hidden: { opacity: 0, y: 30, rotateX: -90 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      rotateX: 0,
+      transition: {
+        type: "spring",
+        damping: 14,
+        stiffness: 150,
+      },
+    },
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-[#FAF9F6] text-slate-800 overflow-y-auto overflow-x-hidden selection:bg-orange-500/20">
       
@@ -44,10 +69,32 @@ export function LoginWall() {
             全新温情升级 · 随时倾听
           </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold leading-[1.2] tracking-tight mb-8">
-            <span className="block font-serif text-slate-800 mb-2 md:mb-4 tracking-normal drop-shadow-sm">RETHINK.</span>
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-500 to-orange-400 font-sans font-semibold pb-1">重塑认知 遇见更好的自己</span>
-          </h1>
+          <motion.h1 
+            className="text-4xl md:text-5xl lg:text-7xl font-bold leading-[1.2] tracking-tight mb-8 perspective-1000"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.span 
+              className="block font-serif text-slate-800 mb-2 md:mb-4 tracking-normal drop-shadow-sm"
+              initial={{ opacity: 0, filter: "blur(10px)", y: 20 }}
+              animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+            >
+              RETHINK.
+            </motion.span>
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-500 to-orange-400 font-sans font-semibold pb-1 flex justify-center space-x-[0.02em]">
+              {titleLetters.map((letter, index) => (
+                <motion.span 
+                  key={index} 
+                  variants={letterVariants}
+                  className={letter === " " ? "w-3 md:w-5" : "inline-block origin-bottom"}
+                >
+                  {letter}
+                </motion.span>
+              ))}
+            </span>
+          </motion.h1>
           
           <p className="text-base md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed mb-10 font-sans">
             在这里，卸下所有的疲惫与防备。<br className="hidden md:block" />在阳光满溢的安全空间里，与 AI 一起整理思绪，重获平静。
