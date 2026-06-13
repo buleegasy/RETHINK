@@ -229,7 +229,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 <LoginSparkle className="w-9 h-9" />
               </div>
               <h2 className="text-2xl lg:text-3xl font-serif font-semibold text-white text-center">
-                Welcome Back
+                欢迎回来
               </h2>
               <p className="text-sm text-white/60 mt-2 text-center px-2 leading-relaxed">
                 请登录或注册以继续您的旅程
