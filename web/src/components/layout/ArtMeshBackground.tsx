@@ -117,7 +117,7 @@ export function ArtMeshBackground() {
     <div className="absolute inset-0 w-full h-full z-0 overflow-hidden pointer-events-none" style={{ background: '#FFFDF5' }}>
       <Canvas
         camera={{ position: [0, 0, 5], fov: 45 }}
-        dpr={[1, 2]} // Support retina displays beautifully
+        dpr={[1, 1.5]} // Optimized for mobile performance and battery
         gl={{ antialias: true, alpha: false }} // alpha false for better performance when we completely cover the screen
       >
         <BreathingMesh />

@@ -27,7 +27,7 @@ export function LoginWall() {
               initial={{ opacity: 0, y: 10, filter: 'blur(20px)' }}
               animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
               transition={{ duration: 2, ease: "easeOut", delay: 0.2 }}
-              className="font-serif text-6xl md:text-8xl tracking-[0.2em] font-light text-slate-800/90 mb-6 drop-shadow-sm"
+              className="font-serif text-5xl md:text-8xl tracking-[0.2em] font-light text-slate-800/90 mb-6 drop-shadow-sm px-4 text-center"
               style={{ textShadow: '0 4px 24px rgba(255,255,255,0.4)' }}
             >
               RETHINK
@@ -37,7 +37,7 @@ export function LoginWall() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 2, delay: 1.5 }}
-              className="text-slate-600/60 font-light tracking-widest text-sm uppercase mb-16"
+              className="text-slate-600/60 font-light tracking-widest text-xs md:text-sm uppercase mb-16 px-6 text-center leading-relaxed"
             >
               Interactive digital art & psychological safety
             </motion.p>
@@ -50,7 +50,7 @@ export function LoginWall() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsLoginModalOpen(true)}
-              className="pointer-events-auto relative group flex items-center justify-center w-24 h-24 rounded-full"
+              className="pointer-events-auto relative group flex items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-full"
             >
               {/* Glass Orb background */}
               <div className="absolute inset-0 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-[0_0_40px_rgba(255,255,255,0.3)] transition-all duration-700 group-hover:bg-white/20 group-hover:shadow-[0_0_60px_rgba(255,255,255,0.6)]" />
@@ -72,7 +72,7 @@ export function LoginWall() {
           <>
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1 }}
-              className="absolute top-8 left-8 right-8 flex justify-between items-center text-[10px] tracking-[0.3em] uppercase text-slate-800/40 font-medium z-10 pointer-events-none"
+              className="absolute top-6 left-6 right-6 md:top-8 md:left-8 md:right-8 flex justify-between items-center text-[9px] md:text-[10px] tracking-[0.3em] uppercase text-slate-800/40 font-medium z-10 pointer-events-none"
             >
               <span>Exhibition 01</span>
               <span>Sanctuary</span>
@@ -80,7 +80,7 @@ export function LoginWall() {
             
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1 }}
-              className="absolute bottom-8 left-8 right-8 flex justify-center text-[10px] tracking-[0.2em] uppercase text-slate-800/30 font-medium z-10 pointer-events-none"
+              className="absolute bottom-6 left-6 right-6 md:bottom-8 md:left-8 md:right-8 flex justify-center text-[9px] md:text-[10px] tracking-[0.2em] uppercase text-slate-800/30 font-medium z-10 pointer-events-none"
             >
               <span>© 2026 The Mind</span>
             </motion.div>

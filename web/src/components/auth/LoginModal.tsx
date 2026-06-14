@@ -205,7 +205,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 0.95, filter: 'blur(20px)' }}
             transition={{ duration: 1.2, ease: [0.19, 1.0, 0.22, 1.0] }}
-            className="relative w-full max-w-md md:max-w-4xl bg-white/40 border border-white/60 backdrop-blur-3xl rounded-[40px] shadow-[0_30px_100px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col md:flex-row"
+            className="relative w-full max-w-[calc(100vw-2rem)] md:max-w-4xl bg-white/40 border border-white/60 backdrop-blur-3xl rounded-[32px] md:rounded-[40px] shadow-[0_30px_100px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col md:flex-row max-h-[85dvh] overflow-y-auto"
           >
             {/* Left side: Branding / Graphic (Hidden on mobile) */}
             <div className="hidden md:flex flex-col justify-between w-1/2 p-10 lg:p-14 relative bg-black/5">
@@ -224,10 +224,10 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             </div>
 
             {/* Right side: Form */}
-            <div className="w-full md:w-1/2 p-8 md:p-10 lg:p-12 relative flex flex-col justify-center">
+            <div className="w-full md:w-1/2 p-5 sm:p-8 md:p-10 lg:p-12 relative flex flex-col justify-center">
               <button
                 onClick={onClose}
-                className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors z-20"
+                className="absolute top-4 right-4 md:top-6 md:right-6 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors z-20 min-w-[44px] min-h-[44px] flex items-center justify-center"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -268,7 +268,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
                 <div>
                   <input
                     type="text"
@@ -277,7 +277,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                     placeholder="Username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full bg-white/30 focus:bg-white/60 border-b border-white/50 focus:border-slate-800/40 text-slate-900 placeholder-slate-500/60 text-sm py-4 px-2 outline-none transition-all duration-500 shadow-none rounded-none font-light tracking-wide"
+                    className="w-full bg-white/30 focus:bg-white/60 border-b border-white/50 focus:border-slate-800/40 text-slate-900 placeholder-slate-500/60 text-[16px] md:text-sm py-3 md:py-4 px-2 outline-none transition-all duration-500 shadow-none rounded-none appearance-none font-light tracking-wide"
                   />
                 </div>
 
@@ -289,7 +289,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-white/30 focus:bg-white/60 border-b border-white/50 focus:border-slate-800/40 text-slate-900 placeholder-slate-500/60 text-sm py-4 px-2 outline-none transition-all duration-500 shadow-none rounded-none font-light tracking-wide"
+                    className="w-full bg-white/30 focus:bg-white/60 border-b border-white/50 focus:border-slate-800/40 text-slate-900 placeholder-slate-500/60 text-[16px] md:text-sm py-3 md:py-4 px-2 outline-none transition-all duration-500 shadow-none rounded-none appearance-none font-light tracking-wide"
                   />
                 </div>
 
@@ -302,7 +302,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                       placeholder="Invitation Key"
                       value={invitationCode}
                       onChange={(e) => setInvitationCode(e.target.value)}
-                      className="w-full bg-white/30 focus:bg-white/60 border-b border-white/50 focus:border-slate-800/40 text-slate-900 placeholder-slate-500/60 text-sm py-4 px-2 outline-none transition-all duration-500 shadow-none rounded-none font-light tracking-wide"
+                      className="w-full bg-white/30 focus:bg-white/60 border-b border-white/50 focus:border-slate-800/40 text-slate-900 placeholder-slate-500/60 text-[16px] md:text-sm py-3 md:py-4 px-2 outline-none transition-all duration-500 shadow-none rounded-none appearance-none font-light tracking-wide"
                     />
                   </motion.div>
                 )}
@@ -314,7 +314,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="group relative w-full bg-slate-900/90 hover:bg-slate-900 text-white font-light tracking-widest text-xs uppercase py-5 rounded-full transition-all duration-700 disabled:opacity-40 overflow-hidden"
+                  className="group relative w-full bg-slate-900/90 hover:bg-slate-900 text-white font-light tracking-widest text-xs uppercase py-4 md:py-5 rounded-full transition-all duration-700 disabled:opacity-40 overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
                   {loading ? (
