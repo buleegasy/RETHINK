@@ -1,0 +1,20 @@
+# 依赖
+node_modules/
+.wrangler/
+
+# 环境变量（绝不提交！）
+.dev.vars
+worker/.dev.vars
+web/.env.local
+
+# 构建产物
+dist/
+web/dist/
+worker/dist/
+
+# 系统文件
+.DS_Store
+*.log
+
+# TypeScript 编译缓存
+*.tsbuildinfo

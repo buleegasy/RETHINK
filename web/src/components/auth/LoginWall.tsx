@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LoginModal } from './LoginModal';
-import { ArtMeshBackground } from '../layout/ArtMeshBackground';
 
 export function LoginWall() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -9,9 +8,6 @@ export function LoginWall() {
   return (
     <div className="fixed inset-0 z-50 flex flex-col text-slate-800 overflow-hidden selection:bg-amber-500/20 font-sans">
       
-      {/* The Breathing WebGL Art Installation */}
-      <ArtMeshBackground />
-
       {/* Extreme De-UI Aesthetics */}
       <AnimatePresence>
         {!isLoginModalOpen && (

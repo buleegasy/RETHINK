@@ -97,7 +97,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setError(null);
 
     const API_BASE = import.meta.env.VITE_API_URL || '';
-    const url = isSignUp ? `${API_BASE}/api/auth/register` : `${API_BASE}/api/auth/login`;
+    const url = (isSignUp ? `${API_BASE}/api/auth/register` : `${API_BASE}/api/auth/login`).replace(/\/api\/api\//g, '/api/');
     const payload = isSignUp
       ? { username: username.trim(), password, invitationCode: invitationCode.trim(), turnstileToken }
       : { username: username.trim(), password, turnstileToken };
@@ -123,7 +123,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
       if (sessionId) {
         try {
-          await fetch(`${API_BASE}/api/auth/bind-session`, {
+          await fetch(`${API_BASE}/api/auth/bind-session`.replace(/\/api\/api\//g, '/api/'), {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -151,7 +151,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     const API_BASE = import.meta.env.VITE_API_URL || '';
 
     try {
-      const res = await fetch(`${API_BASE}/api/auth/test-login`, {
+      const res = await fetch(`${API_BASE}/api/auth/test-login`.replace(/\/api\/api\//g, '/api/'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -168,7 +168,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
       if (sessionId) {
         try {
-          await fetch(`${API_BASE}/api/auth/bind-session`, {
+          await fetch(`${API_BASE}/api/auth/bind-session`.replace(/\/api\/api\//g, '/api/'), {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
