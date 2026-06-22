@@ -219,7 +219,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 </p>
               </div>
               <div className="relative z-10 text-[10px] tracking-widest uppercase text-slate-500/60 font-medium">
-                © 2026 Interactive Art Installation
+                © 2026 心理疏导智能体
               </div>
             </div>
 

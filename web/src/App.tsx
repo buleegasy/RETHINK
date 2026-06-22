@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 
 import { ChatPanel } from './components/chat/ChatPanel';
 import { InputBar } from './components/chat/InputBar';
-import { ArtMeshBackground } from './components/layout/ArtMeshBackground';
+import { AmbientGlow } from './components/layout/AmbientGlow';
 import { LoginWall } from './components/auth/LoginWall';
 import { SessionSidebar } from './components/layout/SessionSidebar';
 import { useChat } from './hooks/useChat';
@@ -82,7 +82,7 @@ function App() {
 
   return (
     <div className="fixed inset-0 flex w-full h-[100dvh] max-h-[100dvh] overflow-hidden bg-slate-50 text-slate-800 font-sans selection:bg-amber-500/20">
-      <ArtMeshBackground />
+      <AmbientGlow />
 
       {/* 主对话区 */}
       <div className="flex flex-col flex-1 h-full relative z-10">

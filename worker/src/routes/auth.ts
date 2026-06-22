@@ -202,8 +202,8 @@ authRouter.post('/test-login', async (c) => {
   try {
     const username = 'test_guest';
     const email = 'test_guest@rethink.local';
-    const localId = 'test_guest_fixed_uid';
-    const idToken = 'mock-token-test-guest';
+    const localId = 'visitor';
+    const idToken = 'visitor';
 
     return c.json({
       success: true,
