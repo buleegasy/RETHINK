@@ -1,8 +1,8 @@
 import { useState, useCallback, useRef } from 'react';
-
+import { History, Menu } from 'lucide-react';
 import { ChatPanel } from './components/chat/ChatPanel';
 import { InputBar } from './components/chat/InputBar';
-import { AmbientGlow } from './components/layout/AmbientGlow';
+import { ArtMeshBackground } from './components/layout/ArtMeshBackground';
 import { LoginWall } from './components/auth/LoginWall';
 import { SessionSidebar } from './components/layout/SessionSidebar';
 import { useChat } from './hooks/useChat';
@@ -29,6 +29,8 @@ function App() {
   
   // 计算进度
   const stageIndex = fsmState === 'Onboarding' ? 0 : FSM_ORDER.indexOf(fsmState as FSMState) + 1;
+  const stageColor = stageIndex === 0 ? '' : stageIndex === 1 ? 'bg-stage-blue' : stageIndex === 2 ? 'bg-stage-green' : stageIndex === 3 ? 'bg-stage-orange' : 'bg-stage-red';
+  const stageTextColor = stageIndex === 0 ? '' : stageIndex === 1 ? 'text-stage-blue' : stageIndex === 2 ? 'text-stage-green' : stageIndex === 3 ? 'text-stage-orange' : 'text-stage-red';
   
   // 用于记录每一次对话周期内（从上一次发送到本次发送之间）的所有情绪帧
   const emotionHistoryRef = useRef<EmotionResult[]>([]);
@@ -82,7 +84,7 @@ function App() {
 
   return (
     <div className="fixed inset-0 flex w-full h-[100dvh] max-h-[100dvh] overflow-hidden bg-slate-50 text-slate-800 font-sans selection:bg-amber-500/20">
-      <AmbientGlow />
+      <ArtMeshBackground />
 
       {/* 主对话区 */}
       <div className="flex flex-col flex-1 h-full relative z-10">
