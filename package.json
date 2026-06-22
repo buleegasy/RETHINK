@@ -10,7 +10,7 @@
     "dev": "concurrently \"npm run dev:worker\" \"npm run dev:web\"",
     "dev:worker": "npm run dev --workspace=worker",
     "dev:web": "npm run dev --workspace=web",
-    "build": "npm run build --workspace=web",
+    "build": "npm run build --workspace=web && rm -rf dist && cp -r web/dist dist",
     "deploy": "npm run deploy --workspace=worker",
     "test:agent": "node scripts/agent-smoke-test.mjs"
   },
