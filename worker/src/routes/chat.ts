@@ -19,7 +19,8 @@ export const chatRouter = new Hono<HonoSchema>();
 
 chatRouter.post('/', requireAuth, async (c) => {
   const user = c.get('user') as AuthUser;
-  const body = await c.req.json<ChatRequest>();
+  let body: Partial<ChatRequest> = {};
+  try { body = await c.req.json<ChatRequest>(); } catch (e) {}
   const { messages, stream = true, sessionId = crypto.randomUUID(), profile, facialEmotion, model: requestedModel } = body;
 
   if (!messages || messages.length === 0) {

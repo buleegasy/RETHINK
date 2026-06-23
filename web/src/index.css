@@ -88,22 +88,7 @@
     animation: sparkle 6s ease-in-out infinite;
   }
 
-  /* ── Book-like Typography for AI Replies ── */
-  .gemini-prose {
-    @apply prose prose-slate dark:prose-invert max-w-none text-[16px] md:text-[17px] tracking-[0.02em] font-sans;
-  }
-  .gemini-prose p {
-    @apply leading-loose my-6;
-  }
-  .gemini-prose li {
-    @apply my-3 leading-relaxed;
-  }
-  .gemini-prose strong {
-    @apply font-medium text-on-surface;
-  }
-  .gemini-prose h3, .gemini-prose h4 {
-    @apply mt-8 mb-4 font-display font-medium;
-  }
+
 
   /* ── Suggestion Chip (Gemini style) ── */
   .suggestion-chip {

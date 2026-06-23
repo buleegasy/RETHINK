@@ -4,7 +4,7 @@ import { useChatStore } from '../../store/chatStore';
 
 export const AmbientGlow: React.FC<{ forceShow?: boolean }> = ({ forceShow = false }) => {
   const isStreaming = useChatStore(state => state.isStreaming);
-  const show = true; // Make flowing light permanently visible as the default background
+  const show = true;
 
   return (
     <AnimatePresence>

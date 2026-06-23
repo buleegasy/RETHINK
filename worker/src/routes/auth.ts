@@ -40,7 +40,9 @@ async function verifyTurnstile(token: string, secretKey: string, ip?: string): P
  */
 authRouter.post('/register', async (c) => {
   try {
-    const { username, password, invitationCode, turnstileToken } = await c.req.json<any>();
+    let body: any = {};
+    try { body = await c.req.json<any>(); } catch (e) {}
+    const { username, password, invitationCode, turnstileToken } = body;
 
     if (!username || !password || !invitationCode) {
       return c.json({ error: 'Username, password and invitation code are required' }, 400);
@@ -131,7 +133,9 @@ authRouter.post('/register', async (c) => {
  */
 authRouter.post('/login', async (c) => {
   try {
-    const { username, password, turnstileToken } = await c.req.json<any>();
+    let body: any = {};
+    try { body = await c.req.json<any>(); } catch (e) {}
+    const { username, password, turnstileToken } = body;
 
     if (!username || !password) {
       return c.json({ error: 'Username and password are required' }, 400);
@@ -203,7 +207,7 @@ authRouter.post('/test-login', async (c) => {
     const username = 'test_guest';
     const email = 'test_guest@rethink.local';
     const localId = 'test_guest_fixed_uid';
-    const idToken = 'mock-token-test_guest_fixed_uid';
+    const idToken = 'mock-token-test-guest';
 
     return c.json({
       success: true,
@@ -227,7 +231,9 @@ authRouter.post('/test-login', async (c) => {
 authRouter.post('/bind-session', requireAuth, async (c) => {
   try {
     const user = c.get('user') as AuthUser;
-    const { sessionId } = await c.req.json<any>();
+    let body: any = {};
+    try { body = await c.req.json<any>(); } catch (e) {}
+    const { sessionId } = body;
 
     if (!sessionId) {
       return c.json({ error: 'sessionId is required' }, 400);

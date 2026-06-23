@@ -38,7 +38,8 @@ const SYSTEM_PROMPT = `
 
 onboardingRouter.post('/analyze', async (c) => {
   try {
-    const { text } = await c.req.json<{ text: string }>();
+    let text = '';
+    try { const parsed = await c.req.json<{ text: string }>(); text = parsed.text; } catch (e) {}
 
     if (!text || !text.trim()) {
       return c.json({ error: 'Text is required' }, 400);

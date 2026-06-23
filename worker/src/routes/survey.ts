@@ -9,7 +9,8 @@ export const surveyRouter = new Hono<{ Bindings: Env }>();
  */
 surveyRouter.post('/submit', async (c) => {
   try {
-    const body = await c.req.json<any>();
+    let body: any = {};
+    try { body = await c.req.json<any>(); } catch (e) {}
     
     const id = body.respondentId;
     const openFeedback = body.openFeedback || '';

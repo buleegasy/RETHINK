@@ -1,8 +1,9 @@
 import { useState, useCallback, useRef } from 'react';
-import { History, Menu } from 'lucide-react';
+import { motion } from 'framer-motion';
+
 import { ChatPanel } from './components/chat/ChatPanel';
 import { InputBar } from './components/chat/InputBar';
-import { ArtMeshBackground } from './components/layout/ArtMeshBackground';
+import { AmbientGlow } from './components/layout/AmbientGlow';
 import { LoginWall } from './components/auth/LoginWall';
 import { SessionSidebar } from './components/layout/SessionSidebar';
 import { useChat } from './hooks/useChat';
@@ -29,8 +30,6 @@ function App() {
   
   // 计算进度
   const stageIndex = fsmState === 'Onboarding' ? 0 : FSM_ORDER.indexOf(fsmState as FSMState) + 1;
-  const stageColor = stageIndex === 0 ? '' : stageIndex === 1 ? 'bg-stage-blue' : stageIndex === 2 ? 'bg-stage-green' : stageIndex === 3 ? 'bg-stage-orange' : 'bg-stage-red';
-  const stageTextColor = stageIndex === 0 ? '' : stageIndex === 1 ? 'text-stage-blue' : stageIndex === 2 ? 'text-stage-green' : stageIndex === 3 ? 'text-stage-orange' : 'text-stage-red';
   
   // 用于记录每一次对话周期内（从上一次发送到本次发送之间）的所有情绪帧
   const emotionHistoryRef = useRef<EmotionResult[]>([]);
@@ -83,107 +82,118 @@ function App() {
   }, [sendMessage]);
 
   return (
-    <div className="fixed inset-0 flex w-full h-[100dvh] max-h-[100dvh] overflow-hidden bg-slate-50 text-slate-800 font-sans selection:bg-amber-500/20">
-      <ArtMeshBackground />
-
-      {/* 主对话区 */}
-      <div className="flex flex-col flex-1 h-full relative z-10">
-        {/* ── 移动端顶部 Header ── */}
-        <div className="md:hidden flex items-center justify-between pt-[max(env(safe-area-inset-top),12px)] pb-2.5 px-4 shrink-0 z-20 border-b border-slate-300/30">
-          {/* 左侧：Hamburger 菜单 */}
-          <div className="flex items-center w-[80px] justify-start">
-            {isAuthenticated && (
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="text-slate-400 hover:text-slate-800 min-w-[44px] min-h-[44px] flex items-center justify-start transition-colors"
-                aria-label="打开侧边栏"
-              >
-                <span className="font-mono text-[9px] tracking-[0.2em] uppercase">[MENU]</span>
-              </button>
-            )}
-          </div>
-
-          {/* 中间：品牌 */}
-          <div className="flex items-center justify-center flex-1">
-            <h1 className="text-sm font-serif tracking-[0.2em] font-light text-slate-800 uppercase">
-              RETHINK
-            </h1>
-          </div>
-
-          {/* 右侧：阶段药丸 + 退出 */}
-          <div className="flex items-center w-[80px] justify-end gap-1.5">
-            {stageIndex > 0 && (
-              <div className="text-[9px] font-mono tracking-widest text-slate-400 uppercase">
-                [{stageIndex}/4]
+    <div className="fixed inset-0 flex w-full h-[100dvh] max-h-[100dvh] overflow-hidden bg-surface-dim/40 text-on-surface font-sans selection:bg-gemini-blue/20">
+      {isAuthenticated ? (
+        <>
+          {/* Authenticated: show fluid art background + workspace */}
+          <AmbientGlow />
+          {/* 主对话区 (Workspace Layout) */}
+          <div className="flex flex-col flex-1 h-full relative z-10">
+            {/* ── 移动端顶部 Header ── */}
+            <div className="md:hidden flex items-center justify-between pt-[max(env(safe-area-inset-top),12px)] pb-2.5 px-4 shrink-0 z-20 border-b border-outline-variant/30">
+              {/* 左侧：Hamburger 菜单 */}
+              <div className="flex items-center w-[80px] justify-start">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setSidebarOpen(true)}
+                  className="text-on-surface-variant hover:text-on-surface min-w-[44px] min-h-[44px] flex items-center justify-start transition-colors cursor-pointer"
+                  aria-label="打开侧边栏"
+                >
+                  <span className="text-[11px] tracking-wide text-on-surface-variant">菜单</span>
+                </motion.button>
               </div>
-            )}
-            {isAuthenticated && (
-              <button
-                onClick={logout}
-                className="text-[9px] font-mono text-slate-400 hover:text-slate-800 px-2 min-h-[44px] flex items-center justify-center transition-colors uppercase"
+
+              {/* 中间：品牌 */}
+              <div className="flex items-center justify-center flex-1">
+                <h1 className="text-sm font-serif tracking-[0.2em] font-light text-on-surface uppercase">
+                  RETHINK
+                </h1>
+              </div>
+
+              {/* 右侧：阶段药丸 + 退出 */}
+              <div className="flex items-center w-[80px] justify-end gap-1.5">
+                {stageIndex > 0 && (
+                  <div className="text-[11px] tracking-wide text-on-surface-variant">
+                    {stageIndex}/4
+                  </div>
+                )}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={logout}
+                  className="text-[11px] text-on-surface-variant hover:text-on-surface px-2 min-h-[44px] flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  退出
+                </motion.button>
+              </div>
+            </div>
+
+            {/* ── 错误 Snackbar ── */}
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, y: -20, x: "-50%" }}
+                animate={{ opacity: 1, y: 0, x: "-50%" }}
+                transition={{ type: "spring", stiffness: 350, damping: 20 }}
+                className="absolute top-4 left-1/2 z-50 bg-error-container/95 backdrop-blur-md border border-error/20 text-error px-5 py-3 rounded-2xl shadow-md text-xs font-light tracking-wide flex items-center gap-2.5"
               >
-                [OUT]
-              </button>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                {error}
+              </motion.div>
+            )}
+
+            <ChatPanel />
+            {hasCompletedOnboarding && (
+              <InputBar 
+                onSend={handleSendWithEmotion} 
+                onEmotionChange={handleEmotionChange} 
+              />
             )}
           </div>
-        </div>
 
-        {/* ── 错误 Snackbar ── */}
-        {error && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-white/80 backdrop-blur-md border border-red-200 text-red-500 px-5 py-3 rounded-2xl shadow-sm text-xs font-light tracking-wide animate-slide-up flex items-center gap-2.5">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            {error}
-          </div>
-        )}
-
-        <ChatPanel />
-        {hasCompletedOnboarding && (
-          <InputBar 
-            onSend={handleSendWithEmotion} 
-            onEmotionChange={handleEmotionChange} 
-          />
-        )}
-      </div>
-
-      {/* ── Session History Sidebar ── */}
-      {isAuthenticated && <SessionSidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />}
-      
-      {/* ── Desktop History Button ── */}
-      {isAuthenticated && (
-        <button
-          type="button"
-          onClick={() => setSidebarOpen(true)}
-          aria-label="历史对话"
-          className="absolute top-6 left-6 z-40 hidden md:flex items-center text-[10px] font-mono tracking-[0.2em] text-slate-400 hover:text-slate-800 uppercase transition-colors"
-        >
-          [HISTORY]
-        </button>
-      )}
-
-      {/* ── Desktop Profile Pill ── */}
-      {isAuthenticated && user && (
-        <div className="absolute top-6 right-6 z-40 hidden md:flex items-center gap-4">
-          <span className="text-[10px] font-mono tracking-[0.2em] uppercase text-slate-500">
-            [{user.username}]
-          </span>
-          <button 
-            onClick={logout} 
-            className="text-[10px] font-mono tracking-[0.2em] text-slate-400 hover:text-slate-800 transition-colors uppercase"
+          {/* ── Session History Sidebar ── */}
+          <SessionSidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
+          
+          {/* ── Desktop History Button ── */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="历史对话"
+            className="absolute top-6 left-6 z-40 hidden md:flex items-center text-[11px] tracking-wide text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
           >
-            [LOG OUT]
-          </button>
-        </div>
+            历史
+          </motion.button>
+
+          {/* ── Desktop Profile Pill ── */}
+          {user && (
+            <div className="absolute top-6 right-6 z-40 hidden md:flex items-center gap-4">
+              <span className="text-[11px] tracking-wide text-on-surface-variant">
+                {user.username}
+              </span>
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={logout} 
+                className="text-[11px] tracking-wide text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
+              >
+                退出
+              </motion.button>
+            </div>
+          )}
+
+          {/* 危机干预覆盖层 */}
+          {fsmState === 'Crisis_Escalation' && <CrisisOverlay />}
+        </>
+      ) : (
+        /* Render ONLY LoginWall if not authenticated. Workspace elements are completely unmounted. */
+        <LoginWall />
       )}
-
-      {/* 登录、验证码墙 */}
-      {!isAuthenticated && <LoginWall />}
-
-      {/* 危机干预覆盖层 */}
-      {fsmState === 'Crisis_Escalation' && <CrisisOverlay />}
     </div>
   );
 }

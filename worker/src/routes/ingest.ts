@@ -18,11 +18,14 @@ export const knowledgeRouter = new Hono<{ Bindings: Env }>();
  * Body: { title: string, content: string, sourceFile?: string }
  */
 knowledgeRouter.post('/ingest', async (c) => {
-  const body = await c.req.json<{
-    title: string;
-    content: string;
-    sourceFile?: string;
-  }>();
+  let body: any = {};
+  try {
+    body = await c.req.json<{
+      title: string;
+      content: string;
+      sourceFile?: string;
+    }>();
+  } catch (e) {}
 
   if (!body.title || !body.content) {
     return c.json({ error: 'title 和 content 不能为空' }, 400);
@@ -81,11 +84,14 @@ knowledgeRouter.delete('/:id', async (c) => {
 });
 
 knowledgeRouter.post('/query', async (c) => {
-  const body = await c.req.json<{
-    query: string;
-    topK?: number;
-    minScore?: number;
-  }>();
+  let body: any = {};
+  try {
+    body = await c.req.json<{
+      query: string;
+      topK?: number;
+      minScore?: number;
+    }>();
+  } catch (e) {}
 
   if (!body.query) {
     return c.json({ error: 'query 不能为空' }, 400);

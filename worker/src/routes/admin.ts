@@ -34,7 +34,8 @@ adminRouter.get('/invitations', async (c) => {
 // POST /api/admin/invitations - Create a new invitation code
 adminRouter.post('/invitations', async (c) => {
   try {
-    const body = await c.req.json();
+    let body: any = {};
+    try { body = await c.req.json(); } catch (e) {}
     const code = body.code || crypto.randomUUID().split('-')[0].toUpperCase(); // Default to random 8-char code
     const maxUses = body.maxUses || 1;
 
@@ -56,7 +57,8 @@ adminRouter.post('/invitations', async (c) => {
 adminRouter.put('/invitations/:code', async (c) => {
   try {
     const code = c.req.param('code');
-    const body = await c.req.json();
+    let body: any = {};
+    try { body = await c.req.json(); } catch (e) {}
     const maxUses = body.maxUses;
 
     if (typeof maxUses !== 'number') {
