@@ -154,6 +154,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
       const res = await fetch(`${API_BASE}/api/auth/test-login`.replace(/\/api\/api\//g, '/api/'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
       });
 
       const data: AuthResponse = await res.json();
@@ -205,62 +206,67 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 0.95, filter: 'blur(20px)' }}
             transition={{ duration: 1.2, ease: [0.19, 1.0, 0.22, 1.0] }}
-            className="relative w-full max-w-[calc(100vw-2rem)] md:max-w-4xl bg-white/40 border border-white/60 backdrop-blur-3xl rounded-[32px] md:rounded-[40px] shadow-[0_30px_100px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col md:flex-row max-h-[85dvh] overflow-y-auto"
+            className="relative w-full max-w-[calc(100vw-2rem)] md:max-w-4xl bg-surface-dim/60 border border-outline-variant/30 backdrop-blur-3xl rounded-[32px] md:rounded-[40px] shadow-[0_30px_100px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col md:flex-row max-h-[85dvh] overflow-y-auto"
           >
             {/* Left side: Branding / Graphic (Hidden on mobile) */}
-            <div className="hidden md:flex flex-col justify-between w-1/2 p-10 lg:p-14 relative bg-black/5">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent opacity-80 mix-blend-overlay" />
+            <div className="hidden md:flex flex-col justify-between w-1/2 p-10 lg:p-14 relative bg-surface-container/20">
+              <div className="absolute inset-0 bg-gradient-to-br from-surface/60 to-transparent opacity-80 mix-blend-overlay" />
               <div className="relative z-10">
-                <h2 className="text-4xl font-serif text-slate-800 mb-6 leading-[1.3] tracking-wider drop-shadow-sm">
-                  Reconnect<br />with your<br /><span className="text-slate-900 font-medium">Inner Self</span>
+                <h2 className="text-4xl font-serif text-on-surface mb-6 leading-[1.3] tracking-wider drop-shadow-sm">
+                  重新连接<br />你的<br /><span className="text-on-surface font-medium">内心</span>
                 </h2>
-                <p className="text-slate-600/80 text-sm leading-relaxed max-w-[280px] font-light tracking-wide">
-                  A sanctuary designed without borders. Step into a space of complete psychological safety and let your thoughts flow naturally.
+                <p className="text-on-surface-variant/80 text-sm leading-relaxed max-w-[280px] font-light tracking-wide">
+                  一个专为你设计的安全空间。放下戒备，让思绪自然流动。
                 </p>
               </div>
-              <div className="relative z-10 text-[10px] tracking-widest uppercase text-slate-500/60 font-medium">
-                © 2026 心理疏导智能体
+              <div className="relative z-10 text-[10px] tracking-widest uppercase text-on-surface-variant/60 font-medium">
+                © 2026 心理交互艺术装置
               </div>
             </div>
 
-            {/* Right side: Form */}
-            <div className="w-full md:w-1/2 p-5 sm:p-8 md:p-10 lg:p-12 relative flex flex-col justify-center">
-              <button
+            {/* Right side: Form with optimized responsive padding */}
+            <div className="w-full md:w-1/2 p-4 sm:p-8 md:p-10 lg:p-12 relative flex flex-col justify-center">
+              <motion.button
                 onClick={onClose}
-                className="absolute top-4 right-4 md:top-6 md:right-6 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors z-20 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                whileHover={{ rotate: 90, scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                className="absolute top-4 right-4 md:top-6 md:right-6 p-2 text-on-surface-variant/60 hover:text-on-surface hover:bg-surface-container rounded-full transition-colors z-20 min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer"
               >
                 <X className="w-5 h-5" />
-              </button>
+              </motion.button>
 
-              <div className="md:hidden flex flex-col items-center mb-10">
-                <h2 className="text-2xl font-serif text-slate-800 tracking-wider">
-                  Sanctuary
+              <div className="md:hidden flex flex-col items-center mb-6 md:mb-10">
+                <h2 className="text-2xl font-serif text-on-surface tracking-wider">
+                  RE-THINK
                 </h2>
               </div>
 
-              <div className="flex bg-white/20 rounded-full p-1 border border-white/40 mb-8 relative z-10 backdrop-blur-md shadow-inner">
-                <button
+              <div className="flex bg-surface-container/30 rounded-full p-1 border border-outline-variant/30 mb-5 md:mb-8 relative z-10 backdrop-blur-md shadow-inner-soft">
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
                   type="button"
-                  className={`flex-1 text-center py-2.5 text-xs tracking-widest uppercase font-medium rounded-full transition-all duration-500 ${
-                    !isSignUp ? 'bg-white/70 shadow-sm text-slate-900 border border-white/50' : 'text-slate-600/70 hover:text-slate-900 hover:bg-white/30'
+                  className={`flex-1 text-center py-2.5 text-xs tracking-widest uppercase font-medium rounded-full transition-all duration-500 cursor-pointer ${
+                    !isSignUp ? 'bg-surface/80 shadow-sm text-on-surface border border-outline-variant/30' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container/40'
                   }`}
                   onClick={() => { setIsSignUp(false); setError(null); }}
                 >
-                  Sign In
-                </button>
-                <button
+                  登录
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
                   type="button"
-                  className={`flex-1 text-center py-2.5 text-xs tracking-widest uppercase font-medium rounded-full transition-all duration-500 ${
-                    isSignUp ? 'bg-white/70 shadow-sm text-slate-900 border border-white/50' : 'text-slate-600/70 hover:text-slate-900 hover:bg-white/30'
+                  className={`flex-1 text-center py-2.5 text-xs tracking-widest uppercase font-medium rounded-full transition-all duration-500 cursor-pointer ${
+                    isSignUp ? 'bg-surface/80 shadow-sm text-on-surface border border-outline-variant/30' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container/40'
                   }`}
                   onClick={() => { setIsSignUp(true); setError(null); }}
                 >
-                  Enter Code
-                </button>
+                  注册
+                </motion.button>
               </div>
 
               {error && (
-                <div className="mb-5 bg-red-50 border border-red-100 text-red-600 text-[13px] px-4 py-3 rounded-2xl flex items-start gap-2.5 animate-slide-up shadow-sm">
+                <div className="mb-5 bg-error-container/80 border border-error/20 text-error text-[13px] px-4 py-3 rounded-2xl flex items-start gap-2.5 animate-slide-up shadow-sm">
                   <svg className="w-4 h-4 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
@@ -274,10 +280,10 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                     type="text"
                     required
                     disabled={loading}
-                    placeholder="Username"
+                    placeholder="用户名"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full bg-white/30 focus:bg-white/60 border-b border-white/50 focus:border-slate-800/40 text-slate-900 placeholder-slate-500/60 text-[16px] md:text-sm py-3 md:py-4 px-2 outline-none transition-all duration-500 shadow-none rounded-none appearance-none font-light tracking-wide"
+                    className="w-full bg-surface-container/20 focus:bg-surface-container/50 border-b border-outline-variant/50 focus:border-gemini-blue/60 text-on-surface placeholder-on-surface-dim text-[16px] md:text-sm py-3 md:py-4 px-2 outline-none transition-all duration-500 shadow-none rounded-none appearance-none font-light tracking-wide"
                   />
                 </div>
 
@@ -286,10 +292,10 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                     type="password"
                     required
                     disabled={loading}
-                    placeholder="Password"
+                    placeholder="密码"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-white/30 focus:bg-white/60 border-b border-white/50 focus:border-slate-800/40 text-slate-900 placeholder-slate-500/60 text-[16px] md:text-sm py-3 md:py-4 px-2 outline-none transition-all duration-500 shadow-none rounded-none appearance-none font-light tracking-wide"
+                    className="w-full bg-surface-container/20 focus:bg-surface-container/50 border-b border-outline-variant/50 focus:border-gemini-blue/60 text-on-surface placeholder-on-surface-dim text-[16px] md:text-sm py-3 md:py-4 px-2 outline-none transition-all duration-500 shadow-none rounded-none appearance-none font-light tracking-wide"
                   />
                 </div>
 
@@ -299,10 +305,10 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                       type="text"
                       required
                       disabled={loading}
-                      placeholder="Invitation Key"
+                      placeholder="邀请密钥"
                       value={invitationCode}
                       onChange={(e) => setInvitationCode(e.target.value)}
-                      className="w-full bg-white/30 focus:bg-white/60 border-b border-white/50 focus:border-slate-800/40 text-slate-900 placeholder-slate-500/60 text-[16px] md:text-sm py-3 md:py-4 px-2 outline-none transition-all duration-500 shadow-none rounded-none appearance-none font-light tracking-wide"
+                      className="w-full bg-surface-container/20 focus:bg-surface-container/50 border-b border-outline-variant/50 focus:border-gemini-blue/60 text-on-surface placeholder-on-surface-dim text-[16px] md:text-sm py-3 md:py-4 px-2 outline-none transition-all duration-500 shadow-none rounded-none appearance-none font-light tracking-wide"
                     />
                   </motion.div>
                 )}
@@ -311,30 +317,36 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   <div id="turnstile-container-modal" className="relative overflow-hidden min-h-[65px] flex items-center justify-center opacity-80 mix-blend-multiply filter grayscale"></div>
                 </div>
 
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 12 }}
                   type="submit"
                   disabled={loading}
-                  className="group relative w-full bg-slate-900/90 hover:bg-slate-900 text-white font-light tracking-widest text-xs uppercase py-4 md:py-5 rounded-full transition-all duration-700 disabled:opacity-40 overflow-hidden"
+                  className="group relative w-full bg-on-surface hover:bg-on-surface/90 text-surface font-light tracking-widest text-xs uppercase py-4 md:py-5 rounded-full transition-all duration-700 disabled:opacity-40 overflow-hidden cursor-pointer"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
                   {loading ? (
-                    <span className="animate-pulse">Authenticating...</span>
+                    <span className="animate-pulse">验证中...</span>
                   ) : (
-                    <span>{isSignUp ? 'Materialize' : 'Enter Sanctuary'}</span>
+                    <span>{isSignUp ? '完成注册' : '登录'}</span>
                   )}
-                </button>
+                </motion.button>
               </form>
 
               <div className="mt-6 text-center">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
                   type="button"
                   onClick={handleTestLogin}
                   disabled={loading}
-                  className="text-[11px] tracking-widest uppercase text-slate-600/60 hover:text-slate-900 transition-colors font-medium relative group"
+                  className="text-[11px] tracking-widest uppercase text-on-surface-variant/80 hover:text-on-surface transition-colors font-medium relative group cursor-pointer"
                 >
-                  <span className="relative z-10">Guest Access</span>
-                  <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-slate-900/40 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500" />
-                </button>
+                  <span className="relative z-10">访客体验</span>
+                  <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-on-surface/40 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500" />
+                </motion.button>
               </div>
             </div>
           </motion.div>

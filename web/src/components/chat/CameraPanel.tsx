@@ -33,10 +33,10 @@ export const CameraPanel: React.FC<CameraPanelProps> = ({ onEmotionChange }) => 
 
   return (
     <div className="w-full flex items-center justify-start pointer-events-auto">
-      <div className="relative overflow-hidden rounded-2xl bg-white/40 border border-white/40 shadow-sm flex items-center gap-2 md:gap-3 p-1.5 md:p-2 backdrop-blur-md">
+      <div className="relative overflow-hidden rounded-2xl bg-surface-container/30 border border-outline-variant/30 shadow-sm flex items-center gap-2 md:gap-3 p-1.5 md:p-2 backdrop-blur-md">
         
         {/* 摄像头视图区域 (小圆形/胶囊状) */}
-        <div className="relative w-14 h-14 md:w-16 md:h-16 shrink-0 rounded-full overflow-hidden bg-slate-200/50 shadow-inner ring-1 ring-white/60">
+        <div className="relative w-14 h-14 md:w-16 md:h-16 shrink-0 rounded-full overflow-hidden bg-surface-container-high shadow-inner ring-1 ring-outline-variant/40">
           <video
             ref={videoRef}
             autoPlay
@@ -51,11 +51,11 @@ export const CameraPanel: React.FC<CameraPanelProps> = ({ onEmotionChange }) => 
 
           {/* 错误或加载状态 */}
           {(isModelLoading || !isCameraActive || error) && (
-            <div className="absolute inset-0 flex items-center justify-center bg-slate-100/80 z-20 backdrop-blur-sm">
+            <div className="absolute inset-0 flex items-center justify-center bg-surface-dim/80 z-20 backdrop-blur-sm">
               {error ? (
-                <span className="text-xs text-red-400 font-light tracking-widest">!</span>
+                <span className="text-xs text-error font-light tracking-widest">!</span>
               ) : (
-                <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-500 rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-outline-variant border-t-on-surface-variant rounded-full animate-spin" />
               )}
             </div>
           )}
@@ -64,31 +64,31 @@ export const CameraPanel: React.FC<CameraPanelProps> = ({ onEmotionChange }) => 
         {/* 情绪信息区域 */}
         <div className="flex flex-col justify-center pr-2 md:pr-3 min-w-[100px] md:min-w-[120px]">
           {error ? (
-            <p className="text-[10px] font-light tracking-wide text-red-400 leading-tight">{error}</p>
+            <p className="text-[10px] font-light tracking-wide text-error leading-tight">{error}</p>
           ) : isModelLoading ? (
-            <p className="text-[10px] font-light tracking-widest text-slate-500 animate-pulse">加载模型中...</p>
+            <p className="text-[10px] font-light tracking-widest text-on-surface-variant/80 animate-pulse">加载模型中...</p>
           ) : !isCameraActive ? (
-            <p className="text-[10px] font-light tracking-widest text-slate-500">启动中...</p>
+            <p className="text-[10px] font-light tracking-widest text-on-surface-variant/80">启动中...</p>
           ) : currentEmotion && emotionInfo ? (
             <>
               <div className="flex items-center gap-1.5 mb-1">
                 <span className="text-base leading-none">{emotionInfo.emoji}</span>
-                <span className="text-[11px] font-light tracking-wider text-slate-700">{emotionInfo.zh}</span>
-                <span className="text-[9px] font-light tracking-widest text-slate-500 bg-white/50 px-1.5 py-0.5 rounded-sm border border-white/40">
+                <span className="text-[11px] font-light tracking-wider text-on-surface">{emotionInfo.zh}</span>
+                <span className="text-[9px] font-light tracking-widest text-on-surface-variant bg-surface px-1.5 py-0.5 rounded-sm border border-outline-variant/30">
                   {currentEmotion.confidence}%
                 </span>
               </div>
               {/* 置信度微型进度条 */}
-              <div className="w-full h-[3px] bg-slate-200/50 rounded-full overflow-hidden">
+              <div className="w-full h-[3px] bg-surface-container-high rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-slate-400 transition-all duration-300 ease-out"
+                  className="h-full bg-on-surface-variant/60 transition-all duration-300 ease-out"
                   style={{ width: `${currentEmotion.confidence}%` }}
                 />
               </div>
-              <p className="text-[8px] font-light tracking-widest text-slate-400 mt-1.5">本地检测</p>
+              <p className="text-[8px] font-light tracking-widest text-on-surface-dim mt-1.5">本地检测</p>
             </>
           ) : (
-            <p className="text-[10px] font-light tracking-widest text-slate-500">面孔检测中...</p>
+            <p className="text-[10px] font-light tracking-widest text-on-surface-variant/80">面孔检测中...</p>
           )}
         </div>
 

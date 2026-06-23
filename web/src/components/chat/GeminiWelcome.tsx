@@ -32,7 +32,7 @@ export function GeminiWelcome({ onStart }: GeminiWelcomeProps) {
         initial={{ opacity: 0, y: 10, filter: 'blur(10px)' }}
         animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
         transition={{ delay: 0.15, duration: 1, ease: "easeOut" }}
-        className="text-3xl md:text-4xl font-serif font-light tracking-[0.1em] text-slate-800 text-center px-4"
+        className="text-3xl md:text-4xl font-serif font-light tracking-[0.1em] text-on-surface text-center px-4"
       >
         <span className="leading-tight pb-1">
           你好，欢迎来到这里
@@ -44,10 +44,10 @@ export function GeminiWelcome({ onStart }: GeminiWelcomeProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4, duration: 0.8 }}
-        className="mt-6 text-slate-500 font-light tracking-wide text-sm md:text-base max-w-md text-center leading-relaxed"
+        className="mt-6 text-on-surface-variant font-light tracking-wide text-sm md:text-base max-w-md text-center leading-relaxed"
       >
         在这里，你可以放心地说出任何感受。<br />
-        <span className="text-slate-400/80 text-xs md:text-sm mt-2 block">点击下方，我会先问你几个简单的问题来了解你。</span>
+        <span className="text-on-surface-dim/80 text-xs md:text-sm mt-2 block">点击下方，我会先问你几个简单的问题来了解你。</span>
       </motion.p>
 
       {/* ── Start Button ── */}
@@ -55,9 +55,11 @@ export function GeminiWelcome({ onStart }: GeminiWelcomeProps) {
         <motion.button
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.8, ease: "easeOut" }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.7 }}
           onClick={onStart}
-          className="mt-12 px-8 py-3.5 rounded-full bg-white/40 backdrop-blur-md border border-white/40 text-slate-800 font-light text-sm tracking-[0.2em] uppercase hover:bg-white/60 hover:scale-105 active:scale-95 transition-all duration-500 shadow-[0_0_20px_rgba(255,255,255,0.4)] flex items-center gap-2.5 group"
+          className="mt-12 px-8 py-3.5 rounded-full bg-surface-container/40 backdrop-blur-md border border-outline-variant/30 text-on-surface font-light text-sm tracking-[0.2em] uppercase hover:bg-surface-container/60 transition-colors shadow-md flex items-center gap-2.5 group cursor-pointer"
         >
           <span>开始对话</span>
           <svg className="w-5 h-5 opacity-70 group-hover:opacity-100 group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">

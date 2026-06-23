@@ -2,6 +2,9 @@ import typography from '@tailwindcss/typography';
 
 /** @type {import('tailwindcss').Config} */
 export default {
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -25,6 +28,7 @@ export default {
         // ── Gemini Brand ──
         gemini: {
           blue: '#4285F4',
+          'blue-hover': '#1A73E8',
           'blue-light': '#8AB4F8',
           'blue-pale': '#D2E3FC',
           'blue-surface': '#E8F0FE',

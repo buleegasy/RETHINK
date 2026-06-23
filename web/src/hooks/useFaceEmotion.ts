@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-const faceapi = (window as any).faceapi;
 
 export type EmotionLabel =
   | 'happy' | 'sad' | 'angry' | 'fearful'
@@ -33,15 +32,61 @@ export interface UseFaceEmotionReturn {
   setCanvasRef: (canvas: HTMLCanvasElement | null) => void;
 }
 
+export interface FaceApiNet {
+  loadFromUri: (uri: string) => Promise<void>;
+}
+
+export interface FaceApiNets {
+  ssdMobilenetv1: FaceApiNet;
+  faceLandmark68Net: FaceApiNet;
+  faceExpressionNet: FaceApiNet;
+}
+
+export interface FaceApiDraw {
+  drawDetections: (canvas: HTMLCanvasElement, detections: unknown) => void;
+  drawFaceLandmarks: (canvas: HTMLCanvasElement, detections: unknown) => void;
+}
+
+export interface FaceApiDetection {
+  expressions: Record<string, number>;
+}
+
+export interface FaceApiDetectionWithLandmarks {
+  withFaceExpressions: () => Promise<FaceApiDetection | undefined>;
+}
+
+export interface FaceApiDetectionSingle {
+  withFaceLandmarks: () => FaceApiDetectionWithLandmarks;
+}
+
+export interface FaceAPI {
+  nets: FaceApiNets;
+  SsdMobilenetv1Options: new (options: { minConfidence: number }) => unknown;
+  detectSingleFace: (video: HTMLVideoElement, options: unknown) => FaceApiDetectionSingle;
+  matchDimensions: (canvas: HTMLCanvasElement, displaySize: { width: number; height: number }) => void;
+  resizeResults: (detection: unknown, displaySize: { width: number; height: number }) => unknown;
+  draw: FaceApiDraw;
+}
+
+declare global {
+  interface Window {
+    faceapi?: FaceAPI;
+  }
+}
+
 const MODEL_URL = '/cv-models/';
 let modelsLoaded = false;
 
 async function loadModels() {
+  const api = window.faceapi;
+  if (!api) {
+    throw new Error('faceapi library is not loaded on window object');
+  }
   if (modelsLoaded) return;
   await Promise.all([
-    faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
-    faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-    faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+    api.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
+    api.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+    api.nets.faceExpressionNet.loadFromUri(MODEL_URL),
   ]);
   modelsLoaded = true;
 }
@@ -66,13 +111,14 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
 
   // 分析单帧情绪
   const analyzeFrame = useCallback(async () => {
-    if (!videoRef.current || !isActiveRef.current) return;
+    const api = window.faceapi;
+    if (!api || !videoRef.current || !isActiveRef.current) return;
     const video = videoRef.current;
     if (video.readyState < 2 || video.paused) return;
 
     try {
-      const detection = await faceapi
-        .detectSingleFace(video, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.4 }))
+      const detection = await api
+        .detectSingleFace(video, new api.SsdMobilenetv1Options({ minConfidence: 0.4 }))
         .withFaceLandmarks()
         .withFaceExpressions();
 
@@ -82,15 +128,14 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
       if (canvasRef.current) {
         const displaySize = { width: video.videoWidth, height: video.videoHeight };
         if (displaySize.width > 0 && displaySize.height > 0) {
-          faceapi.matchDimensions(canvasRef.current, displaySize);
-          const resizedDetections = faceapi.resizeResults(detection, displaySize);
+          api.matchDimensions(canvasRef.current, displaySize);
+          const resizedDetections = api.resizeResults(detection, displaySize);
           const ctx = canvasRef.current.getContext('2d');
           if (ctx) {
              ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
           }
-          // 因为外层使用了 scale-x-[-1] 进行水平翻转，由于 canvas 也会被整体翻转，所以我们直接画正向的内容即可，CSS翻转会处理镜像
-          faceapi.draw.drawDetections(canvasRef.current, resizedDetections);
-          faceapi.draw.drawFaceLandmarks(canvasRef.current, resizedDetections);
+          api.draw.drawDetections(canvasRef.current, resizedDetections);
+          api.draw.drawFaceLandmarks(canvasRef.current, resizedDetections);
         }
       }
 
@@ -158,8 +203,8 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
       try {
         await loadModels();
         setIsModelLoaded(true);
-      } catch (err: any) {
-        setError(`情绪识别模型加载失败: ${err?.message || err}`);
+      } catch (err: unknown) {
+        setError(`情绪识别模型加载失败: ${err instanceof Error ? err.message : String(err)}`);
         setIsModelLoading(false);
         return;
       }

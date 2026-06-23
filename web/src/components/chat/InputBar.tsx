@@ -1,14 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import type { KeyboardEvent } from 'react';
+import { motion } from 'framer-motion';
 import { useChatStore } from '../../store/chatStore';
 import { useVoiceInput } from '../../hooks/useVoiceInput';
 import { CameraPanel } from './CameraPanel';
 import type { EmotionResult } from '../../hooks/useFaceEmotion';
-
-const EMOJI_CHIPS = [
-  '🫠', '😭', '🥺', '🤡', '😑', '😡', 
-  '🤢', '💤', '😰', '🧠', '🌧️', '🫂'
-];
 
 interface InputBarProps {
   onSend: (text: string) => void;
@@ -82,15 +78,8 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) =
 
   const canSend = input.trim() && !isStreaming;
 
-  const handleSendEmoji = (text: string) => {
-    if (!isStreaming) {
-      if (isListening) stopListening();
-      onSend(text);
-    }
-  };
-
   return (
-    <div className="absolute bottom-0 left-0 w-full px-4 md:px-8 pb-[calc(max(env(safe-area-inset-bottom),24px))] pt-8 bg-gradient-to-t from-slate-50/90 via-slate-50/40 to-transparent z-30 pointer-events-none">
+    <div className="absolute bottom-0 left-0 w-full px-4 md:px-8 pb-[calc(max(env(safe-area-inset-bottom),24px))] pt-8 bg-gradient-to-t from-surface-dim/95 via-surface-dim/40 to-transparent z-30 pointer-events-none">
       <div className="max-w-3xl mx-auto flex flex-col items-center pointer-events-auto">
         
         {/* 摄像头情感感知（原生融合区） */}
@@ -98,40 +87,31 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) =
           <CameraPanel onEmotionChange={onEmotionChange} />
         </div>
 
-        {/* 表情包破冰快捷气泡 */}
-        {fsmState === 'Onboarding' && !isStreaming && (
-          <div className="w-full mb-2 md:mb-4 flex gap-4 overflow-x-auto pb-2 justify-start md:justify-center animate-fade-in pointer-events-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            {EMOJI_CHIPS.map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => handleSendEmoji(emoji)}
-                type="button"
-                className="flex items-center justify-center text-3xl hover:scale-125 hover:-translate-y-2 hover:rotate-6 active:scale-90 transition-all duration-300 shrink-0 cursor-pointer snap-center opacity-70 hover:opacity-100"
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* Input Container */}
         <div className={`w-full relative transition-all duration-500 ${isStreaming ? 'opacity-50' : ''}`}>
-          <div className="relative flex items-end border-b border-slate-300/50 pb-2">
+          <div className="relative flex items-end border-b border-outline-variant/50 pb-2">
             
             {/* Voice Button or Spacer */}
             {isVoiceSupported ? (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={handleVoiceToggle}
                 disabled={isStreaming}
                 aria-label={isListening ? '停止录音' : '语音输入'}
-                className={`flex-shrink-0 px-2 py-1 mb-1 font-mono text-[10px] tracking-widest uppercase transition-all duration-300 ease-out self-end ${
+                className={`flex-shrink-0 w-11 h-11 md:w-10 md:h-10 flex items-center justify-center rounded-full transition-all duration-300 ease-out self-end ${
                   isListening
-                    ? 'text-amber-600 animate-pulse-gentle'
-                    : 'text-slate-400 hover:text-slate-800'
-                } ${isStreaming ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                    ? 'text-red-400 animate-pulse-gentle'
+                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container/40'
+                } ${isStreaming ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
               >
-                {isListening ? '[ LISTENING ]' : '[ MIC ]'}
-              </button>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect width="8" height="12" x="8" y="2" rx="4"/>
+                  <path d="M4 14a8 8 0 0 0 16 0"/>
+                  <line x1="12" y1="22" x2="12" y2="19"/>
+                </svg>
+              </motion.button>
             ) : (
               <div className="w-2 flex-shrink-0" />
             )}
@@ -146,24 +126,29 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) =
               disabled={isStreaming}
               rows={1}
               style={{ margin: 0 }}
-              className={`flex-1 bg-transparent px-4 py-2 text-[16px] md:text-[18px] leading-[28px] font-sans font-light tracking-wide text-slate-800 placeholder-slate-400 border-none focus:outline-none resize-none overflow-y-auto max-h-[100px] md:max-h-[160px] transition-opacity duration-200 ${
+              className={`flex-1 bg-transparent px-2 md:px-4 py-3 md:py-2 text-[16px] md:text-[18px] leading-[28px] font-sans font-light tracking-wide text-on-surface placeholder-on-surface-dim border-none focus:outline-none resize-none overflow-y-auto max-h-[100px] md:max-h-[160px] transition-opacity duration-200 ${
                 isListening ? 'placeholder-amber-600/60' : ''
               } ${isStreaming ? 'cursor-not-allowed' : ''}`}
             />
 
             {/* Send Button */}
-            <button
-              onClick={handleSend}
-              disabled={!canSend}
-              aria-label="发送消息"
-              className={`flex-shrink-0 px-3 py-1 mb-1 font-mono text-[10px] tracking-widest uppercase transition-all duration-300 ease-out self-end ${
-                canSend
-                  ? 'text-slate-800 hover:text-slate-500 hover:tracking-[0.3em]'
-                  : 'text-slate-300 cursor-not-allowed'
-              }`}
-            >
-              [ SEND ]
-            </button>
+              <motion.button
+                whileHover={canSend ? { scale: 1.1 } : {}}
+                whileTap={canSend ? { scale: 0.9 } : {}}
+                onClick={handleSend}
+                disabled={!canSend}
+                aria-label="发送消息"
+                className={`flex-shrink-0 w-11 h-11 md:w-10 md:h-10 flex items-center justify-center rounded-full transition-all duration-300 ease-out self-end ${
+                  canSend
+                    ? 'text-on-surface hover:bg-surface-container/40 cursor-pointer'
+                    : 'text-outline cursor-not-allowed opacity-30'
+                }`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="19" x2="12" y2="5"/>
+                  <polyline points="5 12 12 5 19 12"/>
+                </svg>
+              </motion.button>
 
           </div>
         </div>

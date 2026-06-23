@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useChatStore } from '../store/chatStore';
-import type { ChatMessage, SSEChunk, FSMState, UserProfile } from '../types';
+import type { ChatMessage, SSEChunk, FSMState, UserProfile, TechChain } from '../types';
 import { chatApi } from '../api/chat';
 export function useChat() {
   const [error, setError] = useState<string | null>(null);
@@ -54,18 +54,22 @@ export function useChat() {
       const reader = streamBody.getReader();
       const decoder = new TextDecoder('utf-8');
       let done = false;
+      let buffer = '';
 
       while (!done) {
         const { value, done: readerDone } = await reader.read();
         done = readerDone;
         
         if (value) {
-          const chunkString = decoder.decode(value, { stream: true });
+          buffer += decoder.decode(value, { stream: true });
           // SSE 格式解析 (data: {...}\n\n)
-          const lines = chunkString.split('\n');
+          const lines = buffer.split('\n');
+          // 最后一个元素可能是未结束的行（没有遇到 \n），将其保留在 buffer 中，等下一个 chunk 拼接
+          buffer = lines.pop() || '';
+          
           for (const line of lines) {
             if (line.startsWith('data: ')) {
-              const dataStr = line.replace('data: ', '').trim();
+              const dataStr = line.substring(6).trim();
               if (!dataStr) continue;
               
               try {
@@ -106,8 +110,10 @@ export function useChat() {
                 
                 // 当收到最终块时，存储技术链元数据（含 FSM 信息）
                 if (parsed.done && (parsed.intent || parsed.model)) {
-                  const techChain = {
-                    intent: parsed.intent || 'ambiguous',
+                  const techChain: TechChain = {
+                    intent: (parsed.intent === 'casual' || parsed.intent === 'emotional' || parsed.intent === 'crisis' || parsed.intent === 'ambiguous')
+                      ? parsed.intent
+                      : 'ambiguous',
                     ragRetrievalMode: parsed.ragRetrievalMode,
                     riskLevel: parsed.riskLevel,
                     riskReason: parsed.riskReason,
@@ -127,7 +133,7 @@ export function useChat() {
                     fsmState: parsed.fsmState,
                     fsmTrigger: parsed.fsmTrigger,
                   };
-                  useChatStore.getState().setLastMessageTechChain(techChain as any);
+                  useChatStore.getState().setLastMessageTechChain(techChain);
                 }
               } catch (e) {
                 // 忽略非 JSON 数据行

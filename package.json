@@ -10,9 +10,12 @@
     "dev": "concurrently \"npm run dev:worker\" \"npm run dev:web\"",
     "dev:worker": "npm run dev --workspace=worker",
     "dev:web": "npm run dev --workspace=web",
-    "build": "npm run build --workspace=web && rm -rf dist && cp -r web/dist dist",
+    "build": "npm run build --workspace=web",
     "deploy": "npm run deploy --workspace=worker",
-    "test:agent": "node scripts/agent-smoke-test.mjs"
+    "test:agent": "node scripts/agent-smoke-test.mjs",
+    "test:unit": "npm run test:unit --workspace=web",
+    "test:e2e": "npm run test:e2e --workspace=web",
+    "test:api": "node scripts/api-verify.mjs"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
@@ -21,6 +24,19 @@
     "postcss-selector-parser": "^6.1.2"
   },
   "dependencies": {
-    "postcss": "^8.4.31"
+    "baseline-browser-mapping": "^2.10.38",
+    "caniuse-lite": "^1.0.30001799",
+    "electron-to-chromium": "^1.5.376",
+    "escalade": "^3.2.0",
+    "micromark-factory-destination": "^2.0.1",
+    "micromark-factory-label": "^2.0.1",
+    "micromark-factory-title": "^2.0.1",
+    "micromark-factory-whitespace": "^2.0.1",
+    "micromark-util-html-tag-name": "^2.0.1",
+    "node-releases": "^2.0.48",
+    "picocolors": "^1.1.1",
+    "playwright": "^1.61.0",
+    "postcss": "^8.5.15",
+    "strip-indent": "^4.1.1"
   }
 }

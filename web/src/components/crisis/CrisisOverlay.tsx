@@ -11,7 +11,7 @@ export const CrisisOverlay: React.FC = () => {
     <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-surface p-6 sm:p-10 animate-fade-in text-center overflow-y-auto">
       <div className="max-w-2xl mx-auto flex flex-col items-center">
         <div className="mb-8 w-24 h-24 rounded-full bg-error-container/20 flex items-center justify-center animate-pulse-gentle">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-error)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="stroke-error">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
         </div>

@@ -65,7 +65,7 @@ export const ChatPanel: React.FC = () => {
             );
           })
         )}
-        <div ref={bottomRef} className="h-56" />
+        {hasCompletedOnboarding && <div ref={bottomRef} className="h-[220px] md:h-[280px] shrink-0" />}
       </div>
     </div>
   );

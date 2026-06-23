@@ -2,12 +2,13 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useChatStore } from '../../store/chatStore';
 
-export const AmbientGlow: React.FC = () => {
+export const AmbientGlow: React.FC<{ forceShow?: boolean }> = ({ forceShow = false }) => {
   const isStreaming = useChatStore(state => state.isStreaming);
+  const show = forceShow || isStreaming;
 
   return (
     <AnimatePresence>
-      {isStreaming && (
+      {show && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

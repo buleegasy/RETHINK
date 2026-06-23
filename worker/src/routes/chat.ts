@@ -98,6 +98,11 @@ chatRouter.post('/', requireAuth, async (c) => {
         intent: intentResult.type,
         fsmState: fsmCtx.currentState,
         fsmTrigger: preTransition.trigger,
+        riskLevel: 'crisis',
+        ragQueried: true,
+        ragRetrievalMode: 'forced_safety',
+        ragChunks: 0,
+        ragSources: [],
       });
     }
 
@@ -111,6 +116,11 @@ chatRouter.post('/', requireAuth, async (c) => {
           intent: intentResult.type,
           fsmState: fsmCtx.currentState,
           fsmTrigger: preTransition.trigger,
+          riskLevel: 'crisis',
+          ragQueried: true,
+          ragRetrievalMode: 'forced_safety',
+          ragChunks: 0,
+          ragSources: [],
         })
       });
     });

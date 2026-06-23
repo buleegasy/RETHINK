@@ -7,7 +7,7 @@ interface EmojiSelectorProps {
 }
 
 const EMOJI_OPTIONS = [
-  { emoji: '🖕', colorClass: 'hover:border-amber-400 hover:shadow-amber-500/10' },
+  { emoji: '😔', colorClass: 'hover:border-amber-400 hover:shadow-amber-500/10' },
   { emoji: '🫠', colorClass: 'hover:border-blue-400 hover:shadow-blue-500/10' },
   { emoji: '😭', colorClass: 'hover:border-red-400 hover:shadow-red-500/10' },
   { emoji: '🥺', colorClass: 'hover:border-pink-400 hover:shadow-pink-500/10' },
@@ -32,10 +32,10 @@ export const EmojiSelector: React.FC<EmojiSelectorProps> = ({ onSelect, onSkip }
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="text-center mb-12 max-w-md"
       >
-        <h2 className="text-2xl md:text-3xl font-serif font-light tracking-[0.1em] text-slate-800 pb-1">
+        <h2 className="text-2xl md:text-3xl font-serif font-light tracking-[0.1em] text-on-surface pb-1">
           此时此刻，你处于什么状态？
         </h2>
-        <p className="mt-4 text-slate-500 text-sm md:text-base font-light tracking-wide">
+        <p className="mt-4 text-on-surface-variant text-sm md:text-base font-light tracking-wide">
           挑选一个代表你当下心境的表情包，开启我们的对话。
         </p>
       </motion.div>
@@ -47,9 +47,16 @@ export const EmojiSelector: React.FC<EmojiSelectorProps> = ({ onSelect, onSkip }
             key={item.emoji}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.02 * idx, duration: 0.4, ease: 'easeOut' }}
+            whileHover={{ scale: 1.05, y: -4 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ 
+              type: "spring",
+              stiffness: 400,
+              damping: 15,
+              delay: 0.02 * idx 
+            }}
             onClick={() => onSelect(item.emoji)}
-            className={`group relative aspect-square flex items-center justify-center rounded-3xl bg-white/30 backdrop-blur-md border border-white/40 shadow-sm cursor-pointer hover:bg-white/50 hover:scale-105 active:scale-95 transition-all duration-300 ${item.colorClass}`}
+            className={`group relative aspect-square flex items-center justify-center rounded-3xl bg-surface-container/30 backdrop-blur-md border border-outline-variant/30 shadow-sm cursor-pointer hover:bg-surface-container/50 transition-colors duration-300 ${item.colorClass}`}
           >
             {/* Hover aura effect */}
             <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-300 bg-gradient-to-br from-white to-transparent" />
@@ -68,7 +75,7 @@ export const EmojiSelector: React.FC<EmojiSelectorProps> = ({ onSelect, onSkip }
         animate={{ opacity: 0.4 }}
         whileHover={{ opacity: 0.8 }}
         onClick={onSkip}
-        className="mt-12 text-slate-600 text-xs font-light tracking-widest uppercase cursor-pointer hover:text-slate-800 transition-all duration-300 border-none bg-transparent outline-none"
+        className="mt-12 text-on-surface-variant text-xs font-light tracking-widest uppercase cursor-pointer hover:text-on-surface transition-all duration-300 border-none bg-transparent outline-none"
       >
         跳过，直接输入文字
       </motion.button>

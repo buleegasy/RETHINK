@@ -1,0 +1,342 @@
+On branch production
+Your branch is ahead of 'origin/production' by 3 commits.
+  (use "git push" to publish your local commits)
+
+It took 69.67 seconds to compute the branch ahead/behind values.
+You can use '--no-ahead-behind' to avoid this.
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	new file:   .agents/auditor_1/BRIEFING.md
+	new file:   .agents/auditor_1/handoff.md
+	new file:   .agents/auditor_1/original_prompt.md
+	new file:   .agents/auditor_1/progress.md
+	new file:   .agents/explorer_1/BRIEFING.md
+	new file:   .agents/explorer_1/analysis.md
+	new file:   .agents/explorer_1/handoff.md
+	new file:   .agents/explorer_1/original_prompt.md
+	new file:   .agents/explorer_1/progress.md
+	new file:   .agents/explorer_2/BRIEFING.md
+	new file:   .agents/explorer_2/analysis.md
+	new file:   .agents/explorer_2/handoff.md
+	new file:   .agents/explorer_2/original_prompt.md
+	new file:   .agents/explorer_2/progress.md
+	new file:   .agents/explorer_2_gen2/BRIEFING.md
+	new file:   .agents/explorer_2_gen2/analysis.md
+	new file:   .agents/explorer_2_gen2/handoff.md
+	new file:   .agents/explorer_2_gen2/original_prompt.md
+	new file:   .agents/explorer_3/BRIEFING.md
+	new file:   .agents/explorer_3/analysis.md
+	new file:   .agents/explorer_3/handoff.md
+	new file:   .agents/explorer_3/original_prompt.md
+	new file:   .agents/explorer_3/progress.md
+	new file:   .agents/orchestrator/BRIEFING.md
+	new file:   .agents/orchestrator/PROJECT.md
+	new file:   .agents/orchestrator/README.md
+	new file:   .agents/orchestrator/handoff.md
+	new file:   .agents/orchestrator/original_prompt.md
+	new file:   .agents/orchestrator/progress.md
+	new file:   .agents/original_prompt.md
+	new file:   .agents/reviewer_1/BRIEFING.md
+	new file:   .agents/reviewer_1/handoff.md
+	new file:   .agents/reviewer_1/original_prompt.md
+	new file:   .agents/reviewer_1/progress.md
+	new file:   .agents/reviewer_2/BRIEFING.md
+	new file:   .agents/reviewer_2/handoff.md
+	new file:   .agents/reviewer_2/original_prompt.md
+	new file:   .agents/reviewer_2/progress.md
+	new file:   .agents/sentinel/BRIEFING.md
+	new file:   .agents/sentinel/handoff.md
+	new file:   .agents/victory_auditor/BRIEFING.md
+	new file:   .agents/victory_auditor/README.md
+	new file:   .agents/victory_auditor/handoff.md
+	new file:   .agents/victory_auditor/original_prompt.md
+	new file:   .agents/victory_auditor/progress.md
+	new file:   .agents/worker_1/BRIEFING.md
+	new file:   .agents/worker_1/handoff.md
+	new file:   .agents/worker_1/original_prompt.md
+	new file:   .agents/worker_1/progress.md
+	new file:   .gitignore
+	new file:   .vscode/settings.json
+	new file:   "B_\346\217\220\344\272\244\346\226\207\344\273\266/\343\200\220\345\276\205\350\241\245\345\205\205\344\277\241\346\201\257\345\271\266\350\275\254PDF\343\200\221\344\275\234\345\223\201\350\256\276\350\256\241\346\212\245\345\221\212.docx"
+	new file:   "B_\346\217\220\344\272\244\346\226\207\344\273\266/\343\200\220\345\276\205\350\241\245\345\205\205\344\277\241\346\201\257\345\271\266\350\275\254PDF\343\200\221\350\277\207\347\250\213\346\200\247\350\257\201\346\230\216\346\235\220\346\226\231.docx"
+	new file:   "B_\346\217\220\344\272\244\346\226\207\344\273\266/\345\237\272\346\234\254\344\277\241\346\201\257.pages"
+	new file:   "B_\346\217\220\344\272\244\346\226\207\344\273\266/\350\277\207\347\250\213\346\200\247\350\257\201\346\230\216\346\235\220\346\226\231.md"
+	new file:   DEPLOYMENT.md
+	new file:   DEVELOPMENT_SOP.md
+	new file:   LICENSE
+	new file:   ORIGINAL_REQUEST.md
+	new file:   README.md
+	new file:   WALKTHROUGH.md
+	new file:   api-proxy/_worker.js
+	new file:   bundle.js
+	new file:   cache_buster.py
+	new file:   docs/demo_script.md
+	new file:   docs/development_record.md
+	new file:   docs/submission_checklist.md
+	new file:   docs/survey_questionnaire.md
+	new file:   docs/testing_and_verification.md
+	new file:   fix_frontend_api.py
+	new file:   ingest-guide.ts
+	new file:   modify_dashboard.py
+	new file:   modify_dashboard_js.py
+	new file:   modify_survey.py
+	new file:   package-lock.json
+	new file:   package.json
+	new file:   plan.md
+	new file:   rag-psy-cbt/.gitignore
+	new file:   rag-psy-cbt/README.md
+	new file:   rag-psy-cbt/data/cleaned/cbt_chunks.jsonl
+	new file:   rag-psy-cbt/data/cleaned/clinical_authoritative_chunks.jsonl
+	new file:   rag-psy-cbt/data/cleaned/clinical_professional_theory_chunks.jsonl
+	new file:   rag-psy-cbt/data/cleaned/dialogue_chunks.jsonl
+	new file:   rag-psy-cbt/data/cleaned/policy_chunks.jsonl
+	new file:   rag-psy-cbt/data/cleaned/safety_chunks.jsonl
+	new file:   rag-psy-cbt/data/cleaned/synthetic_case_chunks.jsonl
+	new file:   rag-psy-cbt/docs/cbt_behavioral_activation.md
+	new file:   rag-psy-cbt/docs/cbt_core_rules.md
+	new file:   rag-psy-cbt/ingest_jsonl.py
+	new file:   rag-psy-cbt/main.py
+	new file:   rag-psy-cbt/scripts/ingest_pinecone.py
+	new file:   rag-psy-cbt/scripts/query_pinecone.py
+	new file:   rag-psy-cbt/scripts/split_and_reingest.py
+	new file:   rag-psy-cbt/scripts/validate_chunks.py
+	new file:   rag-psy-cbt/src/api.py
+	new file:   rag-psy-cbt/src/embedding.py
+	new file:   rag-psy-cbt/src/pinecone_client.py
+	new file:   rag-psy-cbt/src/prompt_builder.py
+	new file:   rag-psy-cbt/src/retriever.py
+	new file:   rag-psy-cbt/src/router.py
+	new file:   rag-psy-cbt/test_suite.py
+	new file:   refine_dashboard.py
+	new file:   refine_survey.py
+	new file:   reports/figures/figure01_project_position.png
+	new file:   reports/figures/figure02_problem_solution.png
+	new file:   reports/figures/figure02a_questionnaire.png
+	new file:   reports/figures/figure02b_questionnaire_items.png
+	new file:   reports/figures/figure02c_survey_painpoints.png
+	new file:   reports/figures/figure02d_survey_scenarios.png
+	new file:   reports/figures/figure02e_opening_preference.png
+	new file:   reports/figures/figure03_system_architecture.png
+	new file:   reports/figures/figure04_abc_flow.png
+	new file:   reports/figures/figure05_cognitive_distortions.png
+	new file:   reports/figures/figure06_risk_route.png
+	new file:   reports/figures/figure07_rag_layers.png
+	new file:   reports/figures/figure08_data_scale.png
+	new file:   reports/figures/figure09_process_timeline.png
+	new file:   reports/figures/figure09a_emoji_entry.png
+	new file:   reports/figures/figure09b_sentence_compression.png
+	new file:   reports/figures/figure09c_prompt_engineering.png
+	new file:   reports/figures/figure10_opening_test.png
+	new file:   reports/figures/figure11_scene_radar.png
+	new file:   reports/figures/figure12_scoring_pie.png
+	new file:   reports/figures/figure13_response_template.png
+	new file:   reports/figures/figure14_validation_chain.png
+	new file:   reports/figures/figure15_ethics_guardrails.png
+	new file:   reports/figures/figure16_submission_package.png
+	new file:   reports/figures/figure_persona_preference.png
+	new file:   "reports/\344\275\234\345\223\201\350\256\276\350\256\241\346\212\245\345\221\212.docx"
+	new file:   "reports/\344\275\234\345\223\201\350\256\276\350\256\241\346\212\245\345\221\212.md"
+	new file:   "reports/\344\275\234\345\223\201\350\256\276\350\256\241\346\212\245\345\221\212_\350\215\211\346\241\210.md"
+	new file:   "reports/\351\235\222\345\260\221\345\271\264\345\277\203\347\220\206\346\224\257\346\214\201\346\231\272\350\203\275\344\275\223\344\275\234\345\223\201\350\256\276\350\256\241\346\212\245\345\221\212.docx"
+	new file:   revert_api.py
+	new file:   scripts/agent-smoke-test.mjs
+	new file:   scripts/build_design_report_docx.py
+	new file:   survey_export_2026-06-06.csv
+	new file:   tasks.md
+	new file:   test-behavior-activation-rag.ts
+	new file:   test-openrouter 2.js
+	new file:   test-openrouter.js
+	new file:   test_fetch.js
+	new file:   tsc-output.txt
+	new file:   update_survey.py
+	new file:   web/.env.production
+	new file:   web/.gitignore
+	new file:   web/README.md
+	new file:   web/build_output.txt
+	new file:   web/curl_out.txt
+	new file:   web/debug_output.txt
+	new file:   web/eslint.config.js
+	new file:   web/fix_charts.py
+	new file:   web/fix_html.py
+	new file:   web/fix_imports.cjs
+	new file:   web/fix_imports.js
+	new file:   web/functions/api/[[path]].js
+	new file:   web/index.html
+	new file:   web/inject_missing_charts.py
+	new file:   web/package.json
+	new file:   web/postcss.config.js
+	new file:   web/public/_redirects
+	new file:   web/public/cv-models/face_expression_model-shard1
+	new file:   web/public/cv-models/face_expression_model-weights_manifest.json
+	new file:   web/public/cv-models/face_expression_recognition_model-shard1
+	new file:   web/public/cv-models/face_expression_recognition_model-weights_manifest.json
+	new file:   web/public/cv-models/face_landmark_68_model-shard1
+	new file:   web/public/cv-models/face_landmark_68_model-shard1 2
+	new file:   web/public/cv-models/face_landmark_68_model-weights_manifest 2.json
+	new file:   web/public/cv-models/face_landmark_68_model-weights_manifest.json
+	new file:   web/public/cv-models/ssd_mobilenetv1_model-shard1
+	new file:   web/public/cv-models/ssd_mobilenetv1_model-shard1 2
+	new file:   web/public/cv-models/ssd_mobilenetv1_model-shard2
+	new file:   web/public/cv-models/ssd_mobilenetv1_model-shard2 2
+	new file:   web/public/cv-models/ssd_mobilenetv1_model-weights_manifest 2.json
+	new file:   web/public/cv-models/ssd_mobilenetv1_model-weights_manifest.json
+	new file:   web/public/favicon.svg
+	new file:   web/public/icons.svg
+	new file:   web/public/logo.png
+	new file:   web/public/survey/dashboard/index.html
+	new file:   web/public/survey/index.html
+	new file:   web/src/AdminApp.tsx
+	modified:   web/src/App.tsx
+	new file:   web/src/api/auth.ts
+	new file:   web/src/api/chat.ts
+	new file:   web/src/api/client.ts
+	new file:   web/src/assets/hero.png
+	new file:   web/src/assets/react.svg
+	new file:   web/src/assets/vite.svg
+	modified:   web/src/components/auth/LoginModal.tsx
+	modified:   web/src/components/auth/LoginWall.tsx
+	new file:   web/src/components/chat/CameraPanel.tsx
+	new file:   web/src/components/chat/ChatPanel.tsx
+	new file:   web/src/components/chat/EmojiSelector.tsx
+	new file:   web/src/components/chat/GeminiWelcome.tsx
+	modified:   web/src/components/chat/MessageBubble.tsx
+	new file:   web/src/components/chat/OnboardingOverlay.tsx
+	new file:   web/src/components/crisis/CrisisOverlay.tsx
+	new file:   web/src/components/layout/AmbientGlow.tsx
+	new file:   web/src/components/layout/ReThinkLogo.tsx
+	new file:   web/src/components/layout/SessionSidebar.tsx
+	new file:   web/src/components/layout/StageIndicator.tsx
+	new file:   web/src/components/layout/SunlightBackground.tsx
+	new file:   web/src/hooks/useChat.ts
+	new file:   web/src/hooks/useFaceEmotion.ts
+	new file:   web/src/hooks/useVoiceInput.ts
+	new file:   web/src/index.css
+	new file:   web/src/lib/utils.ts
+	new file:   web/src/main.tsx
+	new file:   web/src/store/authStore.ts
+	new file:   web/src/store/chatStore.ts
+	new file:   web/src/store/sessionStore.ts
+	new file:   web/src/types/index.ts
+	new file:   web/tailwind.config.js
+	new file:   web/tsconfig.app.json
+	new file:   web/tsconfig.json
+	new file:   web/tsconfig.node.json
+	new file:   web/vite.config.ts
+	new file:   web/vite.config.ts.timestamp-1781452230421-471025bc94dcb8.mjs
+	new file:   web/vite.config.ts.timestamp-1781709234249-67ccd911f3e9c.mjs
+	new file:   web/vite.config.ts.timestamp-1781777943186-3a3bca460db2.mjs
+	new file:   web/vite_output.txt
+	new file:   web/wrangler.toml
+	new file:   worker/.dev.vars.example
+	new file:   worker/migrations/0001_init.sql
+	new file:   worker/migrations/0002_knowledge_documents.sql
+	new file:   worker/migrations/0003_fsm_state.sql
+	new file:   worker/migrations/0004_surveys.sql
+	new file:   worker/migrations/0005_auth_and_invitations.sql
+	new file:   worker/package.json
+	new file:   worker/src/index.ts
+	new file:   worker/src/lib/auth-utils.ts
+	new file:   worker/src/lib/cbt-stages.ts
+	new file:   worker/src/lib/chunker.ts
+	new file:   worker/src/lib/fsm.ts
+	new file:   worker/src/lib/risk.ts
+	new file:   worker/src/middleware/cors.ts
+	new file:   worker/src/routes/admin.ts
+	new file:   worker/src/routes/auth.ts
+	new file:   worker/src/routes/chat.ts
+	new file:   worker/src/routes/ingest.ts
+	new file:   worker/src/routes/onboarding.ts
+	new file:   worker/src/routes/survey.ts
+	new file:   worker/src/types.ts
+	new file:   worker/test-api 2.js
+	new file:   worker/test-api.js
+	new file:   worker/test-api2 2.js
+	new file:   worker/test-api2.js
+	new file:   worker/test-api3 2.js
+	new file:   worker/test-api3.js
+	new file:   worker/test-login 2.js
+	new file:   worker/test-login.js
+	new file:   worker/test_llm.ts
+	new file:   worker/test_llm_2.ts
+	new file:   worker/test_llm_3.ts
+	new file:   worker/tsconfig.json
+	new file:   worker/worker-configuration.d.ts
+	new file:   worker/worker_logs.txt
+	new file:   "\350\265\233\351\241\271\344\270\211_\351\231\204\344\273\266\344\270\200 (1).docx"
+
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   .agents/orchestrator/BRIEFING.md
+	modified:   .agents/orchestrator/PROJECT.md
+	modified:   .agents/orchestrator/handoff.md
+	modified:   .agents/orchestrator/progress.md
+	modified:   .agents/sentinel/BRIEFING.md
+	modified:   .agents/sentinel/handoff.md
+	modified:   .agents/victory_auditor/BRIEFING.md
+	modified:   .agents/victory_auditor/handoff.md
+	modified:   .agents/victory_auditor/progress.md
+	modified:   ORIGINAL_REQUEST.md
+	modified:   api-proxy/_worker.js
+	modified:   package-lock.json
+	modified:   package.json
+	deleted:    test-openrouter 2.js
+	modified:   web/package.json
+	deleted:    web/public/cv-models/face_landmark_68_model-shard1 2
+	deleted:    web/public/cv-models/face_landmark_68_model-weights_manifest 2.json
+	deleted:    web/public/cv-models/ssd_mobilenetv1_model-shard1 2
+	deleted:    web/public/cv-models/ssd_mobilenetv1_model-shard2 2
+	deleted:    web/public/cv-models/ssd_mobilenetv1_model-weights_manifest 2.json
+	modified:   web/src/AdminApp.tsx
+	modified:   web/src/App.tsx
+	modified:   web/src/components/auth/LoginModal.tsx
+	modified:   web/src/components/auth/LoginWall.tsx
+	modified:   web/src/components/chat/MessageBubble.tsx
+	modified:   web/src/components/layout/AmbientGlow.tsx
+	modified:   web/src/components/layout/ArtMeshBackground.tsx
+	deleted:    web/src/components/layout/StageIndicator.tsx
+	deleted:    web/src/components/layout/SunlightBackground.tsx
+	modified:   web/src/hooks/useChat.ts
+	modified:   web/src/hooks/useFaceEmotion.ts
+	modified:   web/tsconfig.app.json
+	modified:   worker/src/routes/auth.ts
+	deleted:    worker/test-api 2.js
+	deleted:    worker/test-api2 2.js
+	deleted:    worker/test-api3 2.js
+	deleted:    worker/test-login 2.js
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	.agents/AGENTS.md
+	.agents/ORIGINAL_REQUEST.md
+	.agents/orchestrator/ORIGINAL_REQUEST.md
+	.agents/orchestrator/plan.md
+	.agents/teamwork_preview_auditor_1/
+	.agents/teamwork_preview_challenger_1/
+	.agents/teamwork_preview_challenger_2/
+	.agents/teamwork_preview_explorer_analysis_1/
+	.agents/teamwork_preview_explorer_analysis_2/
+	.agents/teamwork_preview_reviewer_1/
+	.agents/teamwork_preview_reviewer_2/
+	.agents/teamwork_preview_worker_implementation_1/
+	.agents/teamwork_preview_worker_refactoring_1/
+	.agents/teamwork_preview_worker_testing_1/
+	.agents/teamwork_preview_worker_ui_1/
+	.agents/victory_auditor/ORIGINAL_REQUEST.md
+	PROJECT.md
+	scripts/api-verify.mjs
+	web/e2e/
+	web/playwright.config.ts
+	web/src/components/admin/
+	web/src/components/chat/MessageBubble.test.tsx
+	web/src/components/ui/
+	web/src/test/
+	web/test-results/
+	web/vite.config.ts.timestamp-1781789986175-1b5652fffb2018.mjs
+	web/vitest.config.ts
+
+
+It took 8.76 seconds to enumerate untracked files.
+See 'git help status' for information on how to improve this.
+
