@@ -1,12 +1,65 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { User, Key } from 'lucide-react';
 import { LoginModal } from './LoginModal';
 import { DecryptText } from '../ui/DecryptText';
 import { BlurText } from '../ui/BlurText';
-
+import { useAuthStore } from '../../store/authStore';
+import { useChatStore } from '../../store/chatStore';
+import type { AuthResponse } from '../../types';
 
 export function LoginWall() {
+  const login = useAuthStore(state => state.login);
+  const sessionId = useChatStore(state => state.sessionId);
+
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleGuestAccess = async () => {
+    if (loading) return;
+    setLoading(true);
+    setError(null);
+    const API_BASE = import.meta.env.VITE_API_URL || '';
+
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/test-login`.replace(/\/api\/api\//g, '/api/'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+
+      const data: AuthResponse = await res.json();
+
+      if (!res.ok || !data.success) {
+        setError(data.error || '访客登录失败，请重试');
+        setLoading(false);
+        return;
+      }
+
+      login(data.user, data.token);
+
+      if (sessionId) {
+        try {
+          await fetch(`${API_BASE}/api/auth/bind-session`.replace(/\/api\/api\//g, '/api/'), {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${data.token}`
+            },
+            body: JSON.stringify({ sessionId })
+          });
+        } catch (bindErr) {
+          console.warn('Failed to bind active session on guest access:', bindErr);
+        }
+      }
+    } catch (err: any) {
+      console.error('Guest login error:', err);
+      setError('网络连接失败，请稍后重试');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-surface-dim text-on-surface overflow-hidden selection:bg-gemini-blue/20 font-sans">
@@ -40,40 +93,82 @@ export function LoginWall() {
               <BlurText text="探索内心 · 寻找平静" delay={1.5} />
             </motion.p>
 
-            {/* Magnetic 'De-UI' Entry Orb with Floating Motion */}
-            <motion.div
-              animate={{ y: [0, -6, 0] }}
-              transition={{
-                repeat: Infinity,
-                duration: 4,
-                ease: "easeInOut"
-              }}
-              className="pointer-events-auto"
-            >
-              <motion.button 
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 1.5, delay: 2.5 }}
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.92 }}
-                onClick={() => setIsLoginModalOpen(true)}
-                className="relative group flex items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-full"
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-8 bg-error-container/80 border border-error/20 text-error text-xs tracking-wider px-4 py-2.5 rounded-2xl shadow-sm z-20 pointer-events-auto"
               >
-                {/* Glass Orb background */}
-                <div className="absolute inset-0 rounded-full bg-surface-container/20 backdrop-blur-md border border-outline-variant/30 shadow-[0_0_40px_rgba(255,255,255,0.3)] transition-all duration-700 group-hover:bg-surface-container/30 group-hover:border-outline/45 group-hover:shadow-[0_0_60px_rgba(255,255,255,0.6)]" />
-                
-                {/* Pulsing Core */}
-                <motion.div 
-                  animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.15, 1] }}
-                  transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-                  className="absolute inset-0 rounded-full bg-amber-100/20 blur-xl" 
-                />
-                
-                <span className="relative text-xs font-medium tracking-[0.2em] uppercase text-on-surface-variant hover:text-on-surface transition-colors">
-                  进入
-                </span>
+                {error}
+              </motion.div>
+            )}
+            
+            {/* Control Group: Guest Access and Member Login */}
+            <div className="flex flex-col items-center gap-6 pointer-events-auto relative z-20">
+              {/* Primary Guest Entry Orb */}
+              <motion.div
+                animate={{ y: loading ? 0 : [0, -6, 0] }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 4,
+                  ease: "easeInOut"
+                }}
+              >
+                <motion.button 
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 1.5, delay: 2.2 }}
+                  whileHover={{ scale: loading ? 1 : 1.08 }}
+                  whileTap={{ scale: loading ? 1 : 0.92 }}
+                  onClick={handleGuestAccess}
+                  disabled={loading}
+                  aria-label="访客直达体验"
+                  title="访客直达体验"
+                  className="relative group flex items-center justify-center w-24 h-24 md:w-28 md:h-28 rounded-full cursor-pointer"
+                >
+                  {/* Glass Orb background */}
+                  <div className="absolute inset-0 rounded-full bg-surface-container/25 backdrop-blur-xl border border-outline-variant/35 shadow-[0_0_40px_rgba(255,255,255,0.25)] transition-all duration-700 group-hover:bg-surface-container/35 group-hover:border-outline/50 group-hover:shadow-[0_0_60px_rgba(255,255,255,0.55)]" />
+                  
+                  {/* Pulsing Core */}
+                  <motion.div 
+                    animate={{ 
+                      opacity: loading ? [0.4, 0.8, 0.4] : [0.15, 0.4, 0.15], 
+                      scale: loading ? [1, 1.2, 1] : [1, 1.15, 1] 
+                    }}
+                    transition={{ repeat: Infinity, duration: loading ? 1.5 : 3, ease: "easeInOut" }}
+                    className={`absolute inset-0 rounded-full bg-amber-100/25 blur-xl`} 
+                  />
+
+                  {/* Loading spinner overlay */}
+                  {loading && (
+                    <div className="absolute inset-2 rounded-full border-t border-l border-on-surface/40 animate-spin" />
+                  )}
+                  
+                  <div className="relative flex flex-col items-center gap-1.5 text-on-surface-variant group-hover:text-on-surface transition-colors">
+                    <User className={`w-6 h-6 stroke-[1.25] ${loading ? 'animate-pulse' : ''}`} />
+                    <span className="text-[10px] font-light tracking-[0.25em] translate-x-[0.125em] opacity-80 group-hover:opacity-100 transition-opacity uppercase">
+                      {loading ? '连接中' : '访客体验'}
+                    </span>
+                  </div>
+                </motion.button>
+              </motion.div>
+
+              {/* Secondary Member Login Button */}
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1.5, delay: 2.8 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsLoginModalOpen(true)}
+                disabled={loading}
+                aria-label="成员登录"
+                title="成员登录"
+                className="flex items-center justify-center p-2.5 bg-surface-container/20 hover:bg-surface-container/45 border border-outline-variant/30 rounded-full cursor-pointer w-10 h-10 text-on-surface-variant/70 hover:text-on-surface transition-all duration-300"
+              >
+                <Key className="w-4 h-4 stroke-[1.5]" />
               </motion.button>
-            </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
