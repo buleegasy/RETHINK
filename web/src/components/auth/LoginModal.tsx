@@ -220,7 +220,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 </p>
               </div>
               <div className="relative z-10 text-[10px] tracking-widest uppercase text-on-surface-variant/60 font-medium">
-                © 2026 心理交互艺术装置
+                © 2026 RETHINK 心理疏导智能体
               </div>
             </div>
 

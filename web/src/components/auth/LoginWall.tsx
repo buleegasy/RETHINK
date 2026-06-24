@@ -104,7 +104,7 @@ export function LoginWall() {
             )}
             
             {/* Control Group: Guest Access and Member Login */}
-            <div className="flex flex-col items-center gap-6 pointer-events-auto relative z-20">
+            <div className="flex flex-row items-center justify-center gap-8 md:gap-12 pointer-events-auto relative z-20">
               {/* Primary Guest Entry Orb */}
               <motion.div
                 animate={{ y: loading ? 0 : [0, -6, 0] }}
@@ -122,9 +122,9 @@ export function LoginWall() {
                   whileTap={{ scale: loading ? 1 : 0.92 }}
                   onClick={handleGuestAccess}
                   disabled={loading}
-                  aria-label="访客直达体验"
-                  title="访客直达体验"
-                  className="relative group flex items-center justify-center w-24 h-24 md:w-28 md:h-28 rounded-full cursor-pointer"
+                  aria-label="访客体验"
+                  title="访客体验"
+                  className="relative group flex items-center justify-center w-28 h-28 md:w-32 md:h-32 rounded-full cursor-pointer"
                 >
                   {/* Glass Orb background */}
                   <div className="absolute inset-0 rounded-full bg-surface-container/25 backdrop-blur-xl border border-outline-variant/35 shadow-[0_0_40px_rgba(255,255,255,0.25)] transition-all duration-700 group-hover:bg-surface-container/35 group-hover:border-outline/50 group-hover:shadow-[0_0_60px_rgba(255,255,255,0.55)]" />
@@ -136,7 +136,7 @@ export function LoginWall() {
                       scale: loading ? [1, 1.2, 1] : [1, 1.15, 1] 
                     }}
                     transition={{ repeat: Infinity, duration: loading ? 1.5 : 3, ease: "easeInOut" }}
-                    className={`absolute inset-0 rounded-full bg-amber-100/25 blur-xl`} 
+                    className="absolute inset-0 rounded-full bg-cyan-500/10 blur-xl" 
                   />
 
                   {/* Loading spinner overlay */}
@@ -144,9 +144,9 @@ export function LoginWall() {
                     <div className="absolute inset-2 rounded-full border-t border-l border-on-surface/40 animate-spin" />
                   )}
                   
-                  <div className="relative flex flex-col items-center gap-1.5 text-on-surface-variant group-hover:text-on-surface transition-colors">
-                    <User className={`w-6 h-6 stroke-[1.25] ${loading ? 'animate-pulse' : ''}`} />
-                    <span className="text-[10px] font-light tracking-[0.25em] translate-x-[0.125em] opacity-80 group-hover:opacity-100 transition-opacity uppercase">
+                  <div className="relative flex flex-col items-center gap-2 text-on-surface-variant group-hover:text-on-surface transition-colors">
+                    <User className={`w-7 h-7 stroke-[1.25] ${loading ? 'animate-pulse' : ''}`} />
+                    <span className="text-[11px] font-medium tracking-[0.25em] translate-x-[0.125em] opacity-80 group-hover:opacity-100 transition-opacity uppercase">
                       {loading ? '连接中' : '访客体验'}
                     </span>
                   </div>
@@ -154,20 +154,47 @@ export function LoginWall() {
               </motion.div>
 
               {/* Secondary Member Login Button */}
-              <motion.button
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1.5, delay: 2.8 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setIsLoginModalOpen(true)}
-                disabled={loading}
-                aria-label="成员登录"
-                title="成员登录"
-                className="flex items-center justify-center p-2.5 bg-surface-container/20 hover:bg-surface-container/45 border border-outline-variant/30 rounded-full cursor-pointer w-10 h-10 text-on-surface-variant/70 hover:text-on-surface transition-all duration-300"
+              <motion.div
+                animate={{ y: loading ? 0 : [0, -6, 0] }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 4.5,
+                  ease: "easeInOut"
+                }}
               >
-                <Key className="w-4 h-4 stroke-[1.5]" />
-              </motion.button>
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 1.5, delay: 2.5 }}
+                  whileHover={{ scale: loading ? 1 : 1.08 }}
+                  whileTap={{ scale: loading ? 1 : 0.92 }}
+                  onClick={() => setIsLoginModalOpen(true)}
+                  disabled={loading}
+                  aria-label="成员通道"
+                  title="成员通道"
+                  className="relative group flex items-center justify-center w-28 h-28 md:w-32 md:h-32 rounded-full cursor-pointer"
+                >
+                  {/* Glass Orb background */}
+                  <div className="absolute inset-0 rounded-full bg-surface-container/25 backdrop-blur-xl border border-outline-variant/35 shadow-[0_0_40px_rgba(255,255,255,0.25)] transition-all duration-700 group-hover:bg-surface-container/35 group-hover:border-outline/50 group-hover:shadow-[0_0_60px_rgba(255,255,255,0.55)]" />
+                  
+                  {/* Pulsing Core */}
+                  <motion.div 
+                    animate={{ 
+                      opacity: [0.15, 0.4, 0.15], 
+                      scale: [1, 1.15, 1] 
+                    }}
+                    transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
+                    className="absolute inset-0 rounded-full bg-amber-500/10 blur-xl" 
+                  />
+                  
+                  <div className="relative flex flex-col items-center gap-2 text-on-surface-variant group-hover:text-on-surface transition-colors">
+                    <Key className="w-7 h-7 stroke-[1.25]" />
+                    <span className="text-[11px] font-medium tracking-[0.25em] translate-x-[0.125em] opacity-80 group-hover:opacity-100 transition-opacity uppercase">
+                      成员登录
+                    </span>
+                  </div>
+                </motion.button>
+              </motion.div>
             </div>
           </motion.div>
         )}
@@ -181,15 +208,15 @@ export function LoginWall() {
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1 }}
               className="absolute top-6 left-6 right-6 md:top-8 md:left-8 md:right-8 flex justify-between items-center text-[9px] md:text-[10px] tracking-[0.3em] uppercase text-on-surface-variant/40 font-medium z-10 pointer-events-none"
             >
-              <span>展览 01</span>
-              <span>内心空间</span>
+              <span>智能系统 01</span>
+              <span>心境空间</span>
             </motion.div>
             
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1 }}
               className="absolute bottom-6 left-6 right-6 md:bottom-8 md:left-8 md:right-8 flex justify-center text-[9px] md:text-[10px] tracking-[0.2em] uppercase text-on-surface-variant/30 font-medium z-10 pointer-events-none"
             >
-              <span>© 2026 心理交互艺术装置</span>
+              <span>© 2026 RETHINK 心理疏导智能体</span>
             </motion.div>
           </>
         )}
