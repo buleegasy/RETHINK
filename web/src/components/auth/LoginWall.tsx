@@ -3,15 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LoginModal } from './LoginModal';
 import { DecryptText } from '../ui/DecryptText';
 import { BlurText } from '../ui/BlurText';
-import { AmbientGlow } from '../layout/AmbientGlow';
 
 
 export function LoginWall() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col text-on-surface overflow-hidden selection:bg-gemini-blue/20 font-sans">
-      <AmbientGlow forceShow={true} />
+    <div className="fixed inset-0 z-50 flex flex-col bg-surface-dim text-on-surface overflow-hidden selection:bg-gemini-blue/20 font-sans">
       {/* Extreme De-UI Aesthetics */}
       <AnimatePresence>
         {!isLoginModalOpen && (
@@ -96,7 +94,7 @@ export function LoginWall() {
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1 }}
               className="absolute bottom-6 left-6 right-6 md:bottom-8 md:left-8 md:right-8 flex justify-center text-[9px] md:text-[10px] tracking-[0.2em] uppercase text-on-surface-variant/30 font-medium z-10 pointer-events-none"
             >
-              <span>© 2026 The Mind</span>
+              <span>© 2026 心理交互艺术装置</span>
             </motion.div>
           </>
         )}

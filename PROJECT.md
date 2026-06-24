@@ -15,6 +15,8 @@ RETHINK is a digital art & psychological safety sanctuary built on React, Vite, 
 | 1 | Layout Restructuring | Conditionally render ChatPanel vs LoginWall based on `isAuthenticated` in `App.tsx` | None | DONE |
 | 2 | Premium Animation | Implement premium animations (e.g. `DecryptText`, `BlurText`) and apply to title/subtitle in `LoginWall` | M1 | DONE |
 | 3 | Code Verification | Run compilation, verification scripts, and check for layout overlaps | M2 | DONE |
+| 4 | UI Refactoring & Localization | Fix UI overlap, remove AmbientGlow, replace text buttons with icons, localize to Chinese | M3 | DONE |
+| 5 | Verification & Audit | Verify build, run Vitest and Playwright tests, run Forensic Auditor | M4 | DONE |
 
 ## Interface Contracts
 ### App ↔ LoginWall

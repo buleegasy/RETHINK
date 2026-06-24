@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 
 import { ChatPanel } from './components/chat/ChatPanel';
 import { InputBar } from './components/chat/InputBar';
-import { AmbientGlow } from './components/layout/AmbientGlow';
 import { LoginWall } from './components/auth/LoginWall';
 import { SessionSidebar } from './components/layout/SessionSidebar';
 import { useChat } from './hooks/useChat';
@@ -82,13 +81,11 @@ function App() {
   }, [sendMessage]);
 
   return (
-    <div className="fixed inset-0 flex w-full h-[100dvh] max-h-[100dvh] overflow-hidden bg-surface-dim/40 text-on-surface font-sans selection:bg-gemini-blue/20">
+    <div className="fixed inset-0 flex w-full h-[100dvh] max-h-[100dvh] overflow-hidden bg-surface-dim text-on-surface font-sans selection:bg-gemini-blue/20">
       {isAuthenticated ? (
         <>
-          {/* Authenticated: show fluid art background + workspace */}
-          <AmbientGlow />
           {/* 主对话区 (Workspace Layout) */}
-          <div className="flex flex-col flex-1 h-full relative z-10">
+          <div className="flex flex-col flex-1 h-full relative z-10 bg-surface-dim">
             {/* ── 移动端顶部 Header ── */}
             <div className="md:hidden flex items-center justify-between pt-[max(env(safe-area-inset-top),12px)] pb-2.5 px-4 shrink-0 z-20 border-b border-outline-variant/30">
               {/* 左侧：Hamburger 菜单 */}
@@ -100,7 +97,11 @@ function App() {
                   className="text-on-surface-variant hover:text-on-surface min-w-[44px] min-h-[44px] flex items-center justify-start transition-colors cursor-pointer"
                   aria-label="打开侧边栏"
                 >
-                  <span className="text-[11px] tracking-wide text-on-surface-variant">菜单</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-on-surface-variant">
+                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                    <line x1="4" y1="6" x2="20" y2="6"></line>
+                    <line x1="4" y1="18" x2="20" y2="18"></line>
+                  </svg>
                 </motion.button>
               </div>
 
@@ -165,9 +166,12 @@ function App() {
             type="button"
             onClick={() => setSidebarOpen(true)}
             aria-label="历史对话"
-            className="absolute top-6 left-6 z-40 hidden md:flex items-center text-[11px] tracking-wide text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
+            className="absolute top-6 left-6 z-40 hidden md:flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer p-2 bg-surface-container/30 hover:bg-surface-container/60 border border-outline-variant/30 rounded-full w-10 h-10"
           >
-            历史
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
           </motion.button>
 
           {/* ── Desktop Profile Pill ── */}

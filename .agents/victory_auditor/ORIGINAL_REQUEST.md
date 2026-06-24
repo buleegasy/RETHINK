@@ -35,3 +35,8 @@ Phase 3: Independent Test Execution (verify that you can run `npm run test:unit`
 Please report your verdict: VICTORY CONFIRMED or VICTORY REJECTED with a structured audit report.
 
 
+
+## 2026-06-24T10:31:36Z
+You are the Victory Auditor. The Project Orchestrator has claimed project completion.
+Please perform the mandatory 3-phase post-victory audit (timeline audit, cheating/facade detection, independent test execution) to verify all R1, R2, and R3 requirements and Acceptance Criteria in /Users/chenhaoran/工程文件/心理大赛/ORIGINAL_REQUEST.md.
+Analyze the codebase in /Users/chenhaoran/工程文件/心理大赛/ and determine if the changes are correct, clean, and complete. Report your verdict clearly: either 'VICTORY CONFIRMED' or 'VICTORY REJECTED' with detailed findings. Write your audit report to `.agents/victory_auditor/audit.md`.

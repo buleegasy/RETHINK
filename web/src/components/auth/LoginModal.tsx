@@ -342,10 +342,14 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   type="button"
                   onClick={handleTestLogin}
                   disabled={loading}
-                  className="text-[11px] tracking-widest uppercase text-on-surface-variant/80 hover:text-on-surface transition-colors font-medium relative group cursor-pointer"
+                  aria-label="访客体验"
+                  title="访客体验"
+                  className="text-on-surface-variant/80 hover:text-on-surface transition-colors flex items-center justify-center mx-auto p-2 bg-surface-container/30 hover:bg-surface-container/60 border border-outline-variant/30 rounded-full cursor-pointer w-10 h-10"
                 >
-                  <span className="relative z-10">访客体验</span>
-                  <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-on-surface/40 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500" />
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
                 </motion.button>
               </div>
             </div>

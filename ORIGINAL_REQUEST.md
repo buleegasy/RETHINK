@@ -22,15 +22,6 @@ Integrity mode: development
 
 ## Acceptance Criteria
 
-### 文档专业度与完整性
-- [ ] 知识库文档包含针对 4 大压力域的完整干预行动，每项行动均有明确的耗时、步骤及神经自主系统调节机制说明。
-- [ ] 文档格式为符合分块器读取的 Markdown 结构（含清晰的 H2 二级标题与关键词标注）。
-
-### 知识库导入与质量校验
-- [ ] 测试脚本能成功跑通 5 个测试用例，输出召回的知识片段标题、相关度得分和耗时。
-- [ ] 所有测试用例在 Vectorize 中的检索召回匹配度为 100%（即针对学业问题必须匹配学业习惯，社交问题必须匹配社交习惯）。
-- [ ] 测试脚本能够通过本地 `npx tsx` 无错运行。
-
 ## Follow-up — 2026-06-18T15:31:39Z
 
 Deeply refactor the `LoginWall` and Landing Page components to completely resolve overlapping layout bugs. Elevate the UI to a premium level by integrating smooth, high-performance animations and components from `reactbits.dev` (e.g., text transitions, animated backgrounds).
@@ -49,24 +40,7 @@ Browse and select suitable animation components from `reactbits.dev` (e.g., anim
 ### R3. Maintain Core Logic
 The refactoring must preserve the existing authentication functionality, forms, state management, and validation rules without breaking the user flow.
 
-## Verification Resources
-Use a hybrid approach combining programmatic testing and Agent-as-Judge:
-- **Programmatic Testing**: Create a script or use an existing test suite to verify that the refactored components render without throwing errors and that the page loads correctly.
-- **Agent-as-Judge**: A peer subagent will review the code to confirm that overlapping elements (e.g., absolute positioning conflicts, missing relative containers) have been structurally resolved and that `reactbits.dev` components were implemented correctly.
-
 ## Acceptance Criteria
-
-### Layout Integrity
-- [ ] The structural code clearly separates the login area and landing page, eliminating z-index or absolute positioning conflicts.
-- [ ] An Agent-as-Judge confirms the overlapping issue is resolved based on the DOM/component structure.
-
-### Animation Quality
-- [ ] At least one animated component from `reactbits.dev` is successfully integrated.
-- [ ] Animations use hardware-accelerated properties (`transform`, `opacity`) and avoid layout shifts.
-
-### Functionality
-- [ ] An automated test or verification script confirms that the refactored components mount and render successfully.
-- [ ] The user authentication flow remains completely intact.
 
 ## Follow-up — 2026-06-19T04:02:45Z
 
@@ -88,11 +62,33 @@ Establish a multi-layered testing suite. This must include unit/component tests 
 
 ## Acceptance Criteria
 
-### UI & Architecture
-- [ ] TypeScript compilation (`npx tsc --noEmit`) passes with zero errors.
-- [ ] React UI components scale gracefully down to mobile widths (375px) without horizontal overflow or clipping.
+## Follow-up — 2026-06-23T23:27:02+08:00
 
-### Testing & Verification
-- [ ] A test script (`npm run test:unit` or similar) runs and successfully passes core unit/component tests.
-- [ ] An E2E test script runs and successfully verifies the main chat/login user flow without manual intervention.
-- [ ] An API verification script successfully executes and validates at least two backend endpoints (e.g., chat, auth, or survey).
+# Teamwork Project Prompt — Draft
+
+> Status: Launched
+> Goal: Teamwork subagent executing task
+
+The goal is to fix UI overlapping issues between the login and landing pages, remove the current flowing animated backgrounds for a cleaner aesthetic, unify the design language, replace text-heavy controls (mic, history, guest access) with restrained icon-based buttons, and fully localize the interface to Chinese.
+
+Working directory: `/Users/chenhaoran/工程文件/心理大赛`
+Integrity mode: benchmark
+
+## Requirements
+
+### R1. Fix UI Overlap
+Ensure the Login Wall and the main chat interface do not overlap. Modify the rendering logic so the login screen acts as a distinct view that completely hides the underlying app until authentication is complete.
+
+### R2. Clean Background & Unified Design
+Remove the current "dirty" flowing/curved backgrounds (e.g., `AmbientGlow` and `ArtMeshBackground`). Replace them with a highly restrained, clean, and unified design language. The exact style is left to the team's discretion, as long as it avoids ugly overlapping curves.
+
+### R3. Icon-based Controls & Localization
+Refactor text-based action buttons (such as `[MIC]`, `[HISTORY]`, `[SEND]`, and Guest Access options) into minimalist icon buttons. Translate any remaining interface text into Chinese. The team may choose the appropriate icon library.
+
+## Acceptance Criteria
+
+### Code Level Checks
+- [ ] `AmbientGlow` and `ArtMeshBackground` are no longer rendered in the main application layout (`App.tsx` or `LoginWall.tsx`).
+- [ ] Hardcoded text labels like `[MIC]`, `[HISTORY]`, and `[SEND]` are entirely removed from `InputBar.tsx` and `App.tsx`, replaced by icon components.
+- [ ] `LoginWall.tsx` and `App.tsx` have mutually exclusive rendering (e.g. `!isAuthenticated && <LoginWall />` but without background transparency leaking the chat interface), ensuring zero visual overlap.
+- [ ] The text "Guest Access" or similar is translated/replaced. All visible UI text in the edited files is strictly in Chinese.
