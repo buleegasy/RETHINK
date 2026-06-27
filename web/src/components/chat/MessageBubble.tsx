@@ -219,7 +219,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                         
                         {/* ─── SYSTEM ─── */}
                         <div className="grid grid-cols-2 gap-2 pb-1.5 border-b border-outline-variant/30 text-[10px] text-on-surface-variant/60 font-semibold">
-                          <div>驱动模型: <span className="text-on-surface">{tc.model || 'unknown'}</span></div>
+                          <div>驱动模型: <span className="text-on-surface">DeepSeek V4flash</span></div>
                           <div className="text-right">响应延迟: <span className="text-on-surface">{tc.latencyMs !== undefined ? `${tc.latencyMs}ms` : 'N/A'}</span></div>
                         </div>
 
