@@ -7,7 +7,11 @@ import type { AuthResponse } from '../../types';
 
 declare global {
   interface Window {
-    turnstile?: any;
+    turnstile?: {
+      render: (container: string | HTMLElement, options: Record<string, unknown>) => string;
+      reset: (container: string | HTMLElement) => void;
+      remove: (container: string | HTMLElement) => void;
+    };
   }
 }
 
@@ -135,7 +139,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           console.warn('Failed to bind active session on login:', bindErr);
         }
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Submit auth error:', err);
       setError('网络请求失败，请检查连接');
       if (window.turnstile) window.turnstile.reset('#turnstile-container-modal');
@@ -181,7 +185,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           console.warn('Failed to bind active session on test login:', bindErr);
         }
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Test login error:', err);
       setError('网络请求失败，请检查连接');
     } finally {

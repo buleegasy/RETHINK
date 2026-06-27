@@ -93,6 +93,7 @@ export interface MessageTechChain {
 
 // 聊天消息
 export interface ChatMessage {
+  id?: string;
   role: 'system' | 'user' | 'assistant';
   content: string;
   techChain?: MessageTechChain;

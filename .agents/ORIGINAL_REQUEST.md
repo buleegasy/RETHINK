@@ -122,3 +122,104 @@ Ensure all fixes align with the current design system (Tailwind CSS, existing co
 - [ ] No visual artifacts (like the previous black mesh issue) are present on the main interface.
 - [ ] Layout remains responsive and unbroken across different simulated device sizes.
 
+## Follow-up — 2026-06-24T12:51:19Z
+
+# Teamwork Project Prompt — Draft
+
+> Status: Launched
+> Goal: Teamwork subagent executing task
+
+Review the entire project codebase and automatically refactor UI components to ensure the design language fully aligns with the newly updated terminal-like 'Tech Chain' (后台推演) panel, Gemini MD3 standards, and modern web guidelines.
+
+Working directory: `/Users/chenhaoran/工程文件/心理大赛`
+Integrity mode: benchmark
+
+## Requirements
+
+### R1. Global Aesthetic Unification
+Identify and refactor UI components across the project that deviate from the established Gemini MD3 design system and the high-density terminal style of the "后台推演" panel. Remove emojis where inappropriate, enforce consistent typography (`font-mono` for technical data, `font-sans` for prose), and utilize existing design tokens from `index.css`.
+
+### R2. Skill Integration
+Consult the `modern-web-guidance` and `motion-skill` documents prior to making modifications. Ensure that any structural or layout changes adhere to these modern web best practices (e.g., logical properties, backdrop filters, view transitions if applicable).
+
+### R3. Reference Existing Patterns
+Deeply analyze `web/src/components/chat/MessageBubble.tsx` to extract the correct color mapping (`INTENT_COLOR`), corner radii logic, and semantic background usage (`surface-container/40`, etc.), and apply these patterns consistently to other components like sidebars, inputs, or headers.
+
+## Acceptance Criteria
+
+### Aesthetic & Refactoring
+- [ ] At least 3 major components outside of `MessageBubble.tsx` (e.g., `InputBar.tsx`, `SessionSidebar.tsx`, `CrisisOverlay.tsx`) have been reviewed and updated to strictly use MD3 semantic colors and remove conflicting colloquial elements.
+- [ ] No inline BEM classes or legacy styling patterns remain in the modified files; all modified files utilize the `@layer` utilities or direct Tailwind semantic tokens defined in `index.css`.
+
+### Integrity & Verification
+- [ ] The command `npm run build --workspace=web` from the project root executes successfully with exit code 0.
+- [ ] No regression or visual overlap is introduced (e.g., the Login Wall remains distinct from the main app Workspace).
+
+## Follow-up — 2026-06-27T16:31:32+08:00
+
+# Teamwork Project Prompt — Draft
+
+> Status: Launched
+> Goal: Craft prompt → get user approval → delegate to teamwork_preview
+
+Meticulously review the entire RE-THINK project (frontend, backend, and E2E tests). Use the `modern-web-guidance` skill for frontend best practices, and the `browser` subagent for manual visual/functional testing. Report all findings first before attempting any fixes.
+
+Working directory: `/Users/chenhaoran/工程文件/心理大赛/`
+Integrity mode: benchmark
+
+## Requirements
+
+### R1. Frontend UI/UX and Code Audit
+Use the `modern-web-guidance` skill to audit the frontend codebase. Identify any deviations from modern web best practices (e.g., legacy CSS, missing accessibility features, suboptimal React patterns). 
+
+### R2. Browser Manual Testing
+Start the local development server and use the `browser` subagent to manually navigate the core application flows (e.g., Login, Chat intervention). Identify any visual glitches, console errors, or functional bugs.
+
+### R3. Backend API and E2E Audit
+Review the backend API/worker codebase (`worker/` directory) for logical flaws or performance issues. Execute the existing E2E Playwright tests and unit scripts (e.g. `npm run test:e2e`, `npm run test:api`) to verify current system health.
+
+### R4. Comprehensive Audit Report
+Generate a detailed report of all findings without modifying the project's source code. The report must be categorized and prioritized.
+
+## Acceptance Criteria
+
+### Audit Quality and Scope
+- [ ] A comprehensive `audit_report.md` is generated in the workspace.
+- [ ] The report explicitly references guidelines from the `modern-web-guidance` skill.
+- [ ] The report contains findings from the `browser` subagent's manual navigation.
+- [ ] The report includes the execution results of the E2E and API test scripts.
+- [ ] No project source code is modified during this phase (read-only audit).
+
+## Follow-up — 2026-06-27T11:13:44Z
+
+# Teamwork Project Prompt — Draft
+
+> Status: Launched
+> Goal: Craft prompt → get user approval → delegate to teamwork_preview
+
+为现有的聊天应用增加“删除单条聊天记录”的功能。需要包含前端和后端实现，前端需要提供二次确认弹窗、加载状态，并调用后端 API 从数据库中删除对应的记录，同时同步更新前端的 UI 状态。质量要求为生产级别。
+
+Working directory: /Users/chenhaoran/工程文件/心理大赛
+Integrity mode: development
+
+## Requirements
+
+### R1. 后端 API 实现 (Backend)
+实现一个删除单条聊天记录的后端接口，能够安全地从数据库中删除指定 ID 的消息，并处理可能的错误（如消息不存在或无权限）。
+
+### R2. 前端交互与 API 对接 (Frontend)
+在每条消息气泡旁添加删除按钮。点击后弹出二次确认弹窗。确认后调用后端 API，展示加载中状态，并在成功后从前端状态中移除该消息。
+
+## Acceptance Criteria
+
+### API Verification
+- [ ] 必须提供自动化的后端测试脚本（如使用 Jest、Mocha 或 pytest 等），验证成功删除消息的场景。
+- [ ] 必须在测试脚本中验证错误场景（例如删除不存在的 ID 时返回 404/400 状态码）。
+
+### Frontend Verification
+- [ ] 必须提供前端组件的单元测试（如 React Testing Library/Vue Test Utils），验证点击删除按钮会触发确认弹窗。
+- [ ] 必须在测试中验证当模拟 API 请求处于 pending 状态时，界面会展示加载状态（如 loading spinner）。
+- [ ] 必须验证 API 请求成功后，该消息组件从 DOM 中被正确移除。
+
+
+

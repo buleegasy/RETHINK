@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { KeyRound, LogOut, Plus, Trash2, Edit2, Check, X, Key } from 'lucide-react';
 import { ReThinkLogo } from '../layout/ReThinkLogo';
@@ -32,7 +32,7 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
   const [editingCode, setEditingCode] = useState<string | null>(null);
   const [editMaxUses, setEditMaxUses] = useState(1);
 
-  const fetchCodes = async () => {
+  const fetchCodes = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -51,11 +51,14 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, onLogout]);
 
   useEffect(() => {
-    fetchCodes();
-  }, []);
+    const timer = setTimeout(() => {
+      fetchCodes();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchCodes]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();

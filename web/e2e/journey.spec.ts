@@ -46,15 +46,10 @@ test.describe('RE-THINK Guest Journey', () => {
     // Go to landing page
     await page.goto('/');
 
-    // Wait for the "进入" button to be visible (allows time for Vite dev compilation)
-    const enterButton = page.locator('button:has-text("进入")');
-    await expect(enterButton).toBeVisible({ timeout: 15000 });
-    await enterButton.click({ force: true });
-
     // Verify Guest Access option is visible and click it
     const guestAccessButton = page.locator('button[aria-label="访客体验"]');
-    await expect(guestAccessButton).toBeVisible({ timeout: 10000 });
-    await guestAccessButton.click();
+    await expect(guestAccessButton).toBeVisible({ timeout: 15000 });
+    await guestAccessButton.click({ force: true });
 
     // Verify sanctuary / welcome greeting is displayed
     const welcomeHeader = page.locator('h1:has-text("你好，欢迎来到这里")');

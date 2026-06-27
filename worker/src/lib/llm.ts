@@ -300,6 +300,6 @@ export function getLLMClient(env: Env) {
 
 export function getModelName(env: Env, requestedModel?: string): string {
   if (requestedModel === 'llama-3.4') return 'meta-llama/llama-3.3-70b-instruct';
-  if (requestedModel === 'deepseek-v4-flash' || requestedModel === 'deepseek-v3') return 'google/gemini-3.5-flash';
-  return env.MODEL_NAME || 'google/gemini-3.5-flash';
+  if (requestedModel === 'deepseek-v4-flash' || requestedModel === 'deepseek-v3') return 'deepseek/deepseek-v4-flash';
+  return env.MODEL_NAME || 'deepseek/deepseek-v4-flash';
 }

@@ -107,7 +107,7 @@ export function useVoiceInput(onTranscript?: (text: string) => void): UseVoiceIn
     };
 
     recognition.onerror = (event: ISpeechRecognitionErrorEvent) => {
-      let errorMsg = '语音识别出错';
+      let errorMsg: string;
       switch (event.error) {
         case 'no-speech': errorMsg = '未检测到语音，请重试'; break;
         case 'audio-capture': errorMsg = '无法访问麦克风'; break;

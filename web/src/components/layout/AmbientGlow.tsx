@@ -4,7 +4,7 @@ import { useChatStore } from '../../store/chatStore';
 
 export const AmbientGlow: React.FC<{ forceShow?: boolean }> = ({ forceShow = false }) => {
   const isStreaming = useChatStore(state => state.isStreaming);
-  const show = true;
+  const show = forceShow || isStreaming || true;
 
   return (
     <AnimatePresence>

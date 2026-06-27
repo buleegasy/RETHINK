@@ -26,11 +26,12 @@ export function DecryptText({
 
   useEffect(() => {
     if (!animateOnMount) {
-      setDisplayText(text);
-      return;
+      const timer = setTimeout(() => {
+        setDisplayText(text);
+      }, 0);
+      return () => clearTimeout(timer);
     }
 
-    let timeoutId: ReturnType<typeof setTimeout>;
     let intervalId: ReturnType<typeof setInterval>;
 
     const startAnimation = () => {
@@ -71,7 +72,7 @@ export function DecryptText({
       }, speed);
     };
 
-    timeoutId = setTimeout(startAnimation, delay);
+    const timeoutId = setTimeout(startAnimation, delay);
 
     return () => {
       clearTimeout(timeoutId);

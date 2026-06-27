@@ -16,7 +16,7 @@ interface FetchOptions extends RequestInit {
 /**
  * 通用的 fetch 包装器，处理鉴权和错误拦截
  */
-export async function apiClient<T = any>(endpoint: string, options: FetchOptions = {}): Promise<T> {
+export async function apiClient<T = unknown>(endpoint: string, options: FetchOptions = {}): Promise<T> {
   const { requireAuth = true, headers, ...customOptions } = options;
   
   const token = localStorage.getItem('rethink_auth_token');

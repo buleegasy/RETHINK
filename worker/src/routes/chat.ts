@@ -504,6 +504,62 @@ chatRouter.post('/', requireAuth, async (c) => {
 });
 
 /**
+ * DELETE /api/chat/sessions/:sessionId/messages/:messageId
+ * Deletes a specific message from a session.
+ */
+chatRouter.delete('/sessions/:sessionId/messages/:messageId', requireAuth, async (c) => {
+  try {
+    const user = c.get('user') as AuthUser;
+    const sessionId = c.req.param('sessionId');
+    const messageId = c.req.param('messageId');
+
+    if (!sessionId || !messageId) {
+      return c.json({ error: 'sessionId and messageId are required' }, 400);
+    }
+
+    // Fetch the session from D1
+    const session = await c.env.DB.prepare('SELECT * FROM sessions WHERE id = ?')
+      .bind(sessionId)
+      .first<any>();
+
+    if (!session) {
+      return c.json({ error: 'Session not found' }, 404);
+    }
+
+    // Permission check: ensure session.user_id === user.uid
+    if (session.user_id !== user.uid) {
+      return c.json({ error: 'Forbidden: Session does not belong to you' }, 403);
+    }
+
+    // Parse messages
+    let messages: ChatMessage[] = [];
+    try {
+      messages = JSON.parse(session.messages || '[]');
+    } catch (e) {
+      return c.json({ error: 'Failed to parse session messages' }, 500);
+    }
+
+    // Filter out the target message
+    const initialLength = messages.length;
+    const updatedMessages = messages.filter(m => m.id !== messageId);
+
+    if (updatedMessages.length === initialLength) {
+      return c.json({ error: 'Message not found' }, 404);
+    }
+
+    // Save updated messages back to D1
+    await c.env.DB.prepare('UPDATE sessions SET messages = ?, updated_at = unixepoch() WHERE id = ?')
+      .bind(JSON.stringify(updatedMessages), sessionId)
+      .run();
+
+    return c.json({ success: true, message: 'Message deleted successfully' });
+  } catch (err: any) {
+    console.error('Failed to delete message:', err);
+    return c.json({ error: 'Internal Server Error', details: err.message }, 500);
+  }
+});
+
+/**
  * 辅助函数：保存会话到 D1（含 FSM 状态）
  */
 async function saveToD1(
@@ -515,7 +571,11 @@ async function saveToD1(
   userId: string,
 ) {
   try {
-    const messagesJson = JSON.stringify(messages);
+    const messagesWithId = messages.map(msg => ({
+      ...msg,
+      id: msg.id || crypto.randomUUID()
+    }));
+    const messagesJson = JSON.stringify(messagesWithId);
     const title = messages.find(m => m.role === 'user')?.content.substring(0, 20) || '新对话';
     const fsmState = fsmCtx.currentState;
     const fsmContextJson = JSON.stringify(fsmCtx);

@@ -1,22 +1,32 @@
-# plan.md — 2026-06-24T18:22:00+08:00
+# plan.md — 2026-06-24T20:55:00+08:00
 
 ## Objectives
-1. **Explore current codebase**: Understand how backgrounds (`AmbientGlow`, `ArtMeshBackground`), login walls, chat input bars, text-heavy controls, and localization are implemented.
-2. **Implement UI modifications**:
-   - Fix UI Overlap: Mutually exclusive rendering between `LoginWall` and the main application container.
-   - Clean backgrounds: Remove flowing/curved backgrounds, replacing with a minimalist aesthetic.
-   - Restrained controls: Replace text-based `[MIC]`, `[HISTORY]`, `[SEND]`, and Guest Access buttons with minimalist icons.
-   - Localization: Ensure all visible UI text in affected files is fully translated to Chinese.
-3. **Verify and Audit**: Run existing unit, API, and E2E tests, and check with Forensic Auditor for zero-tolerance compliance.
+1. **Explore UI Components**: Deeply analyze `InputBar.tsx`, `SessionSidebar.tsx`, `CrisisOverlay.tsx`, and `MessageBubble.tsx` to define the refactoring plan for aligning with the terminal-like 'Tech Chain' (后台推演) panel, Gemini MD3 standards, and modern web guidelines.
+2. **Implement Refactoring**:
+   - Apply MD3 semantic colors, corner radii logic (`rounded-[22px]` etc.), and background mappings.
+   - Enforce typography: `font-mono` for technical/status data, `font-sans` for prose/messages.
+   - Restrain visual elements: Remove inappropriate emojis, colloquial styling, and legacy or BEM-like classes.
+   - Enhance aesthetics using modern web guidelines (logical properties, backdrop-blur, clean borders like `border-outline-variant/30`).
+3. **Verify and Audit**: Run `npm run build --workspace=web`, check for regressions or visual overlaps, and run the Forensic Auditor for final verification.
 
-## Milestone 1: Exploration and Analysis
-- **Deliverables**: Handoff reports from Explorer agents identifying code locations, current rendering logic, and proposing exact changes.
-- **Verification**: Analysis reports written by Explorer agents.
+## Milestone 1: Exploration & Analysis
+- **Worker**: `teamwork_preview_explorer`
+- **Deliverables**: Detailed recommendations on how to refactor `InputBar.tsx`, `SessionSidebar.tsx`, and `CrisisOverlay.tsx`.
+- **Verification**: Explorer handoff report.
 
 ## Milestone 2: Implementation
-- **Deliverables**: Code changes implemented by a Worker agent.
-- **Verification**: Compiler and manual check by Reviewer agent.
+- **Worker**: `teamwork_preview_worker`
+- **Deliverables**: Code changes to `InputBar.tsx`, `SessionSidebar.tsx`, and `CrisisOverlay.tsx`.
+- **Verification**: Code diff review.
 
-## Milestone 3: Verification, Hardening, and Auditing
-- **Deliverables**: Verification reports by Challenger agent running all tests, and clean audit verdict by Forensic Auditor.
-- **Verification**: 100% tests passing, clean audit verdict.
+## Milestone 3: Verification & Review
+- **Worker**: `teamwork_preview_reviewer` + `teamwork_preview_challenger`
+- **Deliverables**:
+  - Reviewer: Confirms compliance with MD3 standards and typography rules.
+  - Challenger: Executes `npm run build --workspace=web` and verifies successful compilation.
+- **Verification**: Reports showing passing builds and clean styling.
+
+## Milestone 4: Forensic Audit
+- **Worker**: `teamwork_preview_auditor`
+- **Deliverables**: Forensic audit report.
+- **Verification**: CLEAN verdict.

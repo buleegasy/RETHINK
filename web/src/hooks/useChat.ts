@@ -41,7 +41,7 @@ export function useChat() {
 
     try {
       // 准备请求体
-      const payloadMessages = [...messages, userMsg].map(({ role, content }) => ({ role, content }));
+      const payloadMessages = [...messages, userMsg].map(({ id, role, content }) => ({ id, role, content }));
 
       const streamBody = await chatApi.sendMessageStream({
         messages: payloadMessages,
@@ -143,9 +143,9 @@ export function useChat() {
           }
         }
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Chat error:', err);
-      setError(err.message || '发送失败，请重试');
+      setError(err instanceof Error ? err.message : '发送失败，请重试');
       updateLastMessage('\n\n*(抱歉，网络连接或服务出现了问题，请稍后再试)*');
     } finally {
       setIsStreaming(false);

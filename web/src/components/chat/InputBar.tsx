@@ -14,7 +14,6 @@ interface InputBarProps {
 export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) => {
   const [input, setInput] = useState('');
   const isStreaming = useChatStore(state => state.isStreaming);
-  const fsmState = useChatStore(state => state.fsmState);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleTranscript = useCallback((text: string) => {
@@ -79,18 +78,18 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) =
   const canSend = input.trim() && !isStreaming;
 
   return (
-    <div className="absolute bottom-0 left-0 w-full px-4 md:px-8 pb-[calc(max(env(safe-area-inset-bottom),24px))] pt-8 bg-gradient-to-t from-surface-dim/95 via-surface-dim/40 to-transparent z-30 pointer-events-none">
-      <div className="max-w-3xl mx-auto flex flex-col items-center pointer-events-auto">
+    <div className="absolute bottom-0 start-0 w-full ps-4 pe-4 md:ps-8 md:pe-8 pb-[calc(max(env(safe-area-inset-bottom),24px))] pt-8 bg-gradient-to-t from-surface-dim/95 via-surface-dim/40 to-transparent z-30 pointer-events-none">
+      <div className="max-w-3xl ms-auto me-auto flex flex-col items-center pointer-events-auto">
         
         {/* 摄像头情感感知（原生融合区） */}
-        <div className="w-full mb-3 flex justify-start pl-2 md:pl-0 animate-fade-in">
+        <div className="w-full mb-3 flex justify-start ps-2 md:ps-0 animate-fade-in">
           <CameraPanel onEmotionChange={onEmotionChange} />
         </div>
 
 
         {/* Input Container */}
         <div className={`w-full relative transition-all duration-500 ${isStreaming ? 'opacity-50' : ''}`}>
-          <div className="relative flex items-end border-b border-outline-variant/50 pb-2">
+          <div className="relative flex items-end bg-surface-container/40 backdrop-blur-md border border-outline-variant/30 rounded-input p-2 gap-1">
             
             {/* Voice Button or Spacer */}
             {isVoiceSupported ? (
@@ -100,10 +99,10 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) =
                 onClick={handleVoiceToggle}
                 disabled={isStreaming}
                 aria-label={isListening ? '停止录音' : '语音输入'}
-                className={`flex-shrink-0 w-11 h-11 md:w-10 md:h-10 flex items-center justify-center rounded-full transition-all duration-300 ease-out self-end ${
+                className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 ease-out self-end ${
                   isListening
-                    ? 'text-red-400 animate-pulse-gentle'
-                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container/40'
+                    ? 'text-stage-red animate-pulse-gentle'
+                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60'
                 } ${isStreaming ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -125,30 +124,29 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) =
               placeholder={placeholder}
               disabled={isStreaming}
               rows={1}
-              style={{ margin: 0 }}
-              className={`flex-1 bg-transparent px-2 md:px-4 py-3 md:py-2 text-[16px] md:text-[18px] leading-[28px] font-sans font-light tracking-wide text-on-surface placeholder-on-surface-dim border-none focus:outline-none resize-none overflow-y-auto max-h-[100px] md:max-h-[160px] transition-opacity duration-200 ${
-                isListening ? 'placeholder-amber-600/60' : ''
+              className={`flex-1 bg-transparent ps-2 pe-2 md:ps-4 md:pe-4 py-2 m-0 text-[15px] md:text-[16px] leading-[24px] font-sans font-light tracking-wide text-on-surface placeholder-on-surface-dim border-none focus:outline-none resize-none overflow-y-auto max-h-[100px] md:max-h-[160px] transition-opacity duration-200 ${
+                isListening ? 'placeholder-stage-orange/60' : ''
               } ${isStreaming ? 'cursor-not-allowed' : ''}`}
             />
 
             {/* Send Button */}
-              <motion.button
-                whileHover={canSend ? { scale: 1.1 } : {}}
-                whileTap={canSend ? { scale: 0.9 } : {}}
-                onClick={handleSend}
-                disabled={!canSend}
-                aria-label="发送消息"
-                className={`flex-shrink-0 w-11 h-11 md:w-10 md:h-10 flex items-center justify-center rounded-full transition-all duration-300 ease-out self-end ${
-                  canSend
-                    ? 'text-on-surface hover:bg-surface-container/40 cursor-pointer'
-                    : 'text-outline cursor-not-allowed opacity-30'
-                }`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="12" y1="19" x2="12" y2="5"/>
-                  <polyline points="5 12 12 5 19 12"/>
-                </svg>
-              </motion.button>
+            <motion.button
+              whileHover={canSend ? { scale: 1.1 } : {}}
+              whileTap={canSend ? { scale: 0.9 } : {}}
+              onClick={handleSend}
+              disabled={!canSend}
+              aria-label="发送消息"
+              className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 ease-out self-end ${
+                canSend
+                  ? 'text-on-surface hover:bg-surface-container-high/60 cursor-pointer'
+                  : 'text-outline cursor-not-allowed opacity-30'
+              }`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="19" x2="12" y2="5"/>
+                <polyline points="5 12 12 5 19 12"/>
+              </svg>
+            </motion.button>
 
           </div>
         </div>

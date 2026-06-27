@@ -314,7 +314,7 @@ async function verifyIntentWithLLM(
   initial: IntentResult,
   env: Env
 ): Promise<IntentResult> {
-  const model = env.MODEL_NAME || 'google/gemini-3.5-flash';
+  const model = env.MODEL_NAME || 'deepseek/deepseek-v4-flash';
   const apiBaseUrl = env.API_BASE_URL || 'https://openrouter.ai/api/v1';
   const apiKey = env.API_KEY;
 

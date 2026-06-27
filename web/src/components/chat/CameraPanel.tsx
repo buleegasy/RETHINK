@@ -62,7 +62,7 @@ export const CameraPanel: React.FC<CameraPanelProps> = ({ onEmotionChange }) => 
         </div>
 
         {/* 情绪信息区域 */}
-        <div className="flex flex-col justify-center pr-2 md:pr-3 min-w-[100px] md:min-w-[120px]">
+        <div className="flex flex-col justify-center pe-2 md:pe-3 min-w-[100px] md:min-w-[120px]">
           {error ? (
             <p className="text-[10px] font-light tracking-wide text-error leading-tight">{error}</p>
           ) : isModelLoading ? (

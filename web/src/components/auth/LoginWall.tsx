@@ -32,7 +32,7 @@ export function LoginWall() {
       const data: AuthResponse = await res.json();
 
       if (!res.ok || !data.success) {
-        setError(data.error || '访客登录失败，请重试');
+        setError(data.error || '测试账号登录失败');
         setLoading(false);
         return;
       }
@@ -53,8 +53,8 @@ export function LoginWall() {
           console.warn('Failed to bind active session on guest access:', bindErr);
         }
       }
-    } catch (err: any) {
-      console.error('Guest login error:', err);
+    } catch (err) {
+      console.error('Guest access login error:', err);
       setError('网络连接失败，请稍后重试');
     } finally {
       setLoading(false);
@@ -88,9 +88,9 @@ export function LoginWall() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 2, delay: 1.5 }}
-              className="text-on-surface-variant/60 font-light tracking-widest text-xs md:text-sm uppercase mb-16 px-6 text-center leading-relaxed"
+              className="text-on-surface-variant/80 font-light tracking-widest text-sm md:text-base uppercase mb-16 px-6 text-center leading-relaxed"
             >
-              <BlurText text="探索内心 · 寻找平静" delay={1.5} />
+              <BlurText text="AI 心理疏导智能体系统" delay={1.5} />
             </motion.p>
 
             {error && (
@@ -104,7 +104,7 @@ export function LoginWall() {
             )}
             
             {/* Control Group: Guest Access and Member Login */}
-            <div className="flex flex-row items-center justify-center gap-8 md:gap-12 pointer-events-auto relative z-20">
+            <div className="flex flex-row items-center justify-center gap-10 md:gap-16 pointer-events-auto relative z-20">
               {/* Primary Guest Entry Orb */}
               <motion.div
                 animate={{ y: loading ? 0 : [0, -6, 0] }}
@@ -118,16 +118,16 @@ export function LoginWall() {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 1.5, delay: 2.2 }}
-                  whileHover={{ scale: loading ? 1 : 1.08 }}
-                  whileTap={{ scale: loading ? 1 : 0.92 }}
+                  whileHover={{ scale: loading ? 1 : 1.05 }}
+                  whileTap={{ scale: loading ? 1 : 0.95 }}
                   onClick={handleGuestAccess}
                   disabled={loading}
                   aria-label="访客体验"
                   title="访客体验"
-                  className="relative group flex items-center justify-center w-28 h-28 md:w-32 md:h-32 rounded-full cursor-pointer"
+                  className="relative group flex items-center justify-center w-36 h-36 md:w-48 md:h-48 rounded-full cursor-pointer"
                 >
                   {/* Glass Orb background */}
-                  <div className="absolute inset-0 rounded-full bg-surface-container/25 backdrop-blur-xl border border-outline-variant/35 shadow-[0_0_40px_rgba(255,255,255,0.25)] transition-all duration-700 group-hover:bg-surface-container/35 group-hover:border-outline/50 group-hover:shadow-[0_0_60px_rgba(255,255,255,0.55)]" />
+                  <div className="absolute inset-0 rounded-full bg-surface-container/40 backdrop-blur-xl border border-outline-variant/40 shadow-[0_8px_32px_rgba(0,0,0,0.1)] transition-all duration-500 group-hover:bg-surface-container/60 group-hover:border-outline/60 group-hover:shadow-[0_0_40px_rgba(66,133,244,0.3)]" />
                   
                   {/* Pulsing Core */}
                   <motion.div 
@@ -136,7 +136,7 @@ export function LoginWall() {
                       scale: loading ? [1, 1.2, 1] : [1, 1.15, 1] 
                     }}
                     transition={{ repeat: Infinity, duration: loading ? 1.5 : 3, ease: "easeInOut" }}
-                    className="absolute inset-0 rounded-full bg-cyan-500/10 blur-xl" 
+                    className="absolute inset-0 rounded-full bg-gemini-blue/10 blur-xl group-hover:bg-gemini-blue/20 transition-colors duration-500" 
                   />
 
                   {/* Loading spinner overlay */}
@@ -144,9 +144,9 @@ export function LoginWall() {
                     <div className="absolute inset-2 rounded-full border-t border-l border-on-surface/40 animate-spin" />
                   )}
                   
-                  <div className="relative flex flex-col items-center gap-2 text-on-surface-variant group-hover:text-on-surface transition-colors">
-                    <User className={`w-7 h-7 stroke-[1.25] ${loading ? 'animate-pulse' : ''}`} />
-                    <span className="text-[11px] font-medium tracking-[0.25em] translate-x-[0.125em] opacity-80 group-hover:opacity-100 transition-opacity uppercase">
+                  <div className="relative flex flex-col items-center gap-3 text-on-surface-variant group-hover:text-on-surface transition-colors">
+                    <User className={`w-8 h-8 md:w-10 md:h-10 stroke-[1.25] ${loading ? 'animate-pulse' : ''}`} />
+                    <span className="text-sm md:text-base font-medium tracking-[0.25em] translate-x-[0.125em] opacity-80 group-hover:opacity-100 transition-opacity uppercase">
                       {loading ? '连接中' : '访客体验'}
                     </span>
                   </div>
@@ -166,16 +166,16 @@ export function LoginWall() {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 1.5, delay: 2.5 }}
-                  whileHover={{ scale: loading ? 1 : 1.08 }}
-                  whileTap={{ scale: loading ? 1 : 0.92 }}
+                  whileHover={{ scale: loading ? 1 : 1.05 }}
+                  whileTap={{ scale: loading ? 1 : 0.95 }}
                   onClick={() => setIsLoginModalOpen(true)}
                   disabled={loading}
                   aria-label="成员通道"
                   title="成员通道"
-                  className="relative group flex items-center justify-center w-28 h-28 md:w-32 md:h-32 rounded-full cursor-pointer"
+                  className="relative group flex items-center justify-center w-36 h-36 md:w-48 md:h-48 rounded-full cursor-pointer"
                 >
                   {/* Glass Orb background */}
-                  <div className="absolute inset-0 rounded-full bg-surface-container/25 backdrop-blur-xl border border-outline-variant/35 shadow-[0_0_40px_rgba(255,255,255,0.25)] transition-all duration-700 group-hover:bg-surface-container/35 group-hover:border-outline/50 group-hover:shadow-[0_0_60px_rgba(255,255,255,0.55)]" />
+                  <div className="absolute inset-0 rounded-full bg-surface-container/40 backdrop-blur-xl border border-outline-variant/40 shadow-[0_8px_32px_rgba(0,0,0,0.1)] transition-all duration-500 group-hover:bg-surface-container/60 group-hover:border-outline/60 group-hover:shadow-[0_0_40px_rgba(250,150,0,0.25)]" />
                   
                   {/* Pulsing Core */}
                   <motion.div 
@@ -184,12 +184,12 @@ export function LoginWall() {
                       scale: [1, 1.15, 1] 
                     }}
                     transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
-                    className="absolute inset-0 rounded-full bg-amber-500/10 blur-xl" 
+                    className="absolute inset-0 rounded-full bg-stage-orange/10 blur-xl group-hover:bg-stage-orange/20 transition-colors duration-500" 
                   />
                   
-                  <div className="relative flex flex-col items-center gap-2 text-on-surface-variant group-hover:text-on-surface transition-colors">
-                    <Key className="w-7 h-7 stroke-[1.25]" />
-                    <span className="text-[11px] font-medium tracking-[0.25em] translate-x-[0.125em] opacity-80 group-hover:opacity-100 transition-opacity uppercase">
+                  <div className="relative flex flex-col items-center gap-3 text-on-surface-variant group-hover:text-on-surface transition-colors">
+                    <Key className="w-8 h-8 md:w-10 md:h-10 stroke-[1.25]" />
+                    <span className="text-sm md:text-base font-medium tracking-[0.25em] translate-x-[0.125em] opacity-80 group-hover:opacity-100 transition-opacity uppercase">
                       成员登录
                     </span>
                   </div>
