@@ -299,5 +299,5 @@ export function getLLMClient(env: Env) {
 }
 
 export function getModelName(env: Env, requestedModel?: string): string {
-  return 'deepseek/deepseek-v4-flash';
+  return 'anthropic/claude-haiku-latest';
 }

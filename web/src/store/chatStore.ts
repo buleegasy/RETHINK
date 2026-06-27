@@ -44,7 +44,7 @@ export const useChatStore = create<ChatState>((set) => {
     uiControl: null,
     hasCompletedOnboarding: false,
     isStreaming: false,
-    selectedModel: 'deepseek-v4-flash',
+    selectedModel: 'claude-haiku-latest',
     icebreakerLayer: 1,
 
     // Chat Actions
