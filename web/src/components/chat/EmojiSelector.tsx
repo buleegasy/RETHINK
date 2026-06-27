@@ -17,9 +17,14 @@ const EMOJI_OPTIONS = [
   { emoji: '🤢', colorClass: 'hover:border-green-400 hover:shadow-green-500/10' },
   { emoji: '💤', colorClass: 'hover:border-slate-400 hover:shadow-slate-500/10' },
   { emoji: '😰', colorClass: 'hover:border-teal-400 hover:shadow-teal-500/10' },
-  { emoji: '🧠', colorClass: 'hover:border-pink-600 hover:shadow-pink-700/10' },
-  { emoji: '🌧️', colorClass: 'hover:border-blue-600 hover:shadow-blue-700/10' },
   { emoji: '🫂', colorClass: 'hover:border-indigo-400 hover:shadow-indigo-500/10' },
+  { emoji: '🖕', colorClass: 'hover:border-slate-500 hover:shadow-slate-600/10' },
+  { emoji: '🙄', colorClass: 'hover:border-gray-400 hover:shadow-gray-500/10' },
+  { emoji: '🤬', colorClass: 'hover:border-red-500 hover:shadow-red-600/10' },
+  { emoji: '😵‍💫', colorClass: 'hover:border-purple-500 hover:shadow-purple-600/10' },
+  { emoji: '😵', colorClass: 'hover:border-yellow-400 hover:shadow-yellow-500/10' },
+  { emoji: '🤮', colorClass: 'hover:border-lime-500 hover:shadow-lime-600/10' },
+  { emoji: '🤯', colorClass: 'hover:border-orange-500 hover:shadow-orange-600/10' },
 ];
 
 export const EmojiSelector: React.FC<EmojiSelectorProps> = ({ onSelect, onSkip }) => {
