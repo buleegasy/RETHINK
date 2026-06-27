@@ -12,6 +12,7 @@ import type { UserProfile, FSMState } from './types';
 import type { EmotionResult } from './hooks/useFaceEmotion';
 import { EMOTION_MAP } from './hooks/useFaceEmotion';
 import { CrisisOverlay } from './components/crisis/CrisisOverlay';
+import { AmbientGlow } from './components/layout/AmbientGlow';
 
 const FSM_ORDER: FSMState[] = ['Active_Listening', 'CBT_Stripping', 'Socratic_Questioning', 'Crisis_Escalation'];
 
@@ -84,6 +85,7 @@ function App() {
     <div className="fixed inset-0 flex w-full h-[100dvh] max-h-[100dvh] overflow-hidden bg-surface-dim text-on-surface font-sans selection:bg-gemini-blue/20">
       {isAuthenticated ? (
         <>
+          <AmbientGlow />
           {/* 主对话区 (Workspace Layout) */}
           <div className="flex flex-col flex-1 h-full relative z-10 bg-surface-dim">
             {/* ── 移动端顶部 Header ── */}
