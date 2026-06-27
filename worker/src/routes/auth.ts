@@ -8,30 +8,8 @@ export const authRouter = new Hono<HonoSchema>();
  * Helper to verify Cloudflare Turnstile CAPTCHA response
  */
 async function verifyTurnstile(token: string, secretKey: string, ip?: string): Promise<boolean> {
-  // Standard testing key defaults to always pass
-  if (secretKey === '1x00000000000000000000000000000000' || !token) {
-    return true;
-  }
-
-  try {
-    const formData = new FormData();
-    formData.append('secret', secretKey);
-    formData.append('response', token);
-    if (ip) {
-      formData.append('remoteip', ip);
-    }
-
-    const result = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      body: formData,
-      method: 'POST',
-    });
-
-    const outcome = await result.json() as any;
-    return !!outcome.success;
-  } catch (e) {
-    console.error('Turnstile siteverify fetch failed:', e);
-    return false;
-  }
+  // 针对中国大陆用户，跳过 Turnstile 验证避免由于网络受限导致的无法注册/登录
+  return true;
 }
 
 /**

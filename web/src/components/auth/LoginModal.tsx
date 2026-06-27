@@ -30,55 +30,11 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [invitationCode, setInvitationCode] = useState('');
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let active = true;
-    
-    const initTurnstile = () => {
-      if (!active || !isOpen) return;
-      if (window.turnstile) {
-        try {
-          const container = document.getElementById('turnstile-container-modal');
-          if (container) {
-            container.innerHTML = '';
-            setTurnstileToken(null);
-            window.turnstile.render('#turnstile-container-modal', {
-              sitekey: '0x4AAAAAADgdD3JygbJ4oXZi',
-              callback: (token: string) => {
-                setTurnstileToken(token);
-              },
-              'error-callback': () => {
-                console.error('Turnstile widget failed to render.');
-              }
-            });
-          }
-        } catch (e) {
-          console.warn('Turnstile rendering deferred', e);
-        }
-      }
-    };
 
-    if (isOpen) {
-      if (!window.turnstile) {
-        const script = document.createElement('script');
-        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-        script.async = true;
-        script.defer = true;
-        document.body.appendChild(script);
-        script.onload = initTurnstile;
-      } else {
-        setTimeout(initTurnstile, 50);
-      }
-    }
-
-    return () => {
-      active = false;
-    };
-  }, [isOpen, isSignUp]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,10 +48,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
       return;
     }
 
-    if (!turnstileToken) {
-      setError('请完成人机安全校验');
-      return;
-    }
+
 
     setLoading(true);
     setError(null);
@@ -103,8 +56,8 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     const API_BASE = import.meta.env.VITE_API_URL || '';
     const url = (isSignUp ? `${API_BASE}/api/auth/register` : `${API_BASE}/api/auth/login`).replace(/\/api\/api\//g, '/api/');
     const payload = isSignUp
-      ? { username: username.trim(), password, invitationCode: invitationCode.trim(), turnstileToken }
-      : { username: username.trim(), password, turnstileToken };
+      ? { username: username.trim(), password, invitationCode: invitationCode.trim() }
+      : { username: username.trim(), password };
 
     try {
       const res = await fetch(url, {
@@ -118,8 +71,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
       if (!res.ok || !data.success) {
         setError(data.error || '身份验证失败');
         setLoading(false);
-        if (window.turnstile) window.turnstile.reset('#turnstile-container-modal');
-        setTurnstileToken(null);
+
         return;
       }
 
@@ -142,8 +94,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     } catch (err) {
       console.error('Submit auth error:', err);
       setError('网络请求失败，请检查连接');
-      if (window.turnstile) window.turnstile.reset('#turnstile-container-modal');
-      setTurnstileToken(null);
+
     } finally {
       setLoading(false);
     }
@@ -317,9 +268,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   </motion.div>
                 )}
 
-                <div className="flex justify-center py-2">
-                  <div id="turnstile-container-modal" className="relative overflow-hidden min-h-[65px] flex items-center justify-center opacity-80 mix-blend-multiply filter grayscale"></div>
-                </div>
+
 
                 <motion.button
                   whileHover={{ scale: 1.02 }}

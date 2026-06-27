@@ -299,5 +299,5 @@ export function getLLMClient(env: Env) {
 }
 
 export function getModelName(env: Env, requestedModel?: string): string {
-  return 'anthropic/claude-haiku-latest';
+  return 'anthropic/claude-3.5-haiku';
 }

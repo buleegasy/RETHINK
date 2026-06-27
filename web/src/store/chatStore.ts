@@ -44,7 +44,7 @@ export const useChatStore = create<ChatState>((set) => {
     uiControl: null,
     hasCompletedOnboarding: false,
     isStreaming: false,
-    selectedModel: 'claude-haiku-latest',
+    selectedModel: 'claude-3.5-haiku',
     icebreakerLayer: 1,
 
     // Chat Actions
