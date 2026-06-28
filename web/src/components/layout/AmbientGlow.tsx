@@ -23,6 +23,7 @@ export const AmbientGlow: React.FC<{ forceShow?: boolean }> = ({ forceShow = fal
             style={{
               background: 'radial-gradient(circle, rgba(66, 133, 244, 0.45) 0%, rgba(66, 133, 244, 0) 70%)',
               filter: 'blur(70px)',
+              willChange: 'transform',
             }}
             animate={{
               x: [0, 150, -100, 0],
@@ -30,9 +31,9 @@ export const AmbientGlow: React.FC<{ forceShow?: boolean }> = ({ forceShow = fal
               scale: [1, 1.3, 0.8, 1],
             }}
             transition={{
-              duration: 8,
+              duration: 12,
               repeat: Infinity,
-              ease: 'easeInOut',
+              ease: [0.445, 0.05, 0.55, 0.95],
             }}
           />
 
@@ -42,6 +43,7 @@ export const AmbientGlow: React.FC<{ forceShow?: boolean }> = ({ forceShow = fal
             style={{
               background: 'radial-gradient(circle, rgba(0, 188, 212, 0.35) 0%, rgba(0, 188, 212, 0) 70%)',
               filter: 'blur(70px)',
+              willChange: 'transform',
             }}
             animate={{
               x: [0, -120, 90, 0],
@@ -49,9 +51,9 @@ export const AmbientGlow: React.FC<{ forceShow?: boolean }> = ({ forceShow = fal
               scale: [1, 0.8, 1.25, 1],
             }}
             transition={{
-              duration: 10,
+              duration: 15,
               repeat: Infinity,
-              ease: 'easeInOut',
+              ease: [0.445, 0.05, 0.55, 0.95],
               delay: 0.5,
             }}
           />
@@ -62,6 +64,7 @@ export const AmbientGlow: React.FC<{ forceShow?: boolean }> = ({ forceShow = fal
             style={{
               background: 'radial-gradient(circle, rgba(234, 67, 53, 0.25) 0%, rgba(234, 67, 53, 0) 70%)',
               filter: 'blur(90px)',
+              willChange: 'transform',
             }}
             animate={{
               x: [0, 100, -130, 0],
@@ -69,9 +72,9 @@ export const AmbientGlow: React.FC<{ forceShow?: boolean }> = ({ forceShow = fal
               scale: [1, 1.2, 0.85, 1],
             }}
             transition={{
-              duration: 12,
+              duration: 18,
               repeat: Infinity,
-              ease: 'easeInOut',
+              ease: [0.445, 0.05, 0.55, 0.95],
               delay: 1,
             }}
           />

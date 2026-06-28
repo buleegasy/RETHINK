@@ -49,6 +49,31 @@ describe('MessageBubble Component', () => {
     expect(screen.getByText(/This is a/)).toBeInTheDocument();
   });
 
+  it('applies streaming-glow-bubble class to assistant message only when streaming', () => {
+    const message: ChatMessage = {
+      role: 'assistant',
+      content: 'This is a message from assistant.',
+    };
+
+    const { rerender } = render(
+      <MessageBubble message={message} isStreaming={true} onDeleteRequest={vi.fn()} />
+    );
+
+    // Get the message bubble container
+    const chunkDiv = screen.getByText('This is a message from assistant.').closest('div')?.parentElement;
+    expect(chunkDiv).toHaveClass('streaming-glow-bubble');
+    expect(chunkDiv).toHaveClass('bg-surface-container/90');
+    expect(chunkDiv).toHaveClass('backdrop-blur-sm');
+    expect(chunkDiv).toHaveClass('transition-all');
+    expect(chunkDiv).toHaveClass('duration-300');
+
+    // Rerender with isStreaming=false
+    rerender(<MessageBubble message={message} isStreaming={false} onDeleteRequest={vi.fn()} />);
+    expect(chunkDiv).not.toHaveClass('streaming-glow-bubble');
+    expect(chunkDiv).toHaveClass('bg-surface-container');
+    expect(chunkDiv).not.toHaveClass('bg-surface-container/90');
+  });
+
   it('does not render message when isHidden is true', () => {
     const message: ChatMessage = {
       role: 'user',

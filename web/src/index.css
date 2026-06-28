@@ -163,3 +163,51 @@
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+
+@keyframes border-glow-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes bubble-breath {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(66, 133, 244, 0.04), 0 0 8px rgba(66, 133, 244, 0.08);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(66, 133, 244, 0.12), 0 0 16px rgba(0, 188, 212, 0.18);
+  }
+}
+
+/* Premium Streaming Glow Border Effect */
+.streaming-glow-bubble {
+  position: relative;
+  animation: bubble-breath 4s ease-in-out infinite;
+  z-index: 1;
+}
+
+.streaming-glow-bubble::before {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  /* Pastel color scheme matching Gemini UI aesthetics */
+  background: linear-gradient(90deg, #4285F4, #00BCD4, #8AB4F8, #D7AEFB, #4285F4);
+  background-size: 300% 300%;
+  animation: border-glow-flow 4s ease-in-out infinite;
+  z-index: -1;
+  padding: 1.5px;
+  pointer-events: none;
+  
+  /* Masking trick to show only the border outline and keep center transparent */
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+}

@@ -269,3 +269,30 @@ Update the frontend so that when a conversation is deleted, the chat list is upd
 ### Frontend User Experience
 - [ ] Deleting a chat immediately removes it from the sidebar/history list without requiring a page refresh.
 - [ ] Deleting the currently open chat gracefully transitions the UI to a safe state (e.g., a "New Chat" screen) without errors.
+
+## Follow-up — 2026-06-28T21:58:33+08:00
+
+Restore and upgrade the premium "streaming glow" (流光) animation effect on the background and AI message bubbles. This effect was lost during recent performance optimizations and needs to be re-implemented without causing performance regressions.
+
+Working directory: `/Users/chenhaoran/工程文件/心理大赛`
+Integrity mode: benchmark
+
+## Requirements
+
+### R1. Implement Premium Glow Effect
+Re-introduce the premium streaming glow effect to the global background and the AI message bubbles (especially when generating content). 
+
+### R2. Utilize Required Skills (Motion & Modern Web)
+You MUST execute and read the instructions for `motion-skill` and `modern-web-guidance`. Extract premium animation components/patterns from `reactbits.dev` and implement them using modern web best practices (e.g., hardware acceleration, `content-visibility`, proper compositing).
+
+### R3. Maintain Peak Performance
+The implementation must be highly optimized. You must NOT re-introduce global React state re-rendering loops. The glow effect should rely on CSS animations (e.g., `@keyframes`, `conic-gradient`), Canvas, or WebGL, fully decoupled from the core React rendering cycle.
+
+## Acceptance Criteria
+
+### Skill & Performance Verification
+- [ ] An agent-as-judge or script verifies that the rendering complexity remains at $O(1)$ during message streaming (no continuous React component re-renders caused by the animation).
+- [ ] Evidence that `modern-web-guidance` was consulted for performance best practices (e.g., using `transform` and `opacity` for animations).
+
+### Visual Quality (Agent-as-Judge)
+- [ ] The glow effect is visibly active, fluid, and premium (WOW factor) without causing UI layout shifts (CLS) or high CPU fan noise when idle.

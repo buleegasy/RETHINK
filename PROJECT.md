@@ -1,24 +1,21 @@
-# Project: Fix Chat Deletion Feature
+# Project: Restore & Upgrade Premium Streaming Glow Effect
 
 ## Architecture
-This project refactors the chat deletion feature to completely remove conversation files and associated media assets, synchronizing frontend state and providing automated deletion verification.
-- **Backend API**: Deletion route (`/api/chat/:id` or similar) in the worker/backend.
-- **File System**: Session storage and media asset storage paths.
-- **Frontend Components**:
-  - `SessionSidebar.tsx`: Lists chat sessions.
-  - `ChatPanel.tsx` / `useChat.ts` / state stores: Controls the active session and triggers the deletion API.
+This project restores and upgrades the premium "streaming glow" (流光) animation effect on the background and AI message bubbles.
+To prevent performance regressions during message streaming, the rendering complexity of these animations must remain at $O(1)$, fully decoupled from the core React rendering cycle by deferring to CSS transitions, conic-gradients, keyframe animations, Canvas, or WebGL.
+
+- **Background Animation**: Global background wrapper in the chat app.
+- **AI Message Bubbles**: Specifically during generating/streaming states in the chat dialogue interface.
+- **Performance Constraints**: Must not cause global React state re-rendering loops or high CPU usage.
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|---|---|---|---|
-| 1 | Research & Discovery | Audit file system paths, media association, backend deletion API, and frontend chat list component | None | DONE |
-| 2 | Deletion & Media Cleanup Implementation | Modify backend to delete entire session files and associated media, and update frontend to sync list and route active chat | M1 | DONE |
-| 3 | Review & Challenger Testing | Perform code review and execute a programmatic test verifying no files or media remain | M2 | DONE |
-| 4 | Forensic Audit | Verify integrity of the solution using the Forensic Auditor | M3 | DONE |
-| 5 | Eslint Linting Fix | Resolve eslint error in test files and verify build/lint passes | M4 | DONE |
+| 1 | Research & Discovery | Locate background/bubble components, identify previous implementation, and research O(1) glow designs | None | DONE |
+| 2 | Implementation | Implement CSS/Canvas/WebGL-based premium glow effects decoupled from React render loops | M1 | DONE |
+| 3 | Review & Challenger Testing | Verify rendering complexity is O(1) and check visual fluidness and performance | M2 | DONE |
+| 4 | Forensic Audit | Verify code integrity and check for any performance regressions | M3 | DONE |
 
 ## Interface Contracts
-### Client ↔ Server Chat Deletion
-- **Endpoint**: DELETE `/api/chat/:id` or `/api/session/:id` (exact endpoint to be confirmed by Explorer)
-- **Response**: Success status with a confirmation message, or appropriate error code (e.g. 404 if not found).
-- **Behavior**: Server must recursively delete the target session JSON/Markdown file and any associated media files on disk before returning success.
+- **Message Bubble Streaming State**: The component showing message bubbles must display the streaming glow animation when the message `isGenerating` or `isStreaming` is true, without causing the entire message list or parent components to continuously re-render.
+- **Animation Easing**: Use cubic-bezier easing (`cubic-bezier(0.4, 0, 0.2, 1)`) and hardware-accelerated transforms/opacity for premium feel, as specified in `motion-skill`.

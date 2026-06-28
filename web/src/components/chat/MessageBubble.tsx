@@ -87,9 +87,14 @@ const MessageChunk = React.memo<MessageChunkProps>(({
   isLastChunk,
   isLastInGroup,
 }) => {
+  const isGlowActive = isStreaming && isLastChunk;
   return (
     <div
-      className={`relative ${aiBubbleRadiusClass} bg-surface-container text-on-surface px-4 py-2.5 text-[15px] leading-relaxed font-sans shadow-sm`}
+      className={`relative ${aiBubbleRadiusClass} text-on-surface px-4 py-2.5 text-[15px] leading-relaxed font-sans shadow-sm transition-all duration-300 ${
+        isGlowActive
+          ? 'streaming-glow-bubble bg-surface-container/90 backdrop-blur-sm'
+          : 'bg-surface-container'
+      }`}
     >
       <div className="gemini-prose">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>
