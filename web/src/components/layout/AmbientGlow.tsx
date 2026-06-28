@@ -39,44 +39,44 @@ interface Palette {
 
 const FSM_PALETTES: Record<FSMState, Palette> = {
   Onboarding: {
-    c1: [0.26, 0.52, 0.96],   // #4285F4 trust blue
-    c2: [0.00, 0.79, 0.65],   // #00C9A7 mint
-    c3: [0.61, 0.44, 0.87],   // #9C6FDE purple
-    c4: [1.00, 0.62, 0.35],   // #FF9F5A amber (warm welcome)
-    intensity: 0.85,
+    c1: [0.45, 0.73, 1.00],   // Bright soft blue
+    c2: [0.15, 0.90, 0.75],   // Luminous mint
+    c3: [0.75, 0.55, 1.00],   // Pastel purple
+    c4: [1.00, 0.75, 0.55],   // Warm soft amber
+    intensity: 1.1,
     speed: 0.12,
   },
   Active_Listening: {
-    c1: [0.20, 0.45, 0.88],   // softer blue
-    c2: [0.00, 0.65, 0.55],   // deeper mint
-    c3: [0.72, 0.48, 0.92],   // #B87AEB brighter purple (empathy)
-    c4: [0.95, 0.55, 0.30],   // soft amber
-    intensity: 0.80,
-    speed: 0.08,              // slower = calming
+    c1: [0.35, 0.65, 0.95],
+    c2: [0.10, 0.85, 0.70],
+    c3: [0.85, 0.60, 1.00],
+    c4: [1.00, 0.65, 0.45],
+    intensity: 1.0,
+    speed: 0.08,
   },
   CBT_Stripping: {
-    c1: [0.26, 0.52, 0.96],   // clear blue (analytical)
-    c2: [0.10, 0.82, 0.72],   // bright teal
-    c3: [0.45, 0.35, 0.70],   // muted purple
-    c4: [0.80, 0.50, 0.25],   // dim amber
-    intensity: 0.90,
+    c1: [0.40, 0.70, 1.00],
+    c2: [0.20, 0.88, 0.80],
+    c3: [0.65, 0.50, 0.90],
+    c4: [0.90, 0.60, 0.40],
+    intensity: 1.0,
     speed: 0.10,
   },
   Socratic_Questioning: {
-    c1: [0.12, 0.75, 0.86],   // exploration cyan
-    c2: [0.00, 0.79, 0.65],   // fresh mint
-    c3: [0.61, 0.44, 0.87],   // insight purple
-    c4: [0.60, 0.40, 0.20],   // dim amber
-    intensity: 0.88,
-    speed: 0.14,              // slightly faster = curiosity
+    c1: [0.25, 0.85, 0.95],
+    c2: [0.15, 0.90, 0.75],
+    c3: [0.75, 0.55, 1.00],
+    c4: [0.80, 0.55, 0.35],
+    intensity: 1.05,
+    speed: 0.14,
   },
   Crisis_Escalation: {
-    c1: [0.10, 0.45, 0.91],   // deep safe blue
-    c2: [0.00, 0.70, 0.58],   // safe green
-    c3: [0.18, 0.35, 0.65],   // muted indigo (no stimulation)
-    c4: [0.15, 0.40, 0.55],   // cool teal (zero warm)
-    intensity: 0.65,          // lower = non-threatening
-    speed: 0.05,              // very slow = maximum calm
+    c1: [0.20, 0.60, 0.95],
+    c2: [0.10, 0.80, 0.70],
+    c3: [0.30, 0.45, 0.80],
+    c4: [0.25, 0.55, 0.75],
+    intensity: 0.9,
+    speed: 0.05,
   },
 };
 
@@ -87,25 +87,26 @@ function applyEmotionMod(base: Palette, emotion?: string): Palette {
   switch (emotion) {
     case 'Anxiety':
       // Push cooling colors, suppress warm
-      p.c2 = [0.00, 0.85, 0.70]; // brighter mint
-      p.c1 = [0.18, 0.50, 0.95]; // stronger blue
-      p.c4 = [0.20, 0.30, 0.45]; // suppress amber → cool grey
+      p.c2 = [0.15, 0.95, 0.85]; // bright mint
+      p.c1 = [0.35, 0.70, 1.00]; // bright blue
+      p.c4 = [0.40, 0.50, 0.70]; // cool greyish blue
+      p.c3 = [0.50, 0.60, 0.90]; // cool purple
       p.speed = Math.max(0.04, p.speed * 0.6); // slow down
       break;
     case 'Depression':
       // Push warm activating colors
-      p.c4 = [1.00, 0.65, 0.35]; // bright amber
-      p.c3 = [0.75, 0.50, 0.95]; // bright purple (validation)
-      p.c1 = [0.35, 0.55, 0.90]; // lighter blue
-      p.intensity = Math.min(1.0, p.intensity * 1.25);
+      p.c4 = [1.00, 0.80, 0.50]; // radiant amber
+      p.c3 = [0.90, 0.65, 1.00]; // bright purple
+      p.c1 = [0.55, 0.75, 1.00]; // lighter blue
+      p.intensity = Math.min(1.3, p.intensity * 1.15);
       p.speed = p.speed * 1.3; // gentle speed up
       break;
     case 'Anger':
       // Maximum cooling, zero warmth
-      p.c1 = [0.10, 0.40, 0.88]; // deep blue
-      p.c2 = [0.00, 0.75, 0.65]; // strong mint
-      p.c4 = [0.15, 0.30, 0.50]; // fully cool
-      p.c3 = [0.30, 0.30, 0.60]; // muted purple
+      p.c1 = [0.20, 0.60, 0.95]; 
+      p.c2 = [0.10, 0.85, 0.75]; 
+      p.c4 = [0.25, 0.45, 0.65]; 
+      p.c3 = [0.45, 0.45, 0.80]; 
       p.speed = Math.max(0.04, p.speed * 0.5); // very slow
       break;
   }
@@ -313,34 +314,37 @@ void main() {
   float d3 = length(w - cPos3);
   float d4 = length(w - cPos4);
 
-  float w1 = exp(-d1 * d1 * 1.4);
-  float w2 = exp(-d2 * d2 * 1.4);
-  float w3 = exp(-d3 * d3 * 1.4);
-  float w4 = exp(-d4 * d4 * 1.4);
+  float w1 = exp(-d1 * d1 * 1.8);
+  float w2 = exp(-d2 * d2 * 1.8);
+  float w3 = exp(-d3 * d3 * 1.8);
+  float w4 = exp(-d4 * d4 * 1.8);
 
-  // Weight normalization (prevents color over-exposure)
-  float wSum = w1 + w2 + w3 + w4 + 0.001;
-  w1 /= wSum;
-  w2 /= wSum;
-  w3 /= wSum;
-  w4 /= wSum;
+  // Weight normalization: Add 0.3 to wSum to prevent dark dead-zones and increase overall vibrance
+  float wSum = w1 + w2 + w3 + w4 + 0.3;
+  w1 /= (wSum * 0.85);
+  w2 /= (wSum * 0.85);
+  w3 /= (wSum * 0.85);
+  w4 /= (wSum * 0.85);
 
   vec3 col = uColor1 * w1 + uColor2 * w2 + uColor3 * w3 + uColor4 * w4;
 
+  // Enhance saturation and brightness (Gemini look is highly luminous)
+  col = pow(col, vec3(0.85)); // slight gamma boost to brighten midtones
+
   // 5. Zero-cost Pseudo-3D Shading & Specular Sheen
   // Uses the displacement vector 'r' as the gradient slope of the height field
-  vec2 slope = r * 0.75;
-  vec3 normal = normalize(vec3(-slope.x, -slope.y, 0.65));
-  vec3 lightDir = normalize(vec3(0.4, 0.4, 0.9)); // Direct lighting from top-right
+  vec2 slope = r * 0.6;
+  vec3 normal = normalize(vec3(-slope.x, -slope.y, 1.2));
+  vec3 lightDir = normalize(vec3(0.5, 0.5, 1.0)); // Direct lighting from top-right
   
-  float diffuse = max(dot(normal, lightDir), 0.0) * 0.35 + 0.65;
-  float specular = pow(max(dot(normal, lightDir), 0.0), 24.0) * 0.08;
+  float diffuse = max(dot(normal, lightDir), 0.0) * 0.15 + 0.85;
+  float specular = pow(max(dot(normal, lightDir), 0.0), 32.0) * 0.12;
   
   col *= diffuse;
   col += vec3(specular);
 
-  // 6. Vignette
-  float vignette = 1.0 - dot(uv - 0.5, uv - 0.5) * 1.5;
+  // 6. Vignette (very subtle to preserve brightness)
+  float vignette = 1.0 - dot(uv - 0.5, uv - 0.5) * 0.5;
   col *= vignette;
 
   col *= uIntensity;
