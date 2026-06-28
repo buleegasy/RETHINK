@@ -30,51 +30,58 @@ import type { FSMState } from '../../types';
 
 interface Palette {
   c1: [number, number, number]; // Trust Blue
-  c2: [number, number, number]; // Healing Mint
+  c2: [number, number, number]; // Healing Mint / Cyan
   c3: [number, number, number]; // Empathy Purple
-  c4: [number, number, number]; // Warm Amber
+  c4: [number, number, number]; // Warm Pink/Rose (Replaces Amber to prevent muddy brown blending)
   intensity: number;
   speed: number;
 }
 
+const hex2rgb = (hex: string): [number, number, number] => {
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  return [r, g, b];
+};
+
 const FSM_PALETTES: Record<FSMState, Palette> = {
   Onboarding: {
-    c1: [0.45, 0.73, 1.00],   // Bright soft blue
-    c2: [0.15, 0.90, 0.75],   // Luminous mint
-    c3: [0.75, 0.55, 1.00],   // Pastel purple
-    c4: [1.00, 0.75, 0.55],   // Warm soft amber
+    c1: hex2rgb('#5C94FF'), // Bright Cornflower Blue
+    c2: hex2rgb('#24E0D1'), // Bright Turquoise
+    c3: hex2rgb('#B388FF'), // Soft Lavender
+    c4: hex2rgb('#FF8CA8'), // Soft Rose (replaces Amber for analogous harmony)
     intensity: 1.1,
     speed: 0.12,
   },
   Active_Listening: {
-    c1: [0.35, 0.65, 0.95],
-    c2: [0.10, 0.85, 0.70],
-    c3: [0.85, 0.60, 1.00],
-    c4: [1.00, 0.65, 0.45],
+    c1: hex2rgb('#6B8AFF'), // Empathy Blue
+    c2: hex2rgb('#4AE5FF'), // Soft Cyan
+    c3: hex2rgb('#D088FF'), // Bright Empathy Purple
+    c4: hex2rgb('#FF7EB3'), // Warm Pink
     intensity: 1.0,
     speed: 0.08,
   },
   CBT_Stripping: {
-    c1: [0.40, 0.70, 1.00],
-    c2: [0.20, 0.88, 0.80],
-    c3: [0.65, 0.50, 0.90],
-    c4: [0.90, 0.60, 0.40],
+    c1: hex2rgb('#2979FF'), // Clear Analytical Blue
+    c2: hex2rgb('#00E5FF'), // Bright Cyan
+    c3: hex2rgb('#7C4DFF'), // Deep Purple
+    c4: hex2rgb('#00B0FF'), // Light Blue
     intensity: 1.0,
     speed: 0.10,
   },
   Socratic_Questioning: {
-    c1: [0.25, 0.85, 0.95],
-    c2: [0.15, 0.90, 0.75],
-    c3: [0.75, 0.55, 1.00],
-    c4: [0.80, 0.55, 0.35],
+    c1: hex2rgb('#00B8D4'), // Exploration Cyan
+    c2: hex2rgb('#1DE9B6'), // Fresh Mint
+    c3: hex2rgb('#8C9EFF'), // Insight Indigo
+    c4: hex2rgb('#00E676'), // Bright Green
     intensity: 1.05,
     speed: 0.14,
   },
   Crisis_Escalation: {
-    c1: [0.20, 0.60, 0.95],
-    c2: [0.10, 0.80, 0.70],
-    c3: [0.30, 0.45, 0.80],
-    c4: [0.25, 0.55, 0.75],
+    c1: hex2rgb('#0D47A1'), // Deep Safe Blue
+    c2: hex2rgb('#006064'), // Deep Teal
+    c3: hex2rgb('#1A237E'), // Dark Indigo
+    c4: hex2rgb('#004D40'), // Dark Green
     intensity: 0.9,
     speed: 0.05,
   },
@@ -86,27 +93,28 @@ function applyEmotionMod(base: Palette, emotion?: string): Palette {
 
   switch (emotion) {
     case 'Anxiety':
-      // Push cooling colors, suppress warm
-      p.c2 = [0.15, 0.95, 0.85]; // bright mint
-      p.c1 = [0.35, 0.70, 1.00]; // bright blue
-      p.c4 = [0.40, 0.50, 0.70]; // cool greyish blue
-      p.c3 = [0.50, 0.60, 0.90]; // cool purple
+      // Push cooling colors, suppress warm completely
+      p.c2 = hex2rgb('#00E5FF'); // Cyan
+      p.c1 = hex2rgb('#2979FF'); // Blue
+      p.c4 = hex2rgb('#1DE9B6'); // Mint
+      p.c3 = hex2rgb('#536DFE'); // Indigo
       p.speed = Math.max(0.04, p.speed * 0.6); // slow down
       break;
     case 'Depression':
-      // Push warm activating colors
-      p.c4 = [1.00, 0.80, 0.50]; // radiant amber
-      p.c3 = [0.90, 0.65, 1.00]; // bright purple
-      p.c1 = [0.55, 0.75, 1.00]; // lighter blue
+      // Push warm, activating, radiant pinks/purples
+      p.c4 = hex2rgb('#FF4081'); // Vibrant Pink
+      p.c3 = hex2rgb('#E040FB'); // Bright Purple
+      p.c1 = hex2rgb('#7C4DFF'); // Deep Purple
+      p.c2 = hex2rgb('#FF80AB'); // Light Pink
       p.intensity = Math.min(1.3, p.intensity * 1.15);
       p.speed = p.speed * 1.3; // gentle speed up
       break;
     case 'Anger':
-      // Maximum cooling, zero warmth
-      p.c1 = [0.20, 0.60, 0.95]; 
-      p.c2 = [0.10, 0.85, 0.75]; 
-      p.c4 = [0.25, 0.45, 0.65]; 
-      p.c3 = [0.45, 0.45, 0.80]; 
+      // Maximum cooling, deep ocean colors
+      p.c1 = hex2rgb('#01579B'); 
+      p.c2 = hex2rgb('#006064'); 
+      p.c4 = hex2rgb('#004D40'); 
+      p.c3 = hex2rgb('#1A237E'); 
       p.speed = Math.max(0.04, p.speed * 0.5); // very slow
       break;
   }
