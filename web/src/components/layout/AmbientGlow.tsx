@@ -1,85 +1,36 @@
+/**
+ * AmbientGlow — 背景环境光晕
+ *
+ * 色彩心理学设计：
+ *  • 蓝色  (#4285F4) — 信任、平静、专业感，心理支持的核心锚点
+ *  • 薄荷绿 (#00C9A7) — 治愈、希望、生命力，对抗焦虑与低落
+ *  • 柔紫  (#9C6FDE) — 感性、内省、情绪释放，促进深层共情
+ *  • 暖琥珀 (#FF9F5A，极淡) — 温暖与被接纳感，防止冷色调疏离
+ *
+ * 性能保证：
+ *  • 纯 CSS @keyframes + will-change: transform → GPU 合成线程，零 JS 占用
+ *  • 与 React 渲染周期完全解耦，不监听任何 store
+ *  • prefers-reduced-motion 媒体查询自动暂停动画
+ */
+
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useChatStore } from '../../store/chatStore';
 
-export const AmbientGlow: React.FC<{ forceShow?: boolean }> = ({ forceShow = false }) => {
-  const isStreaming = useChatStore(state => state.isStreaming);
-  const show = forceShow || isStreaming || true;
+export const AmbientGlow: React.FC = () => (
+  <div
+    aria-hidden="true"
+    className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
+    style={{ isolation: 'isolate' }}
+  >
+    {/* ── Orb 1: 信任蓝 — 左上锚点，主导平静感 ── */}
+    <div className="ambient-orb ambient-orb--blue" />
 
-  return (
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 1.5 } }}
-          transition={{ duration: 1.5, ease: 'easeInOut' }}
-          className="fixed inset-0 top-0 left-0 w-full h-full pointer-events-none z-0"
-          style={{ mixBlendMode: 'normal' }}
-        >
-          {/* Cloud 1: Deep Sky Blue */}
-          <motion.div
-            className="absolute top-[-10%] left-[5%] w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] rounded-full"
-            style={{
-              background: 'radial-gradient(circle, rgba(66, 133, 244, 0.45) 0%, rgba(66, 133, 244, 0) 70%)',
-              filter: 'blur(70px)',
-              willChange: 'transform',
-            }}
-            animate={{
-              x: [0, 150, -100, 0],
-              y: [0, -80, 100, 0],
-              scale: [1, 1.3, 0.8, 1],
-            }}
-            transition={{
-              duration: 12,
-              repeat: Infinity,
-              ease: [0.445, 0.05, 0.55, 0.95],
-            }}
-          />
+    {/* ── Orb 2: 治愈绿 — 右下，给予希望与出口感 ── */}
+    <div className="ambient-orb ambient-orb--mint" />
 
-          {/* Cloud 2: Mint Cyan (Replaced Purple) */}
-          <motion.div
-            className="absolute top-[5%] right-[0%] w-[55vw] h-[55vw] max-w-[700px] max-h-[700px] rounded-full"
-            style={{
-              background: 'radial-gradient(circle, rgba(0, 188, 212, 0.35) 0%, rgba(0, 188, 212, 0) 70%)',
-              filter: 'blur(70px)',
-              willChange: 'transform',
-            }}
-            animate={{
-              x: [0, -120, 90, 0],
-              y: [0, 100, -80, 0],
-              scale: [1, 0.8, 1.25, 1],
-            }}
-            transition={{
-              duration: 15,
-              repeat: Infinity,
-              ease: [0.445, 0.05, 0.55, 0.95],
-              delay: 0.5,
-            }}
-          />
+    {/* ── Orb 3: 柔紫 — 中央偏右，促进内省与情感流动 ── */}
+    <div className="ambient-orb ambient-orb--purple" />
 
-          {/* Cloud 3: Coral Peach */}
-          <motion.div
-            className="absolute top-[15%] left-[25%] w-[65vw] h-[65vw] max-w-[900px] max-h-[900px] rounded-full"
-            style={{
-              background: 'radial-gradient(circle, rgba(234, 67, 53, 0.25) 0%, rgba(234, 67, 53, 0) 70%)',
-              filter: 'blur(90px)',
-              willChange: 'transform',
-            }}
-            animate={{
-              x: [0, 100, -130, 0],
-              y: [0, -90, 110, 0],
-              scale: [1, 1.2, 0.85, 1],
-            }}
-            transition={{
-              duration: 18,
-              repeat: Infinity,
-              ease: [0.445, 0.05, 0.55, 0.95],
-              delay: 1,
-            }}
-          />
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-};
+    {/* ── Orb 4: 暖琥珀 — 底部中心，极淡，提供温暖底色 ── */}
+    <div className="ambient-orb ambient-orb--amber" />
+  </div>
+);

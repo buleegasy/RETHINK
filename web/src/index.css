@@ -211,3 +211,129 @@
   mask-composite: exclude;
   -webkit-mask-composite: xor;
 }
+
+/* =====================================================================
+   AMBIENT GLOW — 色彩心理学背景光晕系统
+   =====================================================================
+   色彩语义：
+     蓝  → 信任、稳定、专业（心理咨询核心调性）
+     薄荷绿 → 治愈、希望、再生（缓解焦虑）
+     柔紫 → 内省、感性、情感流动（促进共情）
+     暖琥珀 → 温暖、包容、被接纳（防冷漠距离感）
+   性能策略：
+     will-change: transform + filter → GPU 合成线程
+     animation-duration 18-28s → 极低刷新率，CPU 近零占用
+     prefers-reduced-motion → 自动暂停
+   ===================================================================== */
+
+/* ── Base orb ── */
+.ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform;
+  /* GPU-accelerated blur — promote to own layer */
+  filter: blur(90px);
+  /* Smooth fade-in on mount */
+  animation-fill-mode: both;
+}
+
+/* ── Orb 1: 信任蓝 ── */
+.ambient-orb--blue {
+  width: 70vmax;
+  height: 70vmax;
+  top: -20%;
+  left: -15%;
+  background: radial-gradient(
+    circle at 40% 40%,
+    rgba(66, 133, 244, 0.38) 0%,
+    rgba(66, 133, 244, 0.12) 45%,
+    transparent 70%
+  );
+  animation: orb-drift-blue 22s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+}
+
+/* ── Orb 2: 治愈薄荷绿 ── */
+.ambient-orb--mint {
+  width: 65vmax;
+  height: 65vmax;
+  bottom: -15%;
+  right: -10%;
+  background: radial-gradient(
+    circle at 60% 60%,
+    rgba(0, 201, 167, 0.32) 0%,
+    rgba(0, 201, 167, 0.10) 45%,
+    transparent 70%
+  );
+  animation: orb-drift-mint 28s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+  animation-delay: -8s;
+}
+
+/* ── Orb 3: 内省柔紫 ── */
+.ambient-orb--purple {
+  width: 55vmax;
+  height: 55vmax;
+  top: 20%;
+  right: 5%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(156, 111, 222, 0.28) 0%,
+    rgba(156, 111, 222, 0.08) 45%,
+    transparent 70%
+  );
+  animation: orb-drift-purple 18s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+  animation-delay: -4s;
+}
+
+/* ── Orb 4: 温暖琥珀（极淡，底色补充） ── */
+.ambient-orb--amber {
+  width: 50vmax;
+  height: 50vmax;
+  bottom: 0;
+  left: 20%;
+  background: radial-gradient(
+    circle at 50% 70%,
+    rgba(255, 159, 90, 0.16) 0%,
+    rgba(255, 159, 90, 0.04) 50%,
+    transparent 70%
+  );
+  animation: orb-drift-amber 24s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+  animation-delay: -12s;
+}
+
+/* ── Keyframes: each orb drifts on a unique Lissajous-like path ── */
+@keyframes orb-drift-blue {
+  0%   { transform: translate(0, 0)    scale(1.00); }
+  25%  { transform: translate(8vw, 6vh) scale(1.12); }
+  50%  { transform: translate(4vw, 12vh) scale(0.92); }
+  75%  { transform: translate(-6vw, 8vh) scale(1.08); }
+  100% { transform: translate(-3vw, -4vh) scale(1.05); }
+}
+
+@keyframes orb-drift-mint {
+  0%   { transform: translate(0, 0)     scale(1.00); }
+  30%  { transform: translate(-10vw, -8vh) scale(1.15); }
+  60%  { transform: translate(-5vw, -14vh) scale(0.90); }
+  100% { transform: translate(6vw, -6vh)  scale(1.10); }
+}
+
+@keyframes orb-drift-purple {
+  0%   { transform: translate(0, 0)     scale(1.00); }
+  40%  { transform: translate(-8vw, 10vh) scale(1.18); }
+  70%  { transform: translate(4vw, 6vh)  scale(0.88); }
+  100% { transform: translate(2vw, -8vh)  scale(1.05); }
+}
+
+@keyframes orb-drift-amber {
+  0%   { transform: translate(0, 0)     scale(1.00); }
+  35%  { transform: translate(12vw, -6vh) scale(1.10); }
+  70%  { transform: translate(6vw, -10vh) scale(0.95); }
+  100% { transform: translate(-8vw, -4vh) scale(1.08); }
+}
+
+/* ── Respect prefers-reduced-motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .ambient-orb {
+    animation: none !important;
+  }
+}
+

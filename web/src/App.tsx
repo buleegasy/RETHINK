@@ -85,7 +85,7 @@ function App() {
         <>
           <AmbientGlow />
           {/* 主对话区 (Workspace Layout) */}
-          <div className="flex flex-col flex-1 h-full relative z-10 bg-surface-dim">
+          <div className="flex flex-col flex-1 h-full relative z-10">
             {/* ── 移动端顶部 Header ── */}
             <div className="md:hidden flex items-center justify-between pt-[max(env(safe-area-inset-top),12px)] pb-2.5 px-4 shrink-0 z-20 border-b border-outline-variant/30">
               {/* 左侧：Hamburger 菜单 */}
