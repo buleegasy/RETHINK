@@ -2,11 +2,6 @@ import { ApiError, apiClient } from './client';
 import type { UserProfile } from '../types';
 
 export const chatApi = {
-  deleteMessage: (sessionId: string, messageId: string) => {
-    return apiClient<void>(`/api/chat/sessions/${sessionId}/messages/${messageId}`, {
-      method: 'DELETE',
-    });
-  },
   /**
    * 建立 SSE 连接发送对话
    * 由于需要流式处理，直接封装原生的 fetch 调用

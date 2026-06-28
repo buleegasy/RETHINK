@@ -344,7 +344,7 @@ authRouter.delete('/sessions/:id', requireAuth, async (c) => {
       .first<any>();
 
     if (!session) {
-      return c.json({ error: 'Session not found' }, 404);
+      return c.json({ success: true, message: 'Session not found or already deleted' }, 200);
     }
 
     if (session.user_id !== user.uid) {

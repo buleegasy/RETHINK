@@ -4,7 +4,7 @@ import { cors } from 'hono/cors';
 // 因此开启 CORS 以方便本地联调。
 export const corsMiddleware = cors({
   origin: '*', // 生产环境同域代理时其实不需要跨域，这里设为*方便调试
-  allowMethods: ['POST', 'GET', 'OPTIONS'],
+  allowMethods: ['POST', 'GET', 'OPTIONS', 'DELETE', 'PUT'],
   allowHeaders: ['Content-Type', 'Authorization', 'x-admin-token'],
   exposeHeaders: ['Content-Length'],
   maxAge: 600,

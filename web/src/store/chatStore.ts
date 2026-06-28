@@ -31,7 +31,6 @@ interface ChatState {
   setSelectedModel: (model: string) => void;
   setIcebreakerLayer: (layer: number) => void;
   clearChat: () => void;
-  deleteMessage: (messageId: string) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => {
@@ -122,10 +121,6 @@ export const useChatStore = create<ChatState>((set) => {
       isStreaming: false,
       icebreakerLayer: 1,
     }),
-
-    deleteMessage: (messageId) => set((state) => ({
-      messages: state.messages.filter((msg) => msg.id !== messageId)
-    })),
   };
 });
 

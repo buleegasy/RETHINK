@@ -43,7 +43,6 @@ interface MessageBubbleProps {
   isFirstInGroup?: boolean;
   /** Whether this is the last message in a consecutive group from the same sender */
   isLastInGroup?: boolean;
-  onDeleteRequest: (messageId: string) => void;
 }
 
 const TypingIndicator = () => (
@@ -115,7 +114,6 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
   isStreaming,
   isFirstInGroup = true,
   isLastInGroup = true,
-  onDeleteRequest,
 }) => {
   const isUser = message.role === 'user';
   const [showTechChain, setShowTechChain] = useState(false);
@@ -383,20 +381,6 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
           </>
         )}
       </div>
-
-      {message.id && !isStreaming && (
-        <button
-          type="button"
-          onClick={() => onDeleteRequest(message.id!)}
-          aria-label="删除消息"
-          title="删除消息"
-          className={`opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity p-1.5 rounded-full hover:bg-surface-container text-on-surface-variant/40 hover:text-stage-red focus:outline-none focus:ring-2 focus:ring-stage-red/50 cursor-pointer ${
-            isUser ? 'order-1' : 'order-3'
-          }`}
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
-      )}
     </motion.div>
   );
 };
