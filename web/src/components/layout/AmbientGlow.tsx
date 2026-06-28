@@ -1,132 +1,400 @@
 /**
- * AmbientGlow — 动态色彩心理学背景光晕
+ * AmbientGlow — Gemini-style WebGL Aurora Shader Background
  *
- * 响应逻辑：
- *  1. FSM 状态    → 决定主色调（治疗阶段视觉场）
- *  2. intentEmotion → 情绪「反调节」（对抗而非镜像）
- *     Anxiety    → 强化 mint/蓝（镇静），撤回 amber
- *     Depression → 推高 amber/暖（激活能量），暖紫给予认可
- *     Anger      → 推高冷蓝/青，撤回一切暖色
- *  3. riskLevel   → crisis 时全切蓝绿安抚色，清除刺激色
+ * Uses Three.js + @react-three/fiber for a fluid, organic aurora effect
+ * driven by simplex noise in a fragment shader.
  *
- * 性能保证：
- *  • framer-motion animate 对 rgba 做原生插值，无 JS 逐帧计算
- *  • will-change: transform + filter → GPU 合成线程
- *  • prefers-reduced-motion → 自动静止
+ * Dynamic response:
+ *   FSM State + intentEmotion → uniform color stops sent to GPU
+ *   All color blending happens on the GPU — zero CPU overhead per frame.
+ *
+ * Color psychology (counter-regulation):
+ *   Anxiety    → cool blues + mints (calming)
+ *   Depression → warm amber + purple (energizing)
+ *   Anger      → deep blues + cyans (cooling)
+ *   Crisis     → forced calming blue-green
  */
 
-import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
+import React, { useMemo, useRef } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import * as THREE from 'three';
 import { useChatStore } from '../../store/chatStore';
 import type { FSMState } from '../../types';
 
-// ── 色彩意义 ──────────────────────────────────────────────────
-//  蓝   #4285F4  信任 / 稳定 / 专业    → 心理安全感锚点
-//  薄荷绿 #00C9A7  治愈 / 希望 / 再生    → 缓解焦虑
-//  柔紫  #9C6FDE  感性 / 共情 / 内省    → 情感自由流动
-//  暖琥珀 #FF9F5A  温暖 / 被接纳        → 防疏离感
-// ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// GLSL Shaders
+// ═══════════════════════════════════════════════════════════════
 
-interface OrbColors {
-  blue:   [number, number, number, number]; // [r, g, b, a]
-  mint:   [number, number, number, number];
-  purple: [number, number, number, number];
-  amber:  [number, number, number, number];
+const VERT = /*glsl*/ `
+varying vec2 vUv;
+void main() {
+  vUv = uv;
+  gl_Position = vec4(position, 1.0);
+}
+`;
+
+const FRAG = /*glsl*/ `
+precision highp float;
+
+varying vec2 vUv;
+uniform float uTime;
+uniform float uSpeed;
+uniform vec2 uResolution;
+uniform vec3 uColor1;
+uniform vec3 uColor2;
+uniform vec3 uColor3;
+uniform vec3 uColor4;
+uniform float uIntensity;
+
+// ── Simplex 2D noise ──
+vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+
+float snoise(vec2 v) {
+  const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+                      -0.577350269189626, 0.024390243902439);
+  vec2 i  = floor(v + dot(v, C.yy));
+  vec2 x0 = v -   i + dot(i, C.xx);
+  vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+  vec4 x12 = x0.xyxy + C.xxzz;
+  x12.xy -= i1;
+  i = mod(i, 289.0);
+  vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0))
+                 + i.x + vec3(0.0, i1.x, 1.0));
+  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy),
+               dot(x12.zw,x12.zw)), 0.0);
+  m = m*m; m = m*m;
+  vec3 x_ = 2.0 * fract(p * C.www) - 1.0;
+  vec3 h = abs(x_) - 0.5;
+  vec3 ox = floor(x_ + 0.5);
+  vec3 a0 = x_ - ox;
+  m *= 1.79284291400159 - 0.85373472095314 * (a0*a0 + h*h);
+  vec3 g;
+  g.x  = a0.x  * x0.x  + h.x  * x0.y;
+  g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+  return 130.0 * dot(m, g);
 }
 
-/** FSM 阶段基础色盘 */
-const FSM_PALETTES: Record<FSMState, OrbColors> = {
+// ── Fractal Brownian Motion (organic detail) ──
+float fbm(vec2 p) {
+  float value = 0.0;
+  float amplitude = 0.5;
+  for (int i = 0; i < 5; i++) {
+    value += amplitude * snoise(p);
+    p *= 2.0;
+    amplitude *= 0.5;
+  }
+  return value;
+}
+
+void main() {
+  vec2 uv = vUv;
+  float aspect = uResolution.x / uResolution.y;
+  vec2 p = (uv - 0.5) * vec2(aspect, 1.0);
+
+  float t = uTime * uSpeed;
+
+  // ── Multi-layer aurora noise ──
+  float n1 = fbm(p * 1.2 + vec2(t * 0.15, t * 0.08));
+  float n2 = fbm(p * 0.8 + vec2(-t * 0.12, t * 0.1) + 10.0);
+  float n3 = fbm(p * 1.6 + vec2(t * 0.07, -t * 0.14) + 20.0);
+  float n4 = snoise(p * 0.5 + vec2(t * 0.05, t * 0.03) + 30.0);
+
+  // ── Soft aurora bands ──
+  float band1 = smoothstep(-0.2, 0.6, n1) * 0.65;
+  float band2 = smoothstep(-0.1, 0.5, n2) * 0.55;
+  float band3 = smoothstep(0.0, 0.7, n3) * 0.45;
+  float band4 = smoothstep(-0.3, 0.4, n4) * 0.35;
+
+  // ── Blend colors via aurora bands ──
+  vec3 col = vec3(0.0);
+  col += uColor1 * band1;
+  col += uColor2 * band2;
+  col += uColor3 * band3;
+  col += uColor4 * band4;
+
+  // ── Subtle vignette (darker edges) ──
+  float vignette = 1.0 - dot(uv - 0.5, uv - 0.5) * 1.8;
+  col *= vignette;
+
+  // ── Master intensity ──
+  col *= uIntensity;
+
+  // ── Subtle grain for premium texture ──
+  float grain = fract(sin(dot(uv * uResolution, vec2(12.9898, 78.233))) * 43758.5453);
+  col += (grain - 0.5) * 0.015;
+
+  fragColor = vec4(col, 1.0);
+}
+`;
+
+// Prefix for WebGL2 if needed
+const FRAG_FULL = `#version 300 es
+precision highp float;
+in vec2 vUv;
+out vec4 fragColor;
+uniform float uTime;
+uniform float uSpeed;
+uniform vec2 uResolution;
+uniform vec3 uColor1;
+uniform vec3 uColor2;
+uniform vec3 uColor3;
+uniform vec3 uColor4;
+uniform float uIntensity;
+` + FRAG.split('void main()').slice(-1)[0].replace('varying vec2 vUv;', '');
+
+const VERT_300 = `#version 300 es
+in vec3 position;
+in vec2 uv;
+out vec2 vUv;
+void main() {
+  vUv = uv;
+  gl_Position = vec4(position, 1.0);
+}
+`;
+
+// ═══════════════════════════════════════════════════════════════
+// Color Palettes (Color Psychology)
+// ═══════════════════════════════════════════════════════════════
+
+interface Palette {
+  c1: [number, number, number]; // Trust Blue
+  c2: [number, number, number]; // Healing Mint
+  c3: [number, number, number]; // Empathy Purple
+  c4: [number, number, number]; // Warm Amber
+  intensity: number;
+  speed: number;
+}
+
+const FSM_PALETTES: Record<FSMState, Palette> = {
   Onboarding: {
-    blue:   [66, 133, 244, 0.30],
-    mint:   [0, 201, 167, 0.18],
-    purple: [156, 111, 222, 0.14],
-    amber:  [255, 159, 90, 0.28],  // 欢迎暖意主导
+    c1: [0.26, 0.52, 0.96],   // #4285F4 trust blue
+    c2: [0.00, 0.79, 0.65],   // #00C9A7 mint
+    c3: [0.61, 0.44, 0.87],   // #9C6FDE purple
+    c4: [1.00, 0.62, 0.35],   // #FF9F5A amber (warm welcome)
+    intensity: 0.85,
+    speed: 0.12,
   },
   Active_Listening: {
-    blue:   [66, 133, 244, 0.20],
-    mint:   [0, 201, 167, 0.20],
-    purple: [156, 111, 222, 0.42], // 共情紫 dominant
-    amber:  [255, 159, 90, 0.24],
+    c1: [0.20, 0.45, 0.88],   // softer blue
+    c2: [0.00, 0.65, 0.55],   // deeper mint
+    c3: [0.72, 0.48, 0.92],   // #B87AEB brighter purple (empathy)
+    c4: [0.95, 0.55, 0.30],   // soft amber
+    intensity: 0.80,
+    speed: 0.08,              // slower = calming
   },
   CBT_Stripping: {
-    blue:   [66, 133, 244, 0.44], // 分析蓝 dominant
-    mint:   [0, 201, 167, 0.28],
-    purple: [156, 111, 222, 0.14],
-    amber:  [255, 159, 90, 0.10],
+    c1: [0.26, 0.52, 0.96],   // clear blue (analytical)
+    c2: [0.10, 0.82, 0.72],   // bright teal
+    c3: [0.45, 0.35, 0.70],   // muted purple
+    c4: [0.80, 0.50, 0.25],   // dim amber
+    intensity: 0.90,
+    speed: 0.10,
   },
   Socratic_Questioning: {
-    blue:   [30, 190, 220, 0.36],  // 探索青 dominant
-    mint:   [0, 201, 167, 0.36],
-    purple: [156, 111, 222, 0.24],
-    amber:  [255, 159, 90, 0.10],
+    c1: [0.12, 0.75, 0.86],   // exploration cyan
+    c2: [0.00, 0.79, 0.65],   // fresh mint
+    c3: [0.61, 0.44, 0.87],   // insight purple
+    c4: [0.60, 0.40, 0.20],   // dim amber
+    intensity: 0.88,
+    speed: 0.14,              // slightly faster = curiosity
   },
   Crisis_Escalation: {
-    blue:   [26, 115, 232, 0.55],  // 深安抚蓝，强力镇静
-    mint:   [0, 201, 167, 0.44],
-    purple: [156, 111, 222, 0.06],
-    amber:  [255, 159, 90, 0.03],  // 危机时撤回一切刺激暖色
+    c1: [0.10, 0.45, 0.91],   // deep safe blue
+    c2: [0.00, 0.70, 0.58],   // safe green
+    c3: [0.18, 0.35, 0.65],   // muted indigo (no stimulation)
+    c4: [0.15, 0.40, 0.55],   // cool teal (zero warm)
+    intensity: 0.65,          // lower = non-threatening
+    speed: 0.05,              // very slow = maximum calm
   },
 };
 
-const DEFAULT_PALETTE: OrbColors = {
-  blue:   [66, 133, 244, 0.38],
-  mint:   [0, 201, 167, 0.32],
-  purple: [156, 111, 222, 0.28],
-  amber:  [255, 159, 90, 0.16],
-};
-
-/** 情绪「反调节」修正：对抗情绪，而非镜像情绪 */
-function applyEmotionMod(base: OrbColors, emotion?: string): OrbColors {
+function applyEmotionMod(base: Palette, emotion?: string): Palette {
   if (!emotion || emotion === 'Neutral') return base;
-  const p: OrbColors = {
-    blue:   [...base.blue]   as [number, number, number, number],
-    mint:   [...base.mint]   as [number, number, number, number],
-    purple: [...base.purple] as [number, number, number, number],
-    amber:  [...base.amber]  as [number, number, number, number],
-  };
-
-  const clamp = (v: number) => Math.min(0.70, Math.max(0, v));
+  const p = { ...base, c1: [...base.c1] as [number,number,number], c2: [...base.c2] as [number,number,number], c3: [...base.c3] as [number,number,number], c4: [...base.c4] as [number,number,number] };
 
   switch (emotion) {
     case 'Anxiety':
-      // 焦虑 → 强镇静：推高蓝/绿，压低刺激暖色
-      p.mint[3]   = clamp(p.mint[3]   * 1.55);
-      p.blue[3]   = clamp(p.blue[3]   * 1.40);
-      p.amber[3]  = clamp(p.amber[3]  * 0.35);
-      p.purple[3] = clamp(p.purple[3] * 0.85);
+      // Push cooling colors, suppress warm
+      p.c2 = [0.00, 0.85, 0.70]; // brighter mint
+      p.c1 = [0.18, 0.50, 0.95]; // stronger blue
+      p.c4 = [0.20, 0.30, 0.45]; // suppress amber → cool grey
+      p.speed = Math.max(0.04, p.speed * 0.6); // slow down
       break;
     case 'Depression':
-      // 抑郁 → 激活能量：推高暖琥珀，共情紫给予认可感
-      p.amber[3]  = clamp(p.amber[3]  * 2.40);
-      p.purple[3] = clamp(p.purple[3] * 1.50);
-      p.mint[3]   = clamp(p.mint[3]   * 0.70);
+      // Push warm activating colors
+      p.c4 = [1.00, 0.65, 0.35]; // bright amber
+      p.c3 = [0.75, 0.50, 0.95]; // bright purple (validation)
+      p.c1 = [0.35, 0.55, 0.90]; // lighter blue
+      p.intensity = Math.min(1.0, p.intensity * 1.25);
+      p.speed = p.speed * 1.3; // gentle speed up
       break;
     case 'Anger':
-      // 愤怒 → 冷却调节：推高蓝/绿冷色，移除暖色
-      p.blue[3]   = clamp(p.blue[3]   * 1.60);
-      p.mint[3]   = clamp(p.mint[3]   * 1.45);
-      p.amber[3]  = clamp(p.amber[3]  * 0.20);
-      p.purple[3] = clamp(p.purple[3] * 0.60);
+      // Maximum cooling, zero warmth
+      p.c1 = [0.10, 0.40, 0.88]; // deep blue
+      p.c2 = [0.00, 0.75, 0.65]; // strong mint
+      p.c4 = [0.15, 0.30, 0.50]; // fully cool
+      p.c3 = [0.30, 0.30, 0.60]; // muted purple
+      p.speed = Math.max(0.04, p.speed * 0.5); // very slow
       break;
   }
   return p;
 }
 
-function toRgba([r, g, b, a]: [number, number, number, number]) {
-  return `rgba(${r}, ${g}, ${b}, ${a})`;
+// ═══════════════════════════════════════════════════════════════
+// WebGL Aurora Mesh
+// ═══════════════════════════════════════════════════════════════
+
+const AuroraMesh: React.FC<{ palette: Palette }> = ({ palette }) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const { size } = useThree();
+
+  const uniforms = useRef({
+    uTime: { value: 0 },
+    uSpeed: { value: palette.speed },
+    uResolution: { value: new THREE.Vector2(size.width, size.height) },
+    uColor1: { value: new THREE.Color(...palette.c1) },
+    uColor2: { value: new THREE.Color(...palette.c2) },
+    uColor3: { value: new THREE.Color(...palette.c3) },
+    uColor4: { value: new THREE.Color(...palette.c4) },
+    uIntensity: { value: palette.intensity },
+  });
+
+  // Smoothly lerp uniforms towards target palette
+  useFrame((_, delta) => {
+    const u = uniforms.current;
+    u.uTime.value += delta;
+    u.uResolution.value.set(size.width, size.height);
+
+    // Smooth color transitions (~3s ease)
+    const lerpFactor = 1 - Math.pow(0.15, delta);
+    u.uColor1.value.lerp(new THREE.Color(...palette.c1), lerpFactor);
+    u.uColor2.value.lerp(new THREE.Color(...palette.c2), lerpFactor);
+    u.uColor3.value.lerp(new THREE.Color(...palette.c3), lerpFactor);
+    u.uColor4.value.lerp(new THREE.Color(...palette.c4), lerpFactor);
+    u.uIntensity.value += (palette.intensity - u.uIntensity.value) * lerpFactor;
+    u.uSpeed.value += (palette.speed - u.uSpeed.value) * lerpFactor;
+  });
+
+  const shaderMaterial = useMemo(
+    () =>
+      new THREE.ShaderMaterial({
+        vertexShader: `
+varying vec2 vUv;
+void main() {
+  vUv = uv;
+  gl_Position = vec4(position, 1.0);
+}`,
+        fragmentShader: `
+precision highp float;
+varying vec2 vUv;
+uniform float uTime;
+uniform float uSpeed;
+uniform vec2 uResolution;
+uniform vec3 uColor1;
+uniform vec3 uColor2;
+uniform vec3 uColor3;
+uniform vec3 uColor4;
+uniform float uIntensity;
+
+vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+
+float snoise(vec2 v) {
+  const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+                      -0.577350269189626, 0.024390243902439);
+  vec2 i  = floor(v + dot(v, C.yy));
+  vec2 x0 = v -   i + dot(i, C.xx);
+  vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+  vec4 x12 = x0.xyxy + C.xxzz;
+  x12.xy -= i1;
+  i = mod(i, 289.0);
+  vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0))
+                 + i.x + vec3(0.0, i1.x, 1.0));
+  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy),
+               dot(x12.zw,x12.zw)), 0.0);
+  m = m*m; m = m*m;
+  vec3 x_ = 2.0 * fract(p * C.www) - 1.0;
+  vec3 h = abs(x_) - 0.5;
+  vec3 ox = floor(x_ + 0.5);
+  vec3 a0 = x_ - ox;
+  m *= 1.79284291400159 - 0.85373472095314 * (a0*a0 + h*h);
+  vec3 g;
+  g.x  = a0.x  * x0.x  + h.x  * x0.y;
+  g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+  return 130.0 * dot(m, g);
 }
 
-function makeRadial(color: [number, number, number, number], cx: string, cy: string) {
-  const [r, g, b, a] = color;
-  return `radial-gradient(circle at ${cx} ${cy}, rgba(${r},${g},${b},${a}) 0%, rgba(${r},${g},${b},${a * 0.3}) 40%, transparent 70%)`;
+float fbm(vec2 p) {
+  float value = 0.0;
+  float amp = 0.5;
+  for (int i = 0; i < 5; i++) {
+    value += amp * snoise(p);
+    p *= 2.0;
+    amp *= 0.5;
+  }
+  return value;
 }
+
+void main() {
+  vec2 uv = vUv;
+  float aspect = uResolution.x / uResolution.y;
+  vec2 p = (uv - 0.5) * vec2(aspect, 1.0);
+  float t = uTime * uSpeed;
+
+  // Multi-layer aurora noise
+  float n1 = fbm(p * 1.2 + vec2(t * 0.15, t * 0.08));
+  float n2 = fbm(p * 0.8 + vec2(-t * 0.12, t * 0.1) + 10.0);
+  float n3 = fbm(p * 1.6 + vec2(t * 0.07, -t * 0.14) + 20.0);
+  float n4 = snoise(p * 0.5 + vec2(t * 0.05, t * 0.03) + 30.0);
+
+  // Soft aurora bands
+  float band1 = smoothstep(-0.2, 0.6, n1) * 0.65;
+  float band2 = smoothstep(-0.1, 0.5, n2) * 0.55;
+  float band3 = smoothstep(0.0, 0.7, n3) * 0.45;
+  float band4 = smoothstep(-0.3, 0.4, n4) * 0.35;
+
+  // Blend colors via aurora bands
+  vec3 col = vec3(0.0);
+  col += uColor1 * band1;
+  col += uColor2 * band2;
+  col += uColor3 * band3;
+  col += uColor4 * band4;
+
+  // Subtle vignette
+  float vignette = 1.0 - dot(uv - 0.5, uv - 0.5) * 1.6;
+  col *= vignette;
+
+  col *= uIntensity;
+
+  // Premium grain texture
+  float grain = fract(sin(dot(uv * uResolution, vec2(12.9898, 78.233))) * 43758.5453);
+  col += (grain - 0.5) * 0.012;
+
+  gl_FragColor = vec4(col, 1.0);
+}`,
+        uniforms: uniforms.current,
+        depthTest: false,
+        depthWrite: false,
+      }),
+    []
+  );
+
+  return (
+    <mesh ref={meshRef} material={shaderMaterial}>
+      <planeGeometry args={[2, 2]} />
+    </mesh>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════
+// Main Component
+// ═══════════════════════════════════════════════════════════════
 
 export const AmbientGlow: React.FC = () => {
   const fsmState   = useChatStore(state => state.fsmState);
   const messages   = useChatStore(state => state.messages);
   const isStreaming = useChatStore(state => state.isStreaming);
 
-  // 从最近一条 AI 消息的 techChain 中读取情绪信号
+  // Extract latest emotion from AI response
   const lastTechChain = useMemo(() => {
     for (let i = messages.length - 1; i >= 0; i--) {
       if (messages[i].role === 'assistant' && messages[i].techChain) {
@@ -139,65 +407,33 @@ export const AmbientGlow: React.FC = () => {
   const emotion   = lastTechChain?.intentEmotion;
   const riskLevel = lastTechChain?.riskLevel;
 
-  // 计算最终色盘
   const palette = useMemo(() => {
-    // 危机模式：强制安抚色盘，忽略情绪修正
     if (riskLevel === 'crisis' || fsmState === 'Crisis_Escalation') {
       return FSM_PALETTES.Crisis_Escalation;
     }
-    const base = FSM_PALETTES[fsmState as FSMState] ?? DEFAULT_PALETTE;
-    return applyEmotionMod(base, emotion);
-  }, [fsmState, emotion, riskLevel]);
-
-  // streaming 时轻微放大振幅，增加"AI 正在思考"的视觉存在感
-  const streamingBoost = isStreaming ? 1.20 : 1.0;
-
-  const boosted = useMemo<OrbColors>(() => ({
-    blue:   [...palette.blue.slice(0,3), Math.min(0.70, palette.blue[3]   * streamingBoost)] as [number,number,number,number],
-    mint:   [...palette.mint.slice(0,3), Math.min(0.70, palette.mint[3]   * streamingBoost)] as [number,number,number,number],
-    purple: [...palette.purple.slice(0,3), Math.min(0.70, palette.purple[3] * streamingBoost)] as [number,number,number,number],
-    amber:  [...palette.amber.slice(0,3), Math.min(0.70, palette.amber[3]  * streamingBoost)] as [number,number,number,number],
-  }), [palette, streamingBoost]);
-
-  const transition = { duration: 3.5, ease: [0.4, 0, 0.2, 1] } as const;
+    const base = FSM_PALETTES[fsmState as FSMState] ?? FSM_PALETTES.Onboarding;
+    const result = applyEmotionMod(base, emotion);
+    // Streaming boost
+    if (isStreaming) {
+      return { ...result, intensity: Math.min(1.0, result.intensity * 1.15), speed: result.speed * 1.3 };
+    }
+    return result;
+  }, [fsmState, emotion, riskLevel, isStreaming]);
 
   return (
     <div
       aria-hidden="true"
-      className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
+      className="fixed inset-0 pointer-events-none z-0"
       style={{ isolation: 'isolate' }}
     >
-      {/* ── Orb 1: 信任蓝 — 左上 ── */}
-      <motion.div
-        className="ambient-orb"
-        style={{ width: '70vmax', height: '70vmax', top: '-20%', left: '-15%' }}
-        animate={{ background: makeRadial(boosted.blue, '40%', '40%') }}
-        transition={transition}
-      />
-
-      {/* ── Orb 2: 治愈薄荷绿 — 右下 ── */}
-      <motion.div
-        className="ambient-orb"
-        style={{ width: '65vmax', height: '65vmax', bottom: '-15%', right: '-10%' }}
-        animate={{ background: makeRadial(boosted.mint, '60%', '60%') }}
-        transition={transition}
-      />
-
-      {/* ── Orb 3: 共情柔紫 — 右侧中部 ── */}
-      <motion.div
-        className="ambient-orb"
-        style={{ width: '55vmax', height: '55vmax', top: '20%', right: '5%' }}
-        animate={{ background: makeRadial(boosted.purple, '50%', '50%') }}
-        transition={transition}
-      />
-
-      {/* ── Orb 4: 温暖琥珀 — 底部 ── */}
-      <motion.div
-        className="ambient-orb"
-        style={{ width: '50vmax', height: '50vmax', bottom: '0', left: '20%' }}
-        animate={{ background: makeRadial(boosted.amber, '50%', '70%') }}
-        transition={transition}
-      />
+      <Canvas
+        dpr={Math.min(window.devicePixelRatio, 1.5)}
+        gl={{ antialias: false, alpha: false, powerPreference: 'low-power' }}
+        style={{ width: '100%', height: '100%' }}
+        frameloop="always"
+      >
+        <AuroraMesh palette={palette} />
+      </Canvas>
     </div>
   );
 };
