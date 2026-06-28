@@ -15,142 +15,14 @@
  *   Crisis     → forced calming blue-green
  */
 
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useChatStore } from '../../store/chatStore';
 import type { FSMState } from '../../types';
 
-// ═══════════════════════════════════════════════════════════════
-// GLSL Shaders
-// ═══════════════════════════════════════════════════════════════
+// Shaders are defined inline in AuroraMesh component
 
-const VERT = /*glsl*/ `
-varying vec2 vUv;
-void main() {
-  vUv = uv;
-  gl_Position = vec4(position, 1.0);
-}
-`;
-
-const FRAG = /*glsl*/ `
-precision highp float;
-
-varying vec2 vUv;
-uniform float uTime;
-uniform float uSpeed;
-uniform vec2 uResolution;
-uniform vec3 uColor1;
-uniform vec3 uColor2;
-uniform vec3 uColor3;
-uniform vec3 uColor4;
-uniform float uIntensity;
-
-// ── Simplex 2D noise ──
-vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
-
-float snoise(vec2 v) {
-  const vec4 C = vec4(0.211324865405187, 0.366025403784439,
-                      -0.577350269189626, 0.024390243902439);
-  vec2 i  = floor(v + dot(v, C.yy));
-  vec2 x0 = v -   i + dot(i, C.xx);
-  vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
-  vec4 x12 = x0.xyxy + C.xxzz;
-  x12.xy -= i1;
-  i = mod(i, 289.0);
-  vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0))
-                 + i.x + vec3(0.0, i1.x, 1.0));
-  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy),
-               dot(x12.zw,x12.zw)), 0.0);
-  m = m*m; m = m*m;
-  vec3 x_ = 2.0 * fract(p * C.www) - 1.0;
-  vec3 h = abs(x_) - 0.5;
-  vec3 ox = floor(x_ + 0.5);
-  vec3 a0 = x_ - ox;
-  m *= 1.79284291400159 - 0.85373472095314 * (a0*a0 + h*h);
-  vec3 g;
-  g.x  = a0.x  * x0.x  + h.x  * x0.y;
-  g.yz = a0.yz * x12.xz + h.yz * x12.yw;
-  return 130.0 * dot(m, g);
-}
-
-// ── Fractal Brownian Motion (organic detail) ──
-float fbm(vec2 p) {
-  float value = 0.0;
-  float amplitude = 0.5;
-  for (int i = 0; i < 5; i++) {
-    value += amplitude * snoise(p);
-    p *= 2.0;
-    amplitude *= 0.5;
-  }
-  return value;
-}
-
-void main() {
-  vec2 uv = vUv;
-  float aspect = uResolution.x / uResolution.y;
-  vec2 p = (uv - 0.5) * vec2(aspect, 1.0);
-
-  float t = uTime * uSpeed;
-
-  // ── Multi-layer aurora noise ──
-  float n1 = fbm(p * 1.2 + vec2(t * 0.15, t * 0.08));
-  float n2 = fbm(p * 0.8 + vec2(-t * 0.12, t * 0.1) + 10.0);
-  float n3 = fbm(p * 1.6 + vec2(t * 0.07, -t * 0.14) + 20.0);
-  float n4 = snoise(p * 0.5 + vec2(t * 0.05, t * 0.03) + 30.0);
-
-  // ── Soft aurora bands ──
-  float band1 = smoothstep(-0.2, 0.6, n1) * 0.65;
-  float band2 = smoothstep(-0.1, 0.5, n2) * 0.55;
-  float band3 = smoothstep(0.0, 0.7, n3) * 0.45;
-  float band4 = smoothstep(-0.3, 0.4, n4) * 0.35;
-
-  // ── Blend colors via aurora bands ──
-  vec3 col = vec3(0.0);
-  col += uColor1 * band1;
-  col += uColor2 * band2;
-  col += uColor3 * band3;
-  col += uColor4 * band4;
-
-  // ── Subtle vignette (darker edges) ──
-  float vignette = 1.0 - dot(uv - 0.5, uv - 0.5) * 1.8;
-  col *= vignette;
-
-  // ── Master intensity ──
-  col *= uIntensity;
-
-  // ── Subtle grain for premium texture ──
-  float grain = fract(sin(dot(uv * uResolution, vec2(12.9898, 78.233))) * 43758.5453);
-  col += (grain - 0.5) * 0.015;
-
-  fragColor = vec4(col, 1.0);
-}
-`;
-
-// Prefix for WebGL2 if needed
-const FRAG_FULL = `#version 300 es
-precision highp float;
-in vec2 vUv;
-out vec4 fragColor;
-uniform float uTime;
-uniform float uSpeed;
-uniform vec2 uResolution;
-uniform vec3 uColor1;
-uniform vec3 uColor2;
-uniform vec3 uColor3;
-uniform vec3 uColor4;
-uniform float uIntensity;
-` + FRAG.split('void main()').slice(-1)[0].replace('varying vec2 vUv;', '');
-
-const VERT_300 = `#version 300 es
-in vec3 position;
-in vec2 uv;
-out vec2 vUv;
-void main() {
-  vUv = uv;
-  gl_Position = vec4(position, 1.0);
-}
-`;
 
 // ═══════════════════════════════════════════════════════════════
 // Color Palettes (Color Psychology)
@@ -248,6 +120,67 @@ const AuroraMesh: React.FC<{ palette: Palette }> = ({ palette }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const { size } = useThree();
 
+  // Mouse & Scroll track refs
+  const mouseRef = useRef(new THREE.Vector2(0, 0));
+  const scrollRef = useRef(0);
+
+  // Pre-allocated THREE.Color target instances for GC optimization
+  const targetColors = useRef([
+    new THREE.Color(),
+    new THREE.Color(),
+    new THREE.Color(),
+    new THREE.Color(),
+  ]);
+
+  // Cached layout dimensions to prevent layout thrashing
+  const layoutHeightRef = useRef({ scrollHeight: 0, innerHeight: 0 });
+
+  // Setup non-react-rendering event listeners
+  useEffect(() => {
+    const updateLayoutMetrics = () => {
+      layoutHeightRef.current.scrollHeight = document.documentElement.scrollHeight;
+      layoutHeightRef.current.innerHeight = window.innerHeight;
+    };
+
+    // Initialize metrics
+    updateLayoutMetrics();
+
+    const handlePointerMove = (e: PointerEvent) => {
+      // Normalize client coordinates to WebGL clip space range [-1, 1]
+      mouseRef.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouseRef.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    };
+
+    const handleScroll = () => {
+      const { scrollHeight, innerHeight } = layoutHeightRef.current;
+      const docHeight = scrollHeight - innerHeight;
+      scrollRef.current = docHeight > 0 ? window.scrollY / docHeight : 0;
+    };
+
+    const resizeObserver = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(() => {
+          updateLayoutMetrics();
+        })
+      : null;
+
+    if (resizeObserver) {
+      resizeObserver.observe(document.documentElement);
+    }
+
+    window.addEventListener('pointermove', handlePointerMove, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', updateLayoutMetrics, { passive: true });
+
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', updateLayoutMetrics);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
+  }, []);
+
   const uniforms = useRef({
     uTime: { value: 0 },
     uSpeed: { value: palette.speed },
@@ -257,20 +190,37 @@ const AuroraMesh: React.FC<{ palette: Palette }> = ({ palette }) => {
     uColor3: { value: new THREE.Color(...palette.c3) },
     uColor4: { value: new THREE.Color(...palette.c4) },
     uIntensity: { value: palette.intensity },
+    uMouse: { value: new THREE.Vector2(0, 0) },
+    uScroll: { value: 0.0 },
   });
 
-  // Smoothly lerp uniforms towards target palette
   useFrame((_, delta) => {
     const u = uniforms.current;
     u.uTime.value += delta;
     u.uResolution.value.set(size.width, size.height);
 
-    // Smooth color transitions (~3s ease)
+    // Damped interpolation factor for inertia
     const lerpFactor = 1 - Math.pow(0.15, delta);
-    u.uColor1.value.lerp(new THREE.Color(...palette.c1), lerpFactor);
-    u.uColor2.value.lerp(new THREE.Color(...palette.c2), lerpFactor);
-    u.uColor3.value.lerp(new THREE.Color(...palette.c3), lerpFactor);
-    u.uColor4.value.lerp(new THREE.Color(...palette.c4), lerpFactor);
+
+    // Clamp the pointer and scroll lerp factor using const alpha = Math.min(1.0, lerpFactor * 2.0)
+    const alpha = Math.min(1.0, lerpFactor * 2.0);
+
+    // Smoothly interpolate interactive inputs using alpha
+    u.uMouse.value.lerp(mouseRef.current, alpha);
+    u.uScroll.value += (scrollRef.current - u.uScroll.value) * alpha;
+
+    // Smooth color transitions (~3s ease) using pre-allocated color instances
+    const tc = targetColors.current;
+    tc[0].setRGB(...palette.c1);
+    tc[1].setRGB(...palette.c2);
+    tc[2].setRGB(...palette.c3);
+    tc[3].setRGB(...palette.c4);
+    u.uColor1.value.lerp(tc[0], lerpFactor);
+    u.uColor2.value.lerp(tc[1], lerpFactor);
+    u.uColor3.value.lerp(tc[2], lerpFactor);
+    u.uColor4.value.lerp(tc[3], lerpFactor);
+    
+    // Smoothly interpolate scalar variables
     u.uIntensity.value += (palette.intensity - u.uIntensity.value) * lerpFactor;
     u.uSpeed.value += (palette.speed - u.uSpeed.value) * lerpFactor;
   });
@@ -295,7 +245,10 @@ uniform vec3 uColor2;
 uniform vec3 uColor3;
 uniform vec3 uColor4;
 uniform float uIntensity;
+uniform vec2 uMouse;
+uniform float uScroll;
 
+// Simplex 2D noise implementation (kept for speed and compatibility)
 vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
 
 float snoise(vec2 v) {
@@ -323,54 +276,87 @@ float snoise(vec2 v) {
   return 130.0 * dot(m, g);
 }
 
-float fbm(vec2 p) {
-  float value = 0.0;
-  float amp = 0.5;
-  for (int i = 0; i < 5; i++) {
-    value += amp * snoise(p);
-    p *= 2.0;
-    amp *= 0.5;
-  }
-  return value;
-}
-
 void main() {
   vec2 uv = vUv;
   float aspect = uResolution.x / uResolution.y;
   vec2 p = (uv - 0.5) * vec2(aspect, 1.0);
+  
   float t = uTime * uSpeed;
 
-  // Multi-layer aurora noise
-  float n1 = fbm(p * 1.2 + vec2(t * 0.15, t * 0.08));
-  float n2 = fbm(p * 0.8 + vec2(-t * 0.12, t * 0.1) + 10.0);
-  float n3 = fbm(p * 1.6 + vec2(t * 0.07, -t * 0.14) + 20.0);
-  float n4 = snoise(p * 0.5 + vec2(t * 0.05, t * 0.03) + 30.0);
+  // 1. Interactive input warp scales
+  vec2 warpMouse = uMouse * 0.15;
+  vec2 warpScroll = vec2(0.0, uScroll * 0.25);
+  
+  // 2. Warp Layer 1 (2 noise calls)
+  vec2 q = vec2(
+    snoise(p * 0.7 + vec2(t * 0.04, t * 0.02) + warpMouse),
+    snoise(p * 0.7 - vec2(t * 0.03, -t * 0.05) - warpScroll)
+  );
 
-  // Soft aurora bands
-  float band1 = smoothstep(-0.2, 0.6, n1) * 0.65;
-  float band2 = smoothstep(-0.1, 0.5, n2) * 0.55;
-  float band3 = smoothstep(0.0, 0.7, n3) * 0.45;
-  float band4 = smoothstep(-0.3, 0.4, n4) * 0.35;
+  // 3. Warp Layer 2 (2 noise calls)
+  vec2 r = vec2(
+    snoise(p * 1.1 + q * 1.3 + vec2(t * 0.06, -t * 0.03) + vec2(4.2, 1.8)),
+    snoise(p * 1.1 + q * 1.3 - vec2(-t * 0.04, t * 0.05) + vec2(8.9, 3.1))
+  );
 
-  // Blend colors via aurora bands
-  vec3 col = vec3(0.0);
-  col += uColor1 * band1;
-  col += uColor2 * band2;
-  col += uColor3 * band3;
-  col += uColor4 * band4;
+  // Final warped coordinate domain
+  vec2 w = p + r * 0.45;
 
-  // Subtle vignette
-  float vignette = 1.0 - dot(uv - 0.5, uv - 0.5) * 1.6;
+  // 4. Color zone blending using Gaussian Distance Fields
+  vec2 cPos1 = vec2(-0.6, 0.4);  // Top-left
+  vec2 cPos2 = vec2(0.6, 0.4);   // Top-right
+  vec2 cPos3 = vec2(-0.5, -0.5); // Bottom-left
+  vec2 cPos4 = vec2(0.5, -0.4);  // Bottom-right
+
+  float d1 = length(w - cPos1);
+  float d2 = length(w - cPos2);
+  float d3 = length(w - cPos3);
+  float d4 = length(w - cPos4);
+
+  float w1 = exp(-d1 * d1 * 1.4);
+  float w2 = exp(-d2 * d2 * 1.4);
+  float w3 = exp(-d3 * d3 * 1.4);
+  float w4 = exp(-d4 * d4 * 1.4);
+
+  // Weight normalization (prevents color over-exposure)
+  float wSum = w1 + w2 + w3 + w4 + 0.001;
+  w1 /= wSum;
+  w2 /= wSum;
+  w3 /= wSum;
+  w4 /= wSum;
+
+  vec3 col = uColor1 * w1 + uColor2 * w2 + uColor3 * w3 + uColor4 * w4;
+
+  // 5. Zero-cost Pseudo-3D Shading & Specular Sheen
+  // Uses the displacement vector 'r' as the gradient slope of the height field
+  vec2 slope = r * 0.75;
+  vec3 normal = normalize(vec3(-slope.x, -slope.y, 0.65));
+  vec3 lightDir = normalize(vec3(0.4, 0.4, 0.9)); // Direct lighting from top-right
+  
+  float diffuse = max(dot(normal, lightDir), 0.0) * 0.35 + 0.65;
+  float specular = pow(max(dot(normal, lightDir), 0.0), 24.0) * 0.08;
+  
+  col *= diffuse;
+  col += vec3(specular);
+
+  // 6. Vignette
+  float vignette = 1.0 - dot(uv - 0.5, uv - 0.5) * 1.5;
   col *= vignette;
 
   col *= uIntensity;
 
-  // Premium grain texture
-  float grain = fract(sin(dot(uv * uResolution, vec2(12.9898, 78.233))) * 43758.5453);
-  col += (grain - 0.5) * 0.012;
+  // 7. Dynamic Film Grain (Midtone responsive)
+  float grainNoise = fract(sin(dot(uv * uResolution + t * 0.02, vec2(12.9898, 78.233))) * 43758.5453);
+  float grainAmount = (grainNoise - 0.5) * 0.015;
+  
+  // Film response curve masks grain in pure darks & bright spots
+  float luminance = dot(col, vec3(0.299, 0.587, 0.114));
+  grainAmount *= smoothstep(0.02, 0.18, luminance) * smoothstep(0.98, 0.82, luminance);
+  col += grainAmount;
 
   gl_FragColor = vec4(col, 1.0);
 }`,
+        // eslint-disable-next-line react-hooks/refs
         uniforms: uniforms.current,
         depthTest: false,
         depthWrite: false,

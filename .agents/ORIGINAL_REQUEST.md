@@ -296,3 +296,36 @@ The implementation must be highly optimized. You must NOT re-introduce global Re
 
 ### Visual Quality (Agent-as-Judge)
 - [ ] The glow effect is visibly active, fluid, and premium (WOW factor) without causing UI layout shifts (CLS) or high CPU fan noise when idle.
+
+## Follow-up — 2026-06-28T14:49:00Z
+
+# Teamwork Project Prompt — Draft
+
+> Status: Ready for launch — awaiting user approval
+> Goal: Craft prompt → get user approval → delegate to teamwork_preview
+
+Optimize the WebGL-based Aurora Shader background (AmbientGlow) to achieve an even more premium, fluid, and visually stunning "glow" effect, heavily inspired by the smooth mesh gradients of the new Gemini app.
+
+Working directory: `/Users/chenhaoran/工程文件/心理大赛`
+Integrity mode: benchmark
+
+## Requirements
+
+### R1. Premium Visual Upgrade
+Upgrade the existing WebGL fragment shader to dramatically improve the organic, lava-lamp-like fluid motion, soften the color blending, and enhance texture/lighting (e.g., adding depth or high-quality grain). The final result must closely mirror the visual quality of the new Gemini app's background.
+
+### R2. Interactive Responsiveness
+Make the fluid motion react elegantly to user interactions (e.g., mouse movement or scroll position) to make the interface feel alive, without causing any performance regressions.
+
+### R3. Preserve Color Psychology
+Ensure the upgraded shader still strictly adheres to the existing dynamic color psychology system (FSM state and emotion counter-regulation logic). The color inputs must seamlessly drive the new fluid effect.
+
+## Acceptance Criteria
+
+### Visual Quality & Interaction
+- [ ] An agent-as-judge or visual verification confirms the shader produces smooth, organic shapes with soft blending, noticeably superior to standard noise bands.
+- [ ] The shader code includes uniforms mapped to mouse or scroll events, and the animation visibly reacts to these inputs.
+
+### Performance & Integration
+- [ ] Performance benchmarks or code analysis verify that the interaction logic does not trigger React re-renders or frame drops (must remain a pure GPU operation).
+- [ ] The `AmbientGlow.tsx` file retains the `useChatStore` logic that feeds the `FSM_PALETTES` colors into the shader.
