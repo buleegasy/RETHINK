@@ -5,17 +5,12 @@ import { chatApi } from '../api/chat';
 export function useChat() {
   const [error, setError] = useState<string | null>(null);
   
-  const {
-    sessionId,
-    messages,
-    addMessage,
-    updateLastMessage,
-    setStage,
-    setFSMState,
-    setIsStreaming,
-    setSessionId,
-    selectedModel,
-  } = useChatStore();
+  const addMessage = useChatStore(state => state.addMessage);
+  const updateLastMessage = useChatStore(state => state.updateLastMessage);
+  const setStage = useChatStore(state => state.setStage);
+  const setFSMState = useChatStore(state => state.setFSMState);
+  const setIsStreaming = useChatStore(state => state.setIsStreaming);
+  const setSessionId = useChatStore(state => state.setSessionId);
 
   const sendMessage = async (
     text: string, 
@@ -27,6 +22,8 @@ export function useChat() {
 
     setError(null);
     setIsStreaming(true);
+
+    const { messages, sessionId, selectedModel } = useChatStore.getState();
 
     // 添加用户消息
     const userMsg: ChatMessage = { 
@@ -104,7 +101,8 @@ export function useChat() {
                   useChatStore.getState().setIcebreakerLayer(parsed.icebreakerLayer);
                 }
                 // 存储后端返回的 sessionId
-                if (parsed.sessionId && !sessionId) {
+                const currentSessionId = useChatStore.getState().sessionId;
+                if (parsed.sessionId && !currentSessionId) {
                   setSessionId(parsed.sessionId);
                 }
                 

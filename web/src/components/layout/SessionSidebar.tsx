@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Loader2, MessageSquareText, Plus, RefreshCw } from 'lucide-react';
+import { Loader2, MessageSquareText, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useChatStore } from '../../store/chatStore';
 import { useAuthStore } from '../../store/authStore';
@@ -137,6 +137,22 @@ export function SessionSidebar({ isOpen, onClose }: SessionSidebarProps) {
     }
   };
 
+  const handleDeleteSession = async (id: string) => {
+    const ok = window.confirm('确定要删除这个对话吗？此操作不可恢复。');
+    if (!ok) return;
+
+    try {
+      await authApi.deleteSession(id);
+      setSessions(sessions.filter((s) => s.id !== id));
+      if (id === sessionId) {
+        clearChat();
+      }
+    } catch (err) {
+      const msg = (err as { message?: string })?.message || '删除会话失败';
+      setError(msg);
+    }
+  };
+
   useEffect(() => {
     if (token) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -223,13 +239,20 @@ export function SessionSidebar({ isOpen, onClose }: SessionSidebarProps) {
                 sessions.map((session) => {
                   const active = session.id === sessionId;
                   return (
-                    <motion.button
+                    <motion.div
                       whileHover={{ scale: 1.01, x: 2 }}
                       whileTap={{ scale: 0.99 }}
                       transition={{ type: 'spring', stiffness: 500, damping: 15 }}
                       key={session.id}
-                      type="button"
+                      role="button"
+                      tabIndex={0}
                       onClick={() => void openSession(session.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          void openSession(session.id);
+                        }
+                      }}
                       className={`w-full text-start rounded-chip border ps-3 pe-3 py-2.5 transition-colors cursor-pointer ${
                         active
                           ? 'bg-surface border-outline-variant shadow-sm'
@@ -237,7 +260,7 @@ export function SessionSidebar({ isOpen, onClose }: SessionSidebarProps) {
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <div className="text-sm font-light tracking-wide text-on-surface truncate">
                             {session.title || '新对话'}
                           </div>
@@ -245,9 +268,25 @@ export function SessionSidebar({ isOpen, onClose }: SessionSidebarProps) {
                             {formatTime(session.updated_at)}
                           </div>
                         </div>
-                        {loadingId === session.id && <Loader2 className="w-4 h-4 animate-spin shrink-0 text-on-surface-variant" />}
+                        <div className="flex items-center gap-1 shrink-0">
+                          {loadingId === session.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin text-on-surface-variant" />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                void handleDeleteSession(session.id);
+                              }}
+                              className="p-1 rounded-full text-on-surface-variant/60 hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
+                              aria-label="删除此对话"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    </motion.button>
+                    </motion.div>
                   );
                 })
               )}

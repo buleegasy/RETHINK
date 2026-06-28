@@ -322,3 +322,47 @@ authRouter.get('/sessions/:id', requireAuth, async (c) => {
     return c.json({ error: err.message }, 500);
   }
 });
+
+/**
+ * Delete a session for current User
+ * DELETE /api/auth/sessions/:id
+ */
+authRouter.delete('/sessions/:id', requireAuth, async (c) => {
+  try {
+    const user = c.get('user') as AuthUser;
+    const sessionId = c.req.param('id');
+
+    if (!sessionId) {
+      return c.json({ error: 'sessionId is required' }, 400);
+    }
+
+    // Fetch the session to check existence and user ownership
+    const session = await c.env.DB.prepare(
+      'SELECT id, user_id FROM sessions WHERE id = ?'
+    )
+      .bind(sessionId)
+      .first<any>();
+
+    if (!session) {
+      return c.json({ error: 'Session not found' }, 404);
+    }
+
+    if (session.user_id !== user.uid) {
+      return c.json({ error: 'Forbidden' }, 403);
+    }
+
+    // Delete the session from D1 database using SQL
+    await c.env.DB.prepare('DELETE FROM sessions WHERE id = ?')
+      .bind(sessionId)
+      .run();
+
+    return c.json({
+      success: true,
+      message: 'Session deleted successfully'
+    });
+  } catch (err: any) {
+    console.error('Delete session error:', err);
+    return c.json({ error: err.message || 'Delete session failed' }, 500);
+  }
+});
+

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MessageBubble } from './MessageBubble';
+import { ChatPanel } from './ChatPanel';
 import type { ChatMessage } from '../../types';
 import { useChatStore } from '../../store/chatStore';
 import { chatApi } from '../../api/chat';
@@ -27,7 +28,7 @@ describe('MessageBubble Component', () => {
       content: 'Hello, this is a test message from user.',
     };
 
-    render(<MessageBubble message={message} />);
+    render(<MessageBubble message={message} onDeleteRequest={vi.fn()} />);
 
     // Assert that the user message content is rendered
     expect(screen.getByText('Hello, this is a test message from user.')).toBeInTheDocument();
@@ -39,7 +40,7 @@ describe('MessageBubble Component', () => {
       content: 'This is a **bold** markdown response.',
     };
 
-    render(<MessageBubble message={message} />);
+    render(<MessageBubble message={message} onDeleteRequest={vi.fn()} />);
 
     // ReactMarkdown parses **bold** into a <strong> element
     const boldElement = screen.getByText('bold');
@@ -55,7 +56,7 @@ describe('MessageBubble Component', () => {
       isHidden: true,
     };
 
-    const { container } = render(<MessageBubble message={message} />);
+    const { container } = render(<MessageBubble message={message} onDeleteRequest={vi.fn()} />);
     expect(container.firstChild).toBeNull();
   });
 
@@ -69,9 +70,10 @@ describe('MessageBubble Component', () => {
 
       useChatStore.setState({
         messages: [message],
+        hasCompletedOnboarding: true,
       });
 
-      render(<MessageBubble message={message} />);
+      render(<ChatPanel />);
 
       // Hover-triggered delete button with aria-label="删除消息"
       const deleteBtn = screen.getByLabelText('删除消息');
@@ -98,6 +100,7 @@ describe('MessageBubble Component', () => {
 
       useChatStore.setState({
         messages: [message],
+        hasCompletedOnboarding: true,
       });
 
       // Create a pending promise to simulate loading
@@ -107,7 +110,7 @@ describe('MessageBubble Component', () => {
       });
       vi.mocked(chatApi.deleteMessage).mockReturnValueOnce(deletePromise);
 
-      render(<MessageBubble message={message} />);
+      render(<ChatPanel />);
 
       // Click delete icon
       const deleteBtn = screen.getByLabelText('删除消息');
@@ -141,23 +144,12 @@ describe('MessageBubble Component', () => {
 
       useChatStore.setState({
         messages: [message],
+        hasCompletedOnboarding: true,
       });
 
       vi.mocked(chatApi.deleteMessage).mockResolvedValueOnce(undefined);
 
-      // Render inside a wrapper to simulate Zustand driving list mounting/unmounting
-      const TestWrapper = () => {
-        const messages = useChatStore((state) => state.messages);
-        return (
-          <div>
-            {messages.map((msg) => (
-              <MessageBubble key={msg.id} message={msg} />
-            ))}
-          </div>
-        );
-      };
-
-      render(<TestWrapper />);
+      render(<ChatPanel />);
 
       // Verify initial mount
       expect(screen.getByText('Target for unmounting')).toBeInTheDocument();

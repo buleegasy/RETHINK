@@ -34,13 +34,33 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) =
 
   const isListening = voiceState === 'listening';
 
+  const lastHeightRef = useRef<number>(0);
+  const lastInputLengthRef = useRef<number>(0);
+
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = 'auto'; 
-      const scrollHeight = textarea.scrollHeight;
+      const currentLength = input.length;
+      const prevLength = lastInputLengthRef.current;
+      lastInputLengthRef.current = currentLength;
       const maxH = window.innerWidth < 768 ? 100 : 160;
-      textarea.style.height = `${Math.min(scrollHeight, maxH)}px`;
+
+      if (currentLength < prevLength || currentLength === 0) {
+        // Only set height to 'auto' to recalculate when the input length decreases (e.g. deletion, clear)
+        textarea.style.height = 'auto';
+        const scrollHeight = textarea.scrollHeight;
+        const targetHeight = Math.min(scrollHeight, maxH);
+        textarea.style.height = `${targetHeight}px`;
+        lastHeightRef.current = targetHeight;
+      } else {
+        // When typing forward, scrollHeight will naturally expand if text wraps
+        const scrollHeight = textarea.scrollHeight;
+        const targetHeight = Math.min(scrollHeight, maxH);
+        if (lastHeightRef.current !== targetHeight) {
+          textarea.style.height = `${targetHeight}px`;
+          lastHeightRef.current = targetHeight;
+        }
+      }
     }
   }, [input]);
 

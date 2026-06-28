@@ -109,10 +109,23 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
     canvasRef.current = canvas;
   }, []);
 
+  const clearCanvas = useCallback(() => {
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+      }
+    }
+  }, []);
+
   // 分析单帧情绪
   const analyzeFrame = useCallback(async () => {
     const api = window.faceapi;
     if (!api || !videoRef.current || !isActiveRef.current) return;
+
+    // Stop running if the document is hidden to conserve CPU
+    if (typeof document !== 'undefined' && document.hidden) return;
+
     const video = videoRef.current;
     if (video.readyState < 2 || video.paused) return;
 
@@ -122,7 +135,12 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
         .withFaceLandmarks()
         .withFaceExpressions();
 
-      if (!detection || !isActiveRef.current) return;
+      if (!isActiveRef.current) return;
+
+      if (!detection) {
+        clearCanvas();
+        return;
+      }
 
       // 绘制覆盖层
       if (canvasRef.current) {
@@ -192,57 +210,7 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
     } catch {
       // 单帧失败静默跳过
     }
-  }, []);
-
-  const startCamera = useCallback(async () => {
-    setError(null);
-
-    // 加载模型（只加载一次）
-    if (!modelsLoaded) {
-      setIsModelLoading(true);
-      try {
-        await loadModels();
-        setIsModelLoaded(true);
-      } catch (err: unknown) {
-        setError(`情绪识别模型加载失败: ${err instanceof Error ? err.message : String(err)}`);
-        setIsModelLoading(false);
-        return;
-      }
-      setIsModelLoading(false);
-    }
-
-    // 请求摄像头权限
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 320, height: 240, facingMode: 'user' },
-        audio: false,
-      });
-      streamRef.current = stream;
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current?.play();
-        };
-      }
-
-      isActiveRef.current = true;
-      setIsCameraActive(true);
-
-      // 每 800ms 分析一帧（平衡性能与实时性）
-      intervalRef.current = setInterval(analyzeFrame, 800);
-    } catch (e: unknown) {
-      if (e instanceof Error) {
-        if (e.name === 'NotAllowedError') {
-          setError('摄像头权限被拒绝，请在浏览器设置中允许访问');
-        } else if (e.name === 'NotFoundError') {
-          setError('未找到摄像头设备');
-        } else {
-          setError('无法启动摄像头');
-        }
-      }
-    }
-  }, [analyzeFrame]);
+  }, [clearCanvas]);
 
   const stopCamera = useCallback(() => {
     isActiveRef.current = false;
@@ -257,24 +225,91 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
     }
     if (videoRef.current) {
       videoRef.current.srcObject = null;
+      videoRef.current.onloadedmetadata = null;
     }
 
     setIsCameraActive(false);
     setCurrentEmotion(null);
     historyRef.current = [];
-    if (canvasRef.current) {
-      const ctx = canvasRef.current.getContext('2d');
-      if (ctx) ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    clearCanvas();
+  }, [clearCanvas]);
+
+  const startCamera = useCallback(async () => {
+    // Prevent starting multiple sessions concurrently
+    if (isActiveRef.current || streamRef.current) {
+      return;
     }
-  }, []);
+
+    isActiveRef.current = true;
+    setError(null);
+
+    // 加载模型（只加载一次）
+    if (!modelsLoaded) {
+      setIsModelLoading(true);
+      try {
+        await loadModels();
+        setIsModelLoaded(true);
+      } catch (err: unknown) {
+        setError(`情绪识别模型加载失败: ${err instanceof Error ? err.message : String(err)}`);
+        setIsModelLoading(false);
+        isActiveRef.current = false;
+        return;
+      }
+      setIsModelLoading(false);
+    }
+
+    // Check if stopCamera was called while loading models
+    if (!isActiveRef.current) {
+      return;
+    }
+
+    // 请求摄像头权限
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 320, height: 240, facingMode: 'user' },
+        audio: false,
+      });
+
+      // Secondary check: if stopCamera was called while waiting for getUserMedia
+      if (!isActiveRef.current) {
+        stream.getTracks().forEach(track => track.stop());
+        return;
+      }
+
+      streamRef.current = stream;
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current?.play().catch(() => {});
+        };
+      }
+
+      setIsCameraActive(true);
+
+      // Clean any accidental dangling interval before setting a new one
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      // 每 800ms 分析一帧（平衡性能与实时性）
+      intervalRef.current = setInterval(analyzeFrame, 800);
+    } catch (e: unknown) {
+      stopCamera();
+      if (e instanceof Error) {
+        if (e.name === 'NotAllowedError') {
+          setError('摄像头权限被拒绝，请在浏览器设置中允许访问');
+        } else if (e.name === 'NotFoundError') {
+          setError('未找到摄像头设备');
+        } else {
+          setError('无法启动摄像头');
+        }
+      }
+    }
+  }, [analyzeFrame, stopCamera]);
 
   useEffect(() => {
     return () => {
-      isActiveRef.current = false;
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
+      stopCamera();
     };
-  }, []);
+  }, [stopCamera]);
 
   return {
     isCameraActive,

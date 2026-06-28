@@ -14,4 +14,13 @@ export const authApi = {
    */
   getSessionDetail: (id: string) => 
     apiClient<{ session?: ChatSessionDetail }>(`/api/auth/sessions/${encodeURIComponent(id)}`),
+
+  /**
+   * 删除指定的会话
+   * @param id 会话 ID
+   */
+  deleteSession: (id: string) =>
+    apiClient<{ success: boolean }>(`/api/auth/sessions/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    }),
 };

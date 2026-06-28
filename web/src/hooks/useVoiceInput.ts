@@ -65,9 +65,23 @@ export function useVoiceInput(onTranscript?: (text: string) => void): UseVoiceIn
   const [transcript, setTranscript] = useState('');
   const [error, setError] = useState<string | null>(null);
   const recognitionRef = useRef<ISpeechRecognition | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Store the callback in a ref to avoid invalidating dependencies
+  const onTranscriptRef = useRef(onTranscript);
+  useEffect(() => {
+    onTranscriptRef.current = onTranscript;
+  }, [onTranscript]);
 
   const isSupported = typeof window !== 'undefined' &&
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
+
+  const cleanListeners = useCallback((recognition: ISpeechRecognition) => {
+    recognition.onstart = null;
+    recognition.onresult = null;
+    recognition.onerror = null;
+    recognition.onend = null;
+  }, []);
 
   const initRecognition = useCallback(() => {
     if (!isSupported) return null;
@@ -101,8 +115,8 @@ export function useVoiceInput(onTranscript?: (text: string) => void): UseVoiceIn
       const currentText = finalText || interimText;
       setTranscript(currentText);
 
-      if (finalText && onTranscript) {
-        onTranscript(finalText);
+      if (finalText && onTranscriptRef.current) {
+        onTranscriptRef.current(finalText);
       }
     };
 
@@ -117,7 +131,10 @@ export function useVoiceInput(onTranscript?: (text: string) => void): UseVoiceIn
       }
       setError(errorMsg);
       setVoiceState('error');
-      setTimeout(() => setVoiceState('idle'), 2000);
+      
+      // Clear previous timeout before setting a new one
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => setVoiceState('idle'), 2000);
     };
 
     recognition.onend = () => {
@@ -125,7 +142,7 @@ export function useVoiceInput(onTranscript?: (text: string) => void): UseVoiceIn
     };
 
     return recognition;
-  }, [isSupported, onTranscript]);
+  }, [isSupported]);
 
   const startListening = useCallback(() => {
     if (!isSupported) {
@@ -133,8 +150,16 @@ export function useVoiceInput(onTranscript?: (text: string) => void): UseVoiceIn
       return;
     }
 
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+
     if (recognitionRef.current) {
-      try { recognitionRef.current.stop(); } catch { /* ignore */ }
+      try {
+        recognitionRef.current.abort();
+        cleanListeners(recognitionRef.current);
+      } catch { /* ignore */ }
     }
 
     const recognition = initRecognition();
@@ -149,11 +174,13 @@ export function useVoiceInput(onTranscript?: (text: string) => void): UseVoiceIn
       setError('启动语音识别失败');
       setVoiceState('idle');
     }
-  }, [isSupported, initRecognition]);
+  }, [isSupported, initRecognition, cleanListeners]);
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
-      try { recognitionRef.current.stop(); } catch { /* ignore */ }
+      try {
+        recognitionRef.current.stop();
+      } catch { /* ignore */ }
     }
     setVoiceState('idle');
   }, []);
@@ -164,11 +191,15 @@ export function useVoiceInput(onTranscript?: (text: string) => void): UseVoiceIn
 
   useEffect(() => {
     return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       if (recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch { /* ignore */ }
+        try {
+          recognitionRef.current.abort();
+          cleanListeners(recognitionRef.current);
+        } catch { /* ignore */ }
       }
     };
-  }, []);
+  }, [cleanListeners]);
 
   return {
     voiceState,

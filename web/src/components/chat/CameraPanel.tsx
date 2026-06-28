@@ -15,19 +15,33 @@ export const CameraPanel: React.FC<CameraPanelProps> = ({ onEmotionChange }) => 
     currentEmotion,
     videoRef,
     startCamera,
+    stopCamera,
     error,
     setCanvasRef,
   } = useFaceEmotion();
 
-  // 挂载时自动启动，并设置 canvas 引用
+  // 挂载时自动启动，并设置 canvas 引用，卸载时清理
   useEffect(() => {
     setCanvasRef(canvasRef.current);
     startCamera();
-  }, [setCanvasRef, startCamera]);
+    
+    return () => {
+      stopCamera();
+      setCanvasRef(null);
+    };
+  }, [setCanvasRef, startCamera, stopCamera]);
+
+  // 使用 ref 来避免外部传入的 onEmotionChange 引起副作用重复触发
+  const onEmotionChangeRef = useRef(onEmotionChange);
+  useEffect(() => {
+    onEmotionChangeRef.current = onEmotionChange;
+  }, [onEmotionChange]);
 
   useEffect(() => {
-    onEmotionChange?.(currentEmotion);
-  }, [currentEmotion, onEmotionChange]);
+    if (onEmotionChangeRef.current) {
+      onEmotionChangeRef.current(currentEmotion);
+    }
+  }, [currentEmotion]);
 
   const emotionInfo = currentEmotion ? EMOTION_MAP[currentEmotion.label] : null;
 

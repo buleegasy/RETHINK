@@ -62,36 +62,40 @@ export const useChatStore = create<ChatState>((set) => {
     }),
     
     addMessage: (msg) => set((state) => ({ 
-      messages: [...state.messages, { ...msg, id: crypto.randomUUID() }] 
+      messages: [...state.messages, { ...msg, id: msg.id || crypto.randomUUID() }] 
     })),
     
     updateLastMessage: (delta) => set((state) => {
-      const newMessages = [...state.messages];
-      if (newMessages.length > 0) {
-        const lastIdx = newMessages.length - 1;
+      const messages = state.messages;
+      if (messages.length > 0) {
+        const lastIdx = messages.length - 1;
         // 只有当前是一条 assistant 消息时，才允许 append
-        if (newMessages[lastIdx].role === 'assistant') {
+        if (messages[lastIdx].role === 'assistant') {
+          const newMessages = [...messages];
           newMessages[lastIdx] = {
             ...newMessages[lastIdx],
             content: newMessages[lastIdx].content + delta,
           };
+          return { messages: newMessages };
         }
       }
-      return { messages: newMessages };
+      return {};
     }),
 
     setLastMessageTechChain: (techChain) => set((state) => {
-      const newMessages = [...state.messages];
-      if (newMessages.length > 0) {
-        const lastIdx = newMessages.length - 1;
-        if (newMessages[lastIdx].role === 'assistant') {
+      const messages = state.messages;
+      if (messages.length > 0) {
+        const lastIdx = messages.length - 1;
+        if (messages[lastIdx].role === 'assistant') {
+          const newMessages = [...messages];
           newMessages[lastIdx] = {
             ...newMessages[lastIdx],
             techChain,
           };
+          return { messages: newMessages };
         }
       }
-      return { messages: newMessages };
+      return {};
     }),
     
     setStage: (stage) => set({ currentStage: stage }),

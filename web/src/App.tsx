@@ -25,7 +25,6 @@ function App() {
   const logout = useAuthStore(state => state.logout);
   const fsmState = useChatStore(state => state.fsmState);
 
-  const [, setCurrentEmotion] = useState<EmotionResult | null>(null);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   
   // 计算进度
@@ -35,7 +34,6 @@ function App() {
   const emotionHistoryRef = useRef<EmotionResult[]>([]);
 
   const handleEmotionChange = useCallback((emotion: EmotionResult | null) => {
-    setCurrentEmotion(emotion);
     if (emotion) {
       emotionHistoryRef.current.push(emotion);
     }

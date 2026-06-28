@@ -220,6 +220,52 @@ Integrity mode: development
 - [ ] 必须提供前端组件的单元测试（如 React Testing Library/Vue Test Utils），验证点击删除按钮会触发确认弹窗。
 - [ ] 必须在测试中验证当模拟 API 请求处于 pending 状态时，界面会展示加载状态（如 loading spinner）。
 - [ ] 必须验证 API 请求成功后，该消息组件从 DOM 中被正确移除。
+## Follow-up — 2026-06-28T12:59:27Z
 
+Conduct a comprehensive code review and performance optimization of the frontend dialogue interface. The goal is to resolve severe system lag and overheating by addressing rendering inefficiencies, state management bottlenecks, and potential memory leaks.
 
+Working directory: `/Users/chenhaoran/工程文件/心理大赛`
+Integrity mode: benchmark
 
+## Requirements
+
+### R1. Optimize Frontend Rendering
+Identify and resolve unnecessary re-renders, DOM node bloat, and inefficient component updates within the dialogue interface.
+
+### R2. Optimize State Management & Memory
+Analyze and fix memory leaks or inefficient state handling that leads to high CPU/memory consumption over time, especially during long dialogue sessions.
+
+## Acceptance Criteria
+
+### Performance Improvement
+- [ ] A before-and-after performance benchmark report is generated, demonstrating a quantifiable reduction in CPU usage and/or render times.
+- [ ] No memory leaks are detected during simulated long dialogue sessions (e.g. 50+ messages).
+- [ ] The dialogue interface remains fully functional with no regressions in user interactions.
+
+## Follow-up — 2026-06-28T13:35:35Z
+
+Fix the chat deletion feature: Ensure that deleting a chat removes the entire conversation file (the whole chat session) along with all its associated media files, rather than just deleting a single message.
+
+Working directory: `/Users/chenhaoran/工程文件/心理大赛`
+Integrity mode: benchmark
+
+## Requirements
+
+### R1. Complete Conversation Deletion
+Modify the backend logic so that triggering a chat deletion removes the entire conversation file (e.g., the JSON/Markdown file storing the session) from the file system.
+
+### R2. Associated Media Cleanup
+Ensure that all media files (voice recordings, generated images, etc.) associated with the deleted conversation are also completely removed from the file system.
+
+### R3. Frontend State Synchronization
+Update the frontend so that when a conversation is deleted, the chat list is updated immediately. If the currently active conversation is deleted, the UI should gracefully reset (e.g., route to a new chat or a default empty state) without leaving a blank screen or crashing.
+
+## Acceptance Criteria
+
+### Deletion Integrity
+- [ ] A programmatic test or script verifies that after deletion, the conversation file and all associated media files no longer exist on the file system.
+- [ ] No orphaned media files are left behind.
+
+### Frontend User Experience
+- [ ] Deleting a chat immediately removes it from the sidebar/history list without requiring a page refresh.
+- [ ] Deleting the currently open chat gracefully transitions the UI to a safe state (e.g., a "New Chat" screen) without errors.

@@ -6,8 +6,6 @@ import type { ChatMessage, FSMState } from '../../types';
 import { FSM_STATE_META } from '../../types';
 import { ReThinkLogo } from '../layout/ReThinkLogo';
 import { ChevronDown, ChevronUp, ShieldAlert, Trash2 } from 'lucide-react';
-import { useChatStore } from '../../store/chatStore';
-import { chatApi } from '../../api/chat';
 
 /** 意图分类 → 中文学术术语映射 */
 const INTENT_LABEL: Record<string, string> = {
@@ -45,6 +43,7 @@ interface MessageBubbleProps {
   isFirstInGroup?: boolean;
   /** Whether this is the last message in a consecutive group from the same sender */
   isLastInGroup?: boolean;
+  onDeleteRequest: (messageId: string) => void;
 }
 
 const TypingIndicator = () => (
@@ -73,35 +72,49 @@ const BubbleTail = ({ isUser }: { isUser: boolean }) => (
   />
 );
 
+interface MessageChunkProps {
+  chunk: string;
+  aiBubbleRadiusClass: string;
+  isStreaming: boolean;
+  isLastChunk: boolean;
+  isLastInGroup: boolean;
+}
 
-export const MessageBubble: React.FC<MessageBubbleProps> = ({
+const MessageChunk = React.memo<MessageChunkProps>(({
+  chunk,
+  aiBubbleRadiusClass,
+  isStreaming,
+  isLastChunk,
+  isLastInGroup,
+}) => {
+  return (
+    <div
+      className={`relative ${aiBubbleRadiusClass} bg-surface-container text-on-surface px-4 py-2.5 text-[15px] leading-relaxed font-sans shadow-sm`}
+    >
+      <div className="gemini-prose">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          {chunk}
+        </ReactMarkdown>
+      </div>
+      {isStreaming && isLastChunk && <TypingIndicator />}
+      {isLastInGroup && isLastChunk && <BubbleTail isUser={false} />}
+    </div>
+  );
+});
+
+MessageChunk.displayName = 'MessageChunk';
+
+
+const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
   message,
   isStreaming,
   isFirstInGroup = true,
   isLastInGroup = true,
+  onDeleteRequest,
 }) => {
   const isUser = message.role === 'user';
   const [showTechChain, setShowTechChain] = useState(false);
   const [expandedRag, setExpandedRag] = useState<number | null>(null);
-
-  const sessionId = useChatStore((state) => state.sessionId);
-  const deleteMessage = useChatStore((state) => state.deleteMessage);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const handleDelete = async () => {
-    if (!message.id) return;
-    setIsDeleting(true);
-    try {
-      await chatApi.deleteMessage(sessionId || '', message.id);
-      deleteMessage(message.id);
-      setShowDeleteConfirm(false);
-    } catch (err) {
-      console.error('Failed to delete message:', err);
-    } finally {
-      setIsDeleting(false);
-    }
-  };
 
   const tc = message.techChain;
 
@@ -180,19 +193,14 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           <>
             {/* ── AI Bubbles (one per sentence chunk) ── */}
             {chunks.map((chunk, idx) => (
-              <div
+              <MessageChunk
                 key={idx}
-                className={`relative ${aiBubbleRadius(idx)} bg-surface-container text-on-surface px-4 py-2.5 text-[15px] leading-relaxed font-sans shadow-sm`}
-              >
-                <div className="gemini-prose">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {chunk}
-                  </ReactMarkdown>
-                </div>
-                {isStreaming && idx === chunks.length - 1 && <TypingIndicator />}
-                {/* Tail on the last chunk of the group */}
-                {isLastInGroup && idx === chunks.length - 1 && <BubbleTail isUser={false} />}
-              </div>
+                chunk={chunk}
+                aiBubbleRadiusClass={aiBubbleRadius(idx)}
+                isStreaming={isStreaming && idx === chunks.length - 1}
+                isLastChunk={idx === chunks.length - 1}
+                isLastInGroup={isLastInGroup}
+              />
             ))}
 
             {/* Collapsible Tech Chain Panel */}
@@ -374,7 +382,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       {message.id && !isStreaming && (
         <button
           type="button"
-          onClick={() => setShowDeleteConfirm(true)}
+          onClick={() => onDeleteRequest(message.id!)}
           aria-label="删除消息"
           title="删除消息"
           className={`opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity p-1.5 rounded-full hover:bg-surface-container text-on-surface-variant/40 hover:text-stage-red focus:outline-none focus:ring-2 focus:ring-stage-red/50 cursor-pointer ${
@@ -384,60 +392,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           <Trash2 className="w-4 h-4" />
         </button>
       )}
-
-      <AnimatePresence>
-        {showDeleteConfirm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
-            {/* Backdrop overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => !isDeleting && setShowDeleteConfirm(false)}
-              className="absolute inset-0 bg-black/55 backdrop-blur-sm"
-            />
-
-            {/* Modal Content */}
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ type: 'spring', duration: 0.3 }}
-              className="relative bg-surface-container border border-outline-variant/30 shadow-2xl rounded-2xl p-6 max-w-sm w-full mx-4 z-10 space-y-4 text-on-surface"
-            >
-              <h3 className="text-lg font-semibold">确认删除消息？</h3>
-              <p className="text-sm text-on-surface-variant">
-                删除后该消息将无法恢复，且会影响后续对话的上下文生成。
-              </p>
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  disabled={isDeleting}
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="px-4 py-2 rounded-xl text-sm font-medium hover:bg-surface-container-high transition-colors disabled:opacity-50 cursor-pointer"
-                >
-                  取消
-                </button>
-                <button
-                  type="button"
-                  disabled={isDeleting}
-                  onClick={handleDelete}
-                  className="px-4 py-2 rounded-xl text-sm font-medium bg-stage-red text-white hover:bg-stage-red/90 transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer"
-                >
-                  {isDeleting ? (
-                    <>
-                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" aria-hidden="true" />
-                      <span>删除中...</span>
-                    </>
-                  ) : (
-                    <span>删除</span>
-                  )}
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 };
+
+export const MessageBubble = React.memo(MessageBubbleComponent);
