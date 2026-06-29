@@ -257,9 +257,8 @@ uniform float uIntensity;
 uniform vec2 uMouse;
 uniform float uScroll;
 
-// Simplex 2D noise implementation (kept for speed and compatibility)
+// Extremely low frequency noise for subtle mesh breathing
 vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
-
 float snoise(vec2 v) {
   const vec4 C = vec4(0.211324865405187, 0.366025403784439,
                       -0.577350269189626, 0.024390243902439);
@@ -290,81 +289,50 @@ void main() {
   float aspect = uResolution.x / uResolution.y;
   vec2 p = (uv - 0.5) * vec2(aspect, 1.0);
   
-  float t = uTime * uSpeed;
+  float t = uTime * uSpeed * 0.4;
 
-  // 1. Interactive input warp scales
-  vec2 warpMouse = uMouse * 0.15;
-  vec2 warpScroll = vec2(0.0, uScroll * 0.25);
+  // 1. Subtle global breathing (no chaotic domain warp, just a gentle wave)
+  vec2 wobble = vec2(
+    snoise(p * 0.8 + vec2(t * 0.5, t * 0.2)),
+    snoise(p * 0.8 - vec2(t * 0.3, -t * 0.4))
+  ) * 0.12;
   
-  // 2. Warp Layer 1 (2 noise calls)
-  vec2 q = vec2(
-    snoise(p * 0.7 + vec2(t * 0.04, t * 0.02) + warpMouse),
-    snoise(p * 0.7 - vec2(t * 0.03, -t * 0.05) - warpScroll)
-  );
-
-  // 3. Warp Layer 2 (2 noise calls)
-  vec2 r = vec2(
-    snoise(p * 1.1 + q * 1.3 + vec2(t * 0.06, -t * 0.03) + vec2(4.2, 1.8)),
-    snoise(p * 1.1 + q * 1.3 - vec2(-t * 0.04, t * 0.05) + vec2(8.9, 3.1))
-  );
-
-  // Final warped coordinate domain
-  vec2 w = p + r * 0.45;
-
-  // 4. Color zone blending using Gaussian Distance Fields
-  vec2 cPos1 = vec2(-0.6, 0.4);  // Top-left
-  vec2 cPos2 = vec2(0.6, 0.4);   // Top-right
-  vec2 cPos3 = vec2(-0.5, -0.5); // Bottom-left
-  vec2 cPos4 = vec2(0.5, -0.4);  // Bottom-right
-
-  float d1 = length(w - cPos1);
-  float d2 = length(w - cPos2);
-  float d3 = length(w - cPos3);
-  float d4 = length(w - cPos4);
-
-  float w1 = exp(-d1 * d1 * 1.8);
-  float w2 = exp(-d2 * d2 * 1.8);
-  float w3 = exp(-d3 * d3 * 1.8);
-  float w4 = exp(-d4 * d4 * 1.8);
-
-  // Weight normalization: Add 0.3 to wSum to prevent dark dead-zones and increase overall vibrance
-  float wSum = w1 + w2 + w3 + w4 + 0.3;
-  w1 /= (wSum * 0.85);
-  w2 /= (wSum * 0.85);
-  w3 /= (wSum * 0.85);
-  w4 /= (wSum * 0.85);
-
-  vec3 col = uColor1 * w1 + uColor2 * w2 + uColor3 * w3 + uColor4 * w4;
-
-  // Enhance saturation and brightness (Gemini look is highly luminous)
-  col = pow(col, vec3(0.85)); // slight gamma boost to brighten midtones
-
-  // 5. Zero-cost Pseudo-3D Shading & Specular Sheen
-  // Uses the displacement vector 'r' as the gradient slope of the height field
-  vec2 slope = r * 0.6;
-  vec3 normal = normalize(vec3(-slope.x, -slope.y, 1.2));
-  vec3 lightDir = normalize(vec3(0.5, 0.5, 1.0)); // Direct lighting from top-right
+  // 2. Smooth interaction offset (mouse + scroll acts as gravity)
+  vec2 interactOffset = uMouse * 0.06 - vec2(0.0, uScroll * 0.15);
   
-  float diffuse = max(dot(normal, lightDir), 0.0) * 0.15 + 0.85;
-  float specular = pow(max(dot(normal, lightDir), 0.0), 32.0) * 0.12;
-  
-  col *= diffuse;
-  col += vec3(specular);
+  vec2 w = p + wobble + interactOffset;
 
-  // 6. Vignette (very subtle to preserve brightness)
-  float vignette = 1.0 - dot(uv - 0.5, uv - 0.5) * 0.5;
-  col *= vignette;
+  // 3. Dynamic Orbital Orbs (Lissajous curves for organic, non-repeating flow)
+  // These act as huge, soft spotlights of color
+  vec2 pos1 = vec2(sin(t * 0.8) * 0.6, cos(t * 0.5) * 0.4);
+  vec2 pos2 = vec2(cos(t * 0.6) * 0.5, sin(t * 0.9) * 0.5);
+  vec2 pos3 = vec2(sin(t * 0.4 + 2.0) * 0.7, cos(t * 0.7 + 1.0) * 0.3);
+  vec2 pos4 = vec2(cos(t * 0.7 + 3.0) * 0.4, sin(t * 0.5 + 2.5) * 0.6);
 
+  // 4. Gaussian Falloff for silky smooth blending
+  // Using exponential curve rather than smoothstep avoids hard edges
+  float d1 = length(w - pos1);
+  float d2 = length(w - pos2);
+  float d3 = length(w - pos3);
+  float d4 = length(w - pos4);
+
+  float spread = 1.3; // Controls how wide and blurred the orbs are
+  float w1 = exp(-d1 * d1 * spread);
+  float w2 = exp(-d2 * d2 * spread);
+  float w3 = exp(-d3 * d3 * spread);
+  float w4 = exp(-d4 * d4 * spread);
+
+  // 5. Normalized Blending to preserve pure curated Hex colors
+  // Adding a base value to wSum prevents dark dead-zones
+  float wSum = w1 + w2 + w3 + w4 + 0.15;
+  vec3 col = (uColor1 * w1 + uColor2 * w2 + uColor3 * w3 + uColor4 * w4) / wSum;
+
+  // Global Intensity
   col *= uIntensity;
 
-  // 7. Dynamic Film Grain (Midtone responsive)
-  float grainNoise = fract(sin(dot(uv * uResolution + t * 0.02, vec2(12.9898, 78.233))) * 43758.5453);
-  float grainAmount = (grainNoise - 0.5) * 0.015;
-  
-  // Film response curve masks grain in pure darks & bright spots
-  float luminance = dot(col, vec3(0.299, 0.587, 0.114));
-  grainAmount *= smoothstep(0.02, 0.18, luminance) * smoothstep(0.98, 0.82, luminance);
-  col += grainAmount;
+  // 6. Micro-grain for premium anti-banding (imperceptible as noise)
+  float noise = fract(sin(dot(uv + t, vec2(12.9898, 78.233))) * 43758.5453);
+  col += (noise - 0.5) * 0.006;
 
   gl_FragColor = vec4(col, 1.0);
 }`,
