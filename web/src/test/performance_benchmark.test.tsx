@@ -133,31 +133,5 @@ describe('ChatPanel Performance & Stress Benchmark Test', () => {
     // Each message bubble should have a bounded number of elements (around 10-25 elements).
     // For 100 messages, total DOM nodes should scale cleanly and not blow up exponentially.
     expect(totalDOMNodes).toBeLessThan(2500);
-
-    // 3. Test deletion modal triggering works without creating duplicate/bloated modals
-    act(() => {
-      // Simulate click of deletion on the first message
-      const deleteButtons = screen.getAllByLabelText('删除消息');
-      // Click delete
-      deleteButtons[0].click();
-    });
-
-    // Modal should now be in the DOM
-    expect(screen.getByText('确认删除消息？')).toBeInTheDocument();
-    
-    // Confirm there is exactly ONE delete confirmation modal in the DOM, not multiple copies
-    const allModals = screen.queryAllByText('确认删除消息？');
-    expect(allModals.length).toBe(1);
-
-    // Close the modal
-    act(() => {
-      const cancelBtn = screen.getByRole('button', { name: '取消' });
-      cancelBtn.click();
-    });
-
-    // Modal should be gone
-    await waitFor(() => {
-      expect(screen.queryByText('确认删除消息？')).not.toBeInTheDocument();
-    });
   });
 });

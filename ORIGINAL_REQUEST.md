@@ -330,3 +330,37 @@ Ensure the upgraded shader still strictly adheres to the existing dynamic color 
 ### Performance & Integration
 - [ ] Performance benchmarks or code analysis verify that the interaction logic does not trigger React re-renders or frame drops (must remain a pure GPU operation).
 - [ ] The `AmbientGlow.tsx` file retains the `useChatStore` logic that feeds the `FSM_PALETTES` colors into the shader.
+
+## Follow-up — 2026-06-29T15:43:21Z
+
+# Teamwork Project Prompt — Draft
+
+> Status: Launched
+> Goal: Craft prompt → get user approval → delegate to teamwork_preview
+
+Refactor the WebGL mesh gradient background into a fully automatic "breathing light" (呼吸灯) and flowing aurora that actively counteracts the user's detected emotions, completely removing any mouse or scroll-based interaction.
+
+Working directory: `/Users/chenhaoran/工程文件/心理大赛`
+Integrity mode: benchmark
+
+## Requirements
+
+### R1. Automatic Breathing Wave Animation
+Modify the WebGL fragment shader in `AmbientGlow.tsx` to generate a smooth, continuous color wash that flows across the screen in soft waves. The animation must eliminate distinct rigid blobs and instead resemble a slow, rhythmic "breathing" light (呼吸灯) effect.
+
+### R2. Remove Pointer/Scroll Interaction
+Completely strip out all mouse and scroll event listeners and uniforms from the shader and component. The animation must be 100% self-driving and autonomous, ensuring zero layout tracking overhead.
+
+### R3. Emotion Counter-Regulation Driver
+Ensure the animation speed, intensity (breathing depth), and color palette strictly react to the user's detected FSM state and emotional intent (e.g., cooling down rapidly when anger is detected, warming up for depression). The FSM and chat store logic must remain intact to drive the shader parameters.
+
+## Acceptance Criteria
+
+### Visual & Architectural Verification
+- [ ] Visual verification (agent-as-judge or programmatic) confirms the shader renders a smooth, blob-less wash of color that flows in rhythmic waves.
+- [ ] Code analysis confirms the complete absence of `mouseRef`, `scrollRef`, `window.addEventListener('pointermove', ...)` and related uniforms in `AmbientGlow.tsx`.
+
+### Performance & Integration
+- [ ] The shader runs purely on `uTime` and `uSpeed`, maintaining a stable O(1) performance footprint.
+- [ ] Unit tests (e.g., `AmbientGlow.test.tsx`) are updated or confirmed passing after the removal of interaction handlers.
+

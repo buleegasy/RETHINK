@@ -15,7 +15,7 @@
  *   Crisis     → forced calming blue-green
  */
 
-import React, { useMemo, useRef, useEffect } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useChatStore } from '../../store/chatStore';
@@ -129,10 +129,6 @@ const AuroraMesh: React.FC<{ palette: Palette }> = ({ palette }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const { size } = useThree();
 
-  // Mouse & Scroll track refs
-  const mouseRef = useRef(new THREE.Vector2(0, 0));
-  const scrollRef = useRef(0);
-
   // Pre-allocated THREE.Color target instances for GC optimization
   const targetColors = useRef([
     new THREE.Color(),
@@ -140,55 +136,6 @@ const AuroraMesh: React.FC<{ palette: Palette }> = ({ palette }) => {
     new THREE.Color(),
     new THREE.Color(),
   ]);
-
-  // Cached layout dimensions to prevent layout thrashing
-  const layoutHeightRef = useRef({ scrollHeight: 0, innerHeight: 0 });
-
-  // Setup non-react-rendering event listeners
-  useEffect(() => {
-    const updateLayoutMetrics = () => {
-      layoutHeightRef.current.scrollHeight = document.documentElement.scrollHeight;
-      layoutHeightRef.current.innerHeight = window.innerHeight;
-    };
-
-    // Initialize metrics
-    updateLayoutMetrics();
-
-    const handlePointerMove = (e: PointerEvent) => {
-      // Normalize client coordinates to WebGL clip space range [-1, 1]
-      mouseRef.current.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouseRef.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
-    };
-
-    const handleScroll = () => {
-      const { scrollHeight, innerHeight } = layoutHeightRef.current;
-      const docHeight = scrollHeight - innerHeight;
-      scrollRef.current = docHeight > 0 ? window.scrollY / docHeight : 0;
-    };
-
-    const resizeObserver = typeof ResizeObserver !== 'undefined'
-      ? new ResizeObserver(() => {
-          updateLayoutMetrics();
-        })
-      : null;
-
-    if (resizeObserver) {
-      resizeObserver.observe(document.documentElement);
-    }
-
-    window.addEventListener('pointermove', handlePointerMove, { passive: true });
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', updateLayoutMetrics, { passive: true });
-
-    return () => {
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', updateLayoutMetrics);
-      if (resizeObserver) {
-        resizeObserver.disconnect();
-      }
-    };
-  }, []);
 
   const uniforms = useRef({
     uTime: { value: 0 },
@@ -199,8 +146,6 @@ const AuroraMesh: React.FC<{ palette: Palette }> = ({ palette }) => {
     uColor3: { value: new THREE.Color(...palette.c3) },
     uColor4: { value: new THREE.Color(...palette.c4) },
     uIntensity: { value: palette.intensity },
-    uMouse: { value: new THREE.Vector2(0, 0) },
-    uScroll: { value: 0.0 },
   });
 
   useFrame((_, delta) => {
@@ -210,13 +155,6 @@ const AuroraMesh: React.FC<{ palette: Palette }> = ({ palette }) => {
 
     // Damped interpolation factor for inertia
     const lerpFactor = 1 - Math.pow(0.15, delta);
-
-    // Clamp the pointer and scroll lerp factor using const alpha = Math.min(1.0, lerpFactor * 2.0)
-    const alpha = Math.min(1.0, lerpFactor * 2.0);
-
-    // Smoothly interpolate interactive inputs using alpha
-    u.uMouse.value.lerp(mouseRef.current, alpha);
-    u.uScroll.value += (scrollRef.current - u.uScroll.value) * alpha;
 
     // Smooth color transitions (~3s ease) using pre-allocated color instances
     const tc = targetColors.current;
@@ -254,8 +192,6 @@ uniform vec3 uColor2;
 uniform vec3 uColor3;
 uniform vec3 uColor4;
 uniform float uIntensity;
-uniform vec2 uMouse;
-uniform float uScroll;
 
 // Extremely low frequency noise for subtle mesh breathing
 vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
@@ -297,10 +233,7 @@ void main() {
     snoise(p * 0.8 - vec2(t * 0.3, -t * 0.4))
   ) * 0.12;
   
-  // 2. Smooth interaction offset (mouse + scroll acts as gravity)
-  vec2 interactOffset = uMouse * 0.06 - vec2(0.0, uScroll * 0.15);
-  
-  vec2 w = p + wobble + interactOffset;
+  vec2 w = p + wobble;
 
   // 3. Dynamic Orbital Orbs (Lissajous curves for organic, non-repeating flow)
   // These act as huge, soft spotlights of color

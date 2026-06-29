@@ -155,93 +155,6 @@ describe('AmbientGlow WebGL Shader stress testing & verification', () => {
     });
   });
 
-  it('verifies zero React re-renders during mouse movement and scroll events', () => {
-    // Render component
-    render(<AmbientGlow />);
-
-    // Capture initial render counts
-    // AmbientGlow renders Canvas. AuroraMesh calls useThree.
-    const initialCanvasRenders = mockR3F.getCanvasRenderCount();
-    const initialMeshRenders = mockR3F.getAuroraMeshRenderCount();
-
-    expect(initialCanvasRenders).toBe(1);
-    expect(initialMeshRenders).toBe(1);
-
-    // Simulate 100 fast mouse movements
-    act(() => {
-      for (let i = 0; i < 100; i++) {
-        window.dispatchEvent(
-          new PointerEvent('pointermove', {
-            clientX: 100 + i * 5,
-            clientY: 200 + i * 3,
-          })
-        );
-      }
-    });
-
-    // Simulate 100 fast scroll events
-    act(() => {
-      for (let i = 0; i < 100; i++) {
-        Object.defineProperty(window, 'scrollY', { value: 10 * i, writable: true });
-        window.dispatchEvent(new Event('scroll'));
-      }
-    });
-
-    // Assert that the component render counts did not change
-    expect(mockR3F.getCanvasRenderCount()).toBe(initialCanvasRenders);
-    expect(mockR3F.getAuroraMeshRenderCount()).toBe(initialMeshRenders);
-  });
-
-  it('verifies mouse coordinates and scroll map correctly to uniforms in useFrame', () => {
-    const spyShaderMaterialConstructor = vi.spyOn(mockThree, 'ShaderMaterial');
-
-    render(<AmbientGlow />);
-
-    const useFrameCallback = mockR3F.getUseFrameCallback();
-    expect(useFrameCallback).not.toBeNull();
-
-    const lastMaterialCall = spyShaderMaterialConstructor.mock.results[spyShaderMaterialConstructor.mock.results.length - 1].value;
-    const uniforms = lastMaterialCall.uniforms;
-
-    expect(uniforms.uMouse.value.x).toBe(0);
-    expect(uniforms.uMouse.value.y).toBe(0);
-    expect(uniforms.uScroll.value).toBe(0);
-
-    // 1. Simulate mouse position at (500, 300) with window (1000, 1000)
-    // Clip space coordinates should be:
-    // x = (500 / 1000) * 2 - 1 = 0
-    // y = -(300 / 1000) * 2 + 1 = 0.4
-    act(() => {
-      window.dispatchEvent(
-        new PointerEvent('pointermove', {
-          clientX: 500,
-          clientY: 300,
-        })
-      );
-    });
-
-    // 2. Simulate scroll: scrollY = 500, scrollHeight = 2000, innerHeight = 1000
-    // docHeight = 2000 - 1000 = 1000
-    // scrollFraction = 500 / 1000 = 0.5
-    act(() => {
-      Object.defineProperty(window, 'scrollY', { value: 500, writable: true });
-      window.dispatchEvent(new Event('scroll'));
-    });
-
-    // Call frame callback multiple times to let it interpolate closer to target
-    const delta = 0.016; // 60 FPS
-    act(() => {
-      for (let i = 0; i < 180; i++) {
-        useFrameCallback!(null, delta);
-      }
-    });
-
-    // Verify values
-    expect(uniforms.uMouse.value.x).toBeCloseTo(0, 3);
-    expect(uniforms.uMouse.value.y).toBeCloseTo(0.4, 3);
-    expect(uniforms.uScroll.value).toBeCloseTo(0.5, 3);
-  });
-
   it('verifies aspect ratio calculation inside fragment shader is correct and handles dynamic resizing', () => {
     const spyShaderMaterialConstructor = vi.spyOn(mockThree, 'ShaderMaterial');
     render(<AmbientGlow />);
@@ -274,11 +187,8 @@ describe('AmbientGlow WebGL Shader stress testing & verification', () => {
     const fragmentShader = lastMaterialCall.fragmentShader;
 
     // Verify weight calculation
-    expect(fragmentShader).toContain('float wSum = w1 + w2 + w3 + w4 + 0.001;');
-    expect(fragmentShader).toContain('w1 /= wSum;');
-    expect(fragmentShader).toContain('w2 /= wSum;');
-    expect(fragmentShader).toContain('w3 /= wSum;');
-    expect(fragmentShader).toContain('w4 /= wSum;');
+    expect(fragmentShader).toContain('float wSum = w1 + w2 + w3 + w4 + 0.15;');
+    expect(fragmentShader).toContain('vec3 col = (uColor1 * w1 + uColor2 * w2 + uColor3 * w3 + uColor4 * w4) / wSum;');
   });
 
   it('measures the garbage collection impact of new THREE.Color allocations inside the frame loop', () => {
