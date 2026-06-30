@@ -364,3 +364,37 @@ Ensure the animation speed, intensity (breathing depth), and color palette stric
 - [ ] The shader runs purely on `uTime` and `uSpeed`, maintaining a stable O(1) performance footprint.
 - [ ] Unit tests (e.g., `AmbientGlow.test.tsx`) are updated or confirmed passing after the removal of interaction handlers.
 
+## Follow-up — 2026-06-30T15:42:35Z
+
+# Teamwork Project Prompt — Draft
+
+> Status: Launched
+> Goal: Craft prompt → get user approval → delegate to teamwork_preview
+
+Revert the application background to a completely static, non-animated state by removing the WebGL shader in `AmbientGlow.tsx` and replacing it with a clean, static CSS background that still reflects the current FSM emotion colors.
+
+Working directory: `/Users/chenhaoran/工程文件/心理大赛`
+Integrity mode: benchmark
+
+## Requirements
+
+### R1. Remove WebGL Animation
+Completely remove the WebGL canvas, `@react-three/fiber` dependencies in the component, and all fragment/vertex shader logic from `AmbientGlow.tsx`. Ensure there is absolutely no animated rendering happening in the background.
+
+### R2. Clean Static Background
+Implement a clean, static background (e.g., a static CSS gradient or solid color) using standard React/CSS. The specific visual design is up to the team, but it must be completely motionless ("没有任何动效") and visually clean.
+
+### R3. Maintain Emotion FSM Connection
+The static background must still react to changes in the user's emotion state (via `useChatStore` and the color palettes). When the emotion state changes, the background color should update statically (or via simple CSS transition) to reflect the new state.
+
+## Acceptance Criteria
+
+### Visual & Architectural Verification
+- [ ] Code analysis confirms the removal of `Canvas`, `useFrame`, and all shader string literals from `AmbientGlow.tsx`.
+- [ ] Visual verification confirms the background is completely static with no ongoing animation loops.
+- [ ] Code analysis confirms `useChatStore` is still used to derive the background's visual properties based on the current emotion state.
+
+### Performance & Integration
+- [ ] The component renders using standard DOM elements (e.g., a `div` with inline styles or Tailwind classes).
+- [ ] Unit tests for `AmbientGlow.tsx` are updated or confirmed passing after the removal of WebGL.
+
