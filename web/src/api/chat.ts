@@ -1,4 +1,4 @@
-import { ApiError, apiClient } from './client';
+import { ApiError } from './client';
 import type { UserProfile } from '../types';
 
 export const chatApi = {

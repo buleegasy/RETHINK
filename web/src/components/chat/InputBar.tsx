@@ -100,12 +100,11 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) =
 
   return (
     <div className="absolute bottom-0 start-0 w-full ps-4 pe-4 md:ps-8 md:pe-8 pb-[calc(max(env(safe-area-inset-bottom),24px))] pt-8 bg-gradient-to-t from-surface-dim/95 via-surface-dim/40 to-transparent z-30 pointer-events-none">
+      <div className="fixed top-24 right-4 md:right-8 z-50 animate-fade-in pointer-events-auto">
+        <CameraPanel onEmotionChange={onEmotionChange} />
+      </div>
+
       <div className="max-w-2xl ms-auto me-auto flex flex-col items-center pointer-events-auto">
-        
-        {/* 摄像头情感感知（原生融合区） */}
-        <div className="w-full mb-4 flex justify-start ps-2 md:ps-0 animate-fade-in">
-          <CameraPanel onEmotionChange={onEmotionChange} />
-        </div>
 
 
         {/* Input Container */}

@@ -430,7 +430,34 @@ Enhance the visual hierarchy by refining shadows, borders, and backdrop blurs (g
 - [ ] Typography inside chat bubbles exhibits improved hierarchy (e.g., distinct code blocks, legible paragraph spacing).
 
 ### Performance Verification
-- [ ] Code analysis confirms that all added micro-animations utilize hardware-accelerated properties (`transform`, `opacity`) and do not trigger layout thrashing.
+- [ ] All added micro-animations utilize hardware-accelerated properties (`transform`, `opacity`) and do not trigger layout thrashing.
 - [ ] The existing automated test suite (`npm run test:unit`) continues to pass cleanly, confirming no core functionality was broken by style changes.
 
+## Follow-up — 2026-07-04T14:53:41Z
 
+Perform a comprehensive, delivery-grade layout refactoring of the chat interface to achieve a flawless, production-ready aesthetic. Fix all overlapping elements (such as the camera module), broken Z-indexes, and misaligned components to deliver a premium, harmonious user experience.
+
+Working directory: `/Users/chenhaoran/工程文件/心理大赛`
+Integrity mode: benchmark
+
+## Requirements
+
+### R1. Camera Module Relocation (Picture-in-Picture)
+Move the camera module (`CameraPanel`) out of the normal document flow in `InputBar` and fix it to the top-right corner of the browser window as a Picture-in-Picture element. Ensure it is permanently anchored there and does not overlap or interfere with the central chat stream.
+
+### R2. Bottom-Up Chat Flow
+Refactor the `ChatPanel` layout so that chat messages anchor to the bottom of the scroll container (just above the InputBar). When there are only a few messages, they should stack from the bottom up, replicating the feel of modern chat apps like WeChat or iMessage.
+
+### R3. Edge-Aligned Global Navigation
+Ensure the Desktop Header (containing the History Clock icon and Logout button) is strictly aligned to the far left and right edges of the browser window. The header must utilize the full screen width and should not be constrained to the central `max-w-2xl` column.
+
+## Acceptance Criteria
+
+### UI Architecture Verification
+- [ ] Code analysis confirms the `CameraPanel` is positioned using `fixed` or `absolute` near `top-right`, entirely removed from the flex flow of the `InputBar`.
+- [ ] Code analysis confirms the `ChatPanel` container uses appropriate flexbox rules (e.g., `justify-end` or `mt-auto` strategies) to anchor messages to the bottom when the list is sparse.
+- [ ] The `App.tsx` desktop header wrapper is verified to possess `w-full` and `justify-between` without any `max-w-*` constraints bounding its width.
+
+### Visual & Regression (Agent-as-Judge)
+- [ ] Visual inspection confirms that no UI elements are overlapping awkwardly (e.g., the camera does not cover text bubbles).
+- [ ] The layout remains fully responsive, and the `InputBar` remains correctly aligned and fixed at the bottom.

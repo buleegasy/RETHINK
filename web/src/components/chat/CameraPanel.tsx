@@ -46,7 +46,7 @@ export const CameraPanel: React.FC<CameraPanelProps> = ({ onEmotionChange }) => 
   const emotionInfo = currentEmotion ? EMOTION_MAP[currentEmotion.label] : null;
 
   return (
-    <div className="w-full flex items-center justify-start pointer-events-auto">
+    <div className="w-auto flex items-center justify-start pointer-events-auto">
       <div className="relative overflow-hidden rounded-2xl bg-surface-container/30 border border-outline-variant/30 shadow-sm flex items-center gap-2 md:gap-3 p-1.5 md:p-2 backdrop-blur-md">
         
         {/* 摄像头视图区域 (小圆形/胶囊状) */}

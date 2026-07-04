@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useChatStore } from '../../store/chatStore';
 import { MessageBubble } from './MessageBubble';
@@ -10,7 +10,6 @@ export const ChatPanel: React.FC = () => {
   const messages = useChatStore(state => state.messages);
   const isStreaming = useChatStore(state => state.isStreaming);
   const hasCompletedOnboarding = useChatStore(state => state.hasCompletedOnboarding);
-  const sessionId = useChatStore(state => state.sessionId);
   
   const setOnboardingComplete = useChatStore(state => state.setOnboardingComplete);
   const { sendMessage } = useChat();
@@ -41,8 +40,8 @@ export const ChatPanel: React.FC = () => {
   };
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 pt-4 pb-4 md:px-8 md:pt-20 md:pb-8 scroll-smooth bg-transparent relative z-10">
-      <div className="max-w-2xl mx-auto flex flex-col gap-1">
+    <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 pt-4 pb-4 md:px-8 md:pt-20 md:pb-8 scroll-smooth bg-transparent relative z-10 flex flex-col">
+      <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col gap-1">
         <AnimatePresence mode="wait">
           {!hasCompletedOnboarding ? (
             !showEmojiSelector ? (
@@ -72,7 +71,7 @@ export const ChatPanel: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4 }}
-              className="flex flex-col gap-1 w-full"
+              className="flex flex-col gap-1 w-full mt-auto"
             >
               {messages.map((msg, idx) => {
                 const prev = messages[idx - 1];

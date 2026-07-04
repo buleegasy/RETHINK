@@ -164,7 +164,7 @@ function App() {
           {/* ── Session History Sidebar ── */}
           <SessionSidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
           {/* ── Desktop Top Header Area (History & Profile) ── */}
-          <div className="absolute top-0 left-0 w-full z-40 pointer-events-none flex justify-center pt-6 px-4 md:px-8">
+          <div className="absolute top-0 left-0 w-full z-40 pointer-events-none pt-6 px-4 md:px-8">
             <div className="w-full flex justify-between items-start pointer-events-auto">
               <motion.button
                 whileHover={{ scale: 1.05 }}

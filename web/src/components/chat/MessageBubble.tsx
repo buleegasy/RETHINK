@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { ChatMessage, FSMState } from '../../types';
 import { FSM_STATE_META } from '../../types';
 import { ReThinkLogo } from '../layout/ReThinkLogo';
-import { ChevronDown, ChevronUp, ShieldAlert, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, ShieldAlert } from 'lucide-react';
 
 /** 意图分类 → 中文学术术语映射 */
 const INTENT_LABEL: Record<string, string> = {

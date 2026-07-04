@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, act, screen, waitFor } from '@testing-library/react';
+import { render, act, screen } from '@testing-library/react';
 import { ChatPanel } from '../components/chat/ChatPanel';
 import { useChatStore } from '../store/chatStore';
 
