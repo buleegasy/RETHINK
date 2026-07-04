@@ -99,17 +99,17 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) =
 
   return (
     <div className="absolute bottom-0 start-0 w-full ps-4 pe-4 md:ps-8 md:pe-8 pb-[calc(max(env(safe-area-inset-bottom),24px))] pt-8 bg-gradient-to-t from-surface-dim/95 via-surface-dim/40 to-transparent z-30 pointer-events-none">
-      <div className="max-w-3xl ms-auto me-auto flex flex-col items-center pointer-events-auto">
+      <div className="max-w-2xl ms-auto me-auto flex flex-col items-center pointer-events-auto">
         
         {/* 摄像头情感感知（原生融合区） */}
-        <div className="w-full mb-3 flex justify-start ps-2 md:ps-0 animate-fade-in">
+        <div className="w-full mb-4 flex justify-start ps-2 md:ps-0 animate-fade-in">
           <CameraPanel onEmotionChange={onEmotionChange} />
         </div>
 
 
         {/* Input Container */}
         <div className={`w-full relative transition-all duration-500 ${isStreaming ? 'opacity-50' : ''}`}>
-          <div className="relative flex items-end bg-surface-container/40 backdrop-blur-md border border-outline-variant/30 rounded-input p-2 gap-1">
+          <div className="relative flex items-end bg-surface-container/80 backdrop-blur-md border border-outline-variant/60 rounded-input p-2 gap-1">
             
             {/* Voice Button or Spacer */}
             {isVoiceSupported ? (
