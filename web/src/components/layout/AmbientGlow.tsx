@@ -1,9 +1,11 @@
 /**
- * AmbientGlow — Static CSS Gradient Background
+ * AmbientGlow — Gemini-style CSS Blob Aurora Background
  *
- * A high-performance, non-animated, static CSS gradient background that
- * dynamically responds to FSM State + intentEmotion, using a double-layered
- * container with opacity transitions for cross-fading.
+ * 4 large blurred blobs drift slowly via pure CSS @keyframes animations.
+ * Each blob uses `transform: translate()` (100% GPU-composited) and
+ * `filter: blur()` to create a soft, organic flowing light effect.
+ *
+ * No WebGL, no JS animation loop, no requestAnimationFrame.
  *
  * Color psychology (counter-regulation):
  *   Anxiety    → cool blues + mints (calming)
@@ -104,6 +106,61 @@ function applyEmotionMod(base: Palette, emotion?: string): Palette {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// Blob configuration — positions & animation assignments
+// ═══════════════════════════════════════════════════════════════
+
+const BLOB_CONFIG = [
+  { top: '5%',  left: '10%', size: '55vmax', animation: 'glow-drift-1', duration: '22s' },
+  { top: '10%', left: '55%', size: '50vmax', animation: 'glow-drift-2', duration: '26s' },
+  { top: '50%', left: '5%',  size: '48vmax', animation: 'glow-drift-3', duration: '30s' },
+  { top: '45%', left: '50%', size: '52vmax', animation: 'glow-drift-4', duration: '28s' },
+];
+
+// ═══════════════════════════════════════════════════════════════
+// Blob Layer — renders 4 blurred, drifting color blobs
+// ═══════════════════════════════════════════════════════════════
+
+interface BlobLayerProps {
+  palette: Palette;
+  opacity: number;
+  testId: string;
+}
+
+const BlobLayer: React.FC<BlobLayerProps> = React.memo(({ palette, opacity, testId }) => {
+  const colors = [palette.c1, palette.c2, palette.c3, palette.c4];
+
+  return (
+    <div
+      className="absolute inset-0 transition-opacity duration-[3000ms] ease-in-out"
+      style={{ opacity }}
+      data-testid={testId}
+    >
+      {BLOB_CONFIG.map((blob, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            top: blob.top,
+            left: blob.left,
+            width: blob.size,
+            height: blob.size,
+            borderRadius: '50%',
+            backgroundColor: colors[i],
+            filter: 'blur(100px)',
+            opacity: 0.7,
+            animation: `${blob.animation} ${blob.duration} ease-in-out infinite`,
+            willChange: 'transform',
+            transition: 'background-color 3s ease-in-out',
+          }}
+        />
+      ))}
+    </div>
+  );
+});
+
+BlobLayer.displayName = 'BlobLayer';
+
+// ═══════════════════════════════════════════════════════════════
 // Main Component
 // ═══════════════════════════════════════════════════════════════
 
@@ -162,20 +219,6 @@ export const AmbientGlow: React.FC = () => {
     });
   }
 
-  const makeGradientStyle = (p: Palette) => ({
-    background: `radial-gradient(circle at 10% 10%, ${p.c1} 0%, transparent 60%), radial-gradient(circle at 90% 10%, ${p.c2} 0%, transparent 60%), radial-gradient(circle at 90% 90%, ${p.c3} 0%, transparent 60%), radial-gradient(circle at 10% 90%, ${p.c4} 0%, transparent 60%)`,
-  });
-
-  const layerAStyle = {
-    ...makeGradientStyle(layerState.paletteA),
-    opacity: layerState.active === 'A' ? 1 : 0,
-  };
-
-  const layerBStyle = {
-    ...makeGradientStyle(layerState.paletteB),
-    opacity: layerState.active === 'B' ? 1 : 0,
-  };
-
   return (
     <div
       aria-hidden="true"
@@ -187,20 +230,15 @@ export const AmbientGlow: React.FC = () => {
       }}
       data-testid="ambient-glow-container"
     >
-      <div
-        className="absolute inset-0 transition-opacity duration-[3000ms] ease-in-out"
-        style={layerAStyle}
-        data-testid="glow-layer-a"
+      <BlobLayer
+        palette={layerState.paletteA}
+        opacity={layerState.active === 'A' ? 1 : 0}
+        testId="glow-layer-a"
       />
-      <div
-        className="absolute inset-0 transition-opacity duration-[3000ms] ease-in-out"
-        style={layerBStyle}
-        data-testid="glow-layer-b"
-      />
-      {/* Blur/overlay layer for soft clean appearance */}
-      <div
-        className="absolute inset-0 backdrop-blur-[100px] pointer-events-none mix-blend-normal"
-        data-testid="glow-blur-layer"
+      <BlobLayer
+        palette={layerState.paletteB}
+        opacity={layerState.active === 'B' ? 1 : 0}
+        testId="glow-layer-b"
       />
     </div>
   );
