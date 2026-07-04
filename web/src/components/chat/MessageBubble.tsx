@@ -168,9 +168,9 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
       {!isUser && (
         <div className="w-8 h-8 shrink-0 mb-0.5 order-1">
           {isLastInGroup ? (
-            <div className="relative w-8 h-8 flex items-center justify-center text-primary dark:text-primary-light">
+            <div className="relative w-8 h-8 flex items-center justify-center text-on-surface dark:text-surface">
               {isStreaming && (
-                <div className="absolute inset-0 bg-primary/20 blur-sm rounded-full animate-pulse" />
+                <div className="absolute inset-0 bg-gemini-blue/20 blur-sm rounded-full animate-pulse" />
               )}
               <ReThinkLogo className="w-8 h-8 relative z-10" isThinking={isStreaming} />
             </div>
