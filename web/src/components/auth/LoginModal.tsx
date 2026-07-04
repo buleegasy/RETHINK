@@ -201,7 +201,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 <motion.button
                   whileTap={{ scale: 0.98 }}
                   type="button"
-                  className={`flex-1 text-center py-2.5 text-xs tracking-widest uppercase font-medium rounded-full transition-all duration-500 cursor-pointer ${
+                  className={`flex-1 text-center py-2.5 text-xs tracking-widest uppercase font-medium rounded-full transition-colors duration-300 cursor-pointer ${
                     !isSignUp ? 'bg-surface/80 shadow-sm text-on-surface border border-outline-variant/30' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container/40'
                   }`}
                   onClick={() => { setIsSignUp(false); setError(null); }}
@@ -211,7 +211,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 <motion.button
                   whileTap={{ scale: 0.98 }}
                   type="button"
-                  className={`flex-1 text-center py-2.5 text-xs tracking-widest uppercase font-medium rounded-full transition-all duration-500 cursor-pointer ${
+                  className={`flex-1 text-center py-2.5 text-xs tracking-widest uppercase font-medium rounded-full transition-colors duration-300 cursor-pointer ${
                     isSignUp ? 'bg-surface/80 shadow-sm text-on-surface border border-outline-variant/30' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container/40'
                   }`}
                   onClick={() => { setIsSignUp(true); setError(null); }}
@@ -255,7 +255,13 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 </div>
 
                 {isSignUp && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                    className="overflow-hidden"
+                  >
                     <input
                       type="text"
                       required
@@ -276,7 +282,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   transition={{ type: "spring", stiffness: 400, damping: 12 }}
                   type="submit"
                   disabled={loading}
-                  className="group relative w-full bg-on-surface hover:bg-on-surface/90 text-surface font-light tracking-widest text-xs uppercase py-4 md:py-5 rounded-full transition-all duration-700 disabled:opacity-40 overflow-hidden cursor-pointer"
+                  className="group relative w-full bg-on-surface hover:bg-on-surface/90 text-surface font-light tracking-widest text-xs uppercase py-4 md:py-5 rounded-full transition-colors duration-300 disabled:opacity-40 overflow-hidden cursor-pointer"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
                   {loading ? (

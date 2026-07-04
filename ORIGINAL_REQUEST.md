@@ -398,3 +398,40 @@ The static background must still react to changes in the user's emotion state (v
 - [ ] The component renders using standard DOM elements (e.g., a `div` with inline styles or Tailwind classes).
 - [ ] Unit tests for `AmbientGlow.tsx` are updated or confirmed passing after the removal of WebGL.
 
+## Follow-up — 2026-07-04T14:28:05Z
+
+# Teamwork Project Prompt — Draft
+
+> Status: Launched
+> Goal: Craft prompt → get user approval → delegate to teamwork_preview
+
+Conduct a comprehensive audit and optimization of the UI details in the RE-THINK chat interface to achieve a highly polished, premium user experience.
+
+Working directory: `/Users/chenhaoran/工程文件/心理大赛`
+Integrity mode: benchmark
+
+## Requirements
+
+### R1. Full UI Detail Audit & Refinement
+Using a browser subagent or manual inspection, the team must audit the current chat interface (`App.tsx`, `ChatPanel.tsx`, `MessageBubble.tsx`, `InputBar.tsx`, etc.) and identify areas lacking premium polish.
+
+### R2. Typography and Spacing Polish
+Refine typography within the chat bubbles (`prose` classes) and application headers. Improve line heights, letter spacing, font weights, and paragraph margins to ensure effortless readability.
+
+### R3. Interactive States & Micro-animations
+Implement tactile feedback for all interactive elements (buttons, inputs). Add subtle, hardware-accelerated micro-animations (using Framer Motion or pure CSS) for hover, active, and focus states, as well as smooth entrance/exit transitions for messages.
+
+### R4. Depth and Glassmorphism
+Enhance the visual hierarchy by refining shadows, borders, and backdrop blurs (glassmorphism) on floating elements (like the InputBar and Error Snackbars) to make them pop cleanly against the flowing background without looking muddy.
+
+## Acceptance Criteria
+
+### Visual Quality Verification
+- [ ] A visual audit (via browser subagent screenshot) confirms that interactive elements have clear, polished states (e.g., hover effects are active and visible).
+- [ ] Typography inside chat bubbles exhibits improved hierarchy (e.g., distinct code blocks, legible paragraph spacing).
+
+### Performance Verification
+- [ ] Code analysis confirms that all added micro-animations utilize hardware-accelerated properties (`transform`, `opacity`) and do not trigger layout thrashing.
+- [ ] The existing automated test suite (`npm run test:unit`) continues to pass cleanly, confirming no core functionality was broken by style changes.
+
+

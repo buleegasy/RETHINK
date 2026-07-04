@@ -41,35 +41,65 @@ export const ChatPanel: React.FC = () => {
   };
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-4 md:px-8 md:py-8 scroll-smooth bg-transparent relative z-10">
+    <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 pt-4 pb-4 md:px-8 md:pt-20 md:pb-8 scroll-smooth bg-transparent relative z-10">
       <div className="max-w-2xl mx-auto flex flex-col gap-1">
-        {!hasCompletedOnboarding ? (
-          !showEmojiSelector ? (
-            <GeminiWelcome onStart={handleStart} />
+        <AnimatePresence mode="wait">
+          {!hasCompletedOnboarding ? (
+            !showEmojiSelector ? (
+              <motion.div
+                key="welcome"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.3 }}
+              >
+                <GeminiWelcome onStart={handleStart} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="emoji"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.3 }}
+              >
+                <EmojiSelector onSelect={handleSelectEmoji} onSkip={handleSkipEmoji} />
+              </motion.div>
+            )
           ) : (
-            <EmojiSelector onSelect={handleSelectEmoji} onSkip={handleSkipEmoji} />
-          )
-        ) : (
-          messages.map((msg, idx) => {
-            const prev = messages[idx - 1];
-            const next = messages[idx + 1];
-            const isFirstInGroup = !prev || prev.isHidden || prev.role !== msg.role;
-            const isLastInGroup = !next || next.isHidden || next.role !== msg.role;
-            // Add extra top margin when a new "speaker" starts
-            const needsGroupSep = isFirstInGroup && idx > 0;
-            return (
-              <div key={msg.id || idx} className={needsGroupSep ? 'mt-4' : ''}>
-                <MessageBubble
-                  message={msg}
-                  isStreaming={isStreaming && idx === messages.length - 1 && msg.role === 'assistant'}
-                  isFirstInGroup={isFirstInGroup}
-                  isLastInGroup={isLastInGroup}
-                />
-              </div>
-            );
-          })
-        )}
-        {hasCompletedOnboarding && <div className="h-[220px] md:h-[280px] shrink-0" />}
+            <motion.div
+              key="chat"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
+              className="flex flex-col gap-1 w-full"
+            >
+              {messages.map((msg, idx) => {
+                const prev = messages[idx - 1];
+                const next = messages[idx + 1];
+                const isFirstInGroup = !prev || prev.isHidden || prev.role !== msg.role;
+                const isLastInGroup = !next || next.isHidden || next.role !== msg.role;
+                // Add extra top margin when a new "speaker" starts
+                const needsGroupSep = isFirstInGroup && idx > 0;
+                return (
+                  <motion.div 
+                    layout="position"
+                    key={msg.id || idx} 
+                    className={needsGroupSep ? 'mt-4' : ''}
+                  >
+                    <MessageBubble
+                      message={msg}
+                      isStreaming={isStreaming && idx === messages.length - 1 && msg.role === 'assistant'}
+                      isFirstInGroup={isFirstInGroup}
+                      isLastInGroup={isLastInGroup}
+                    />
+                  </motion.div>
+                );
+              })}
+              <div className="h-[140px] md:h-[180px] shrink-0" />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

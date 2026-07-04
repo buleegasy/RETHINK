@@ -253,13 +253,20 @@ export function SessionSidebar({ isOpen, onClose }: SessionSidebarProps) {
                           void openSession(session.id);
                         }
                       }}
-                      className={`w-full text-start rounded-chip border ps-3 pe-3 py-2.5 transition-colors cursor-pointer ${
+                      className={`relative w-full text-start rounded-chip border ps-3 pe-3 py-2.5 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-gemini-blue/40 focus-visible:border-gemini-blue/60 focus-visible:outline-none ${
                         active
-                          ? 'bg-surface border-outline-variant shadow-sm'
+                          ? 'border-transparent'
                           : 'bg-surface-container/35 border-outline-variant/20 hover:bg-surface-container/60'
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-3">
+                      {active && (
+                        <motion.div
+                          layoutId="activeSessionPill"
+                          className="absolute inset-0 bg-surface border border-outline-variant rounded-chip shadow-sm"
+                          transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                        />
+                      )}
+                      <div className="relative z-10 flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
                           <div className="text-sm font-light tracking-wide text-on-surface truncate">
                             {session.title || '新对话'}

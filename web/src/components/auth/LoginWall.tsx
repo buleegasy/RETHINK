@@ -104,7 +104,7 @@ export function LoginWall() {
             )}
             
             {/* Control Group: Guest Access and Member Login */}
-            <div className="flex flex-row items-center justify-center gap-10 md:gap-16 pointer-events-auto relative z-20">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-16 pointer-events-auto relative z-20">
               {/* Primary Guest Entry Orb */}
               <motion.div
                 animate={{ y: loading ? 0 : [0, -6, 0] }}
@@ -124,7 +124,7 @@ export function LoginWall() {
                   disabled={loading}
                   aria-label="访客体验"
                   title="访客体验"
-                  className="relative group flex items-center justify-center w-36 h-36 md:w-48 md:h-48 rounded-full cursor-pointer"
+                  className="relative group flex items-center justify-center w-28 h-28 sm:w-36 sm:h-36 md:w-48 md:h-48 rounded-full cursor-pointer"
                 >
                   {/* Glass Orb background */}
                   <div className="absolute inset-0 rounded-full bg-surface-container/40 backdrop-blur-xl border border-outline-variant/40 shadow-[0_8px_32px_rgba(0,0,0,0.1)] transition-all duration-500 group-hover:bg-surface-container/60 group-hover:border-outline/60 group-hover:shadow-[0_0_40px_rgba(66,133,244,0.3)]" />
@@ -172,7 +172,7 @@ export function LoginWall() {
                   disabled={loading}
                   aria-label="成员通道"
                   title="成员通道"
-                  className="relative group flex items-center justify-center w-36 h-36 md:w-48 md:h-48 rounded-full cursor-pointer"
+                  className="relative group flex items-center justify-center w-28 h-28 sm:w-36 sm:h-36 md:w-48 md:h-48 rounded-full cursor-pointer"
                 >
                   {/* Glass Orb background */}
                   <div className="absolute inset-0 rounded-full bg-surface-container/40 backdrop-blur-xl border border-outline-variant/40 shadow-[0_8px_32px_rgba(0,0,0,0.1)] transition-all duration-500 group-hover:bg-surface-container/60 group-hover:border-outline/60 group-hover:shadow-[0_0_40px_rgba(250,150,0,0.25)]" />

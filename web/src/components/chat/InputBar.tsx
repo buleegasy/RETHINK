@@ -13,6 +13,7 @@ interface InputBarProps {
 
 export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) => {
   const [input, setInput] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
   const isStreaming = useChatStore(state => state.isStreaming);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -109,7 +110,11 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) =
 
         {/* Input Container */}
         <div className={`w-full relative transition-all duration-500 ${isStreaming ? 'opacity-50' : ''}`}>
-          <div className="relative flex items-end bg-surface-container/80 backdrop-blur-md border border-outline-variant/60 rounded-input p-2 gap-1">
+          <div className={`relative flex items-end bg-surface-container/80 backdrop-blur-md border rounded-input p-2 gap-1 transition-all duration-200 shadow-[0_8px_32px_rgba(0,0,0,0.06)] ${
+            isFocused
+              ? 'border-gemini-blue ring-4 ring-gemini-blue/15'
+              : 'border-outline-variant/60'
+          }`}>
             
             {/* Voice Button or Spacer */}
             {isVoiceSupported ? (
@@ -119,7 +124,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) =
                 onClick={handleVoiceToggle}
                 disabled={isStreaming}
                 aria-label={isListening ? '停止录音' : '语音输入'}
-                className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 ease-out self-end ${
+                className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full self-end ${
                   isListening
                     ? 'text-stage-red animate-pulse-gentle'
                     : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60'
@@ -141,6 +146,8 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) =
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
               placeholder={placeholder}
               disabled={isStreaming}
               rows={1}
@@ -156,7 +163,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) =
               onClick={handleSend}
               disabled={!canSend}
               aria-label="发送消息"
-              className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 ease-out self-end ${
+              className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full self-end ${
                 canSend
                   ? 'text-on-surface hover:bg-surface-container-high/60 cursor-pointer'
                   : 'text-outline cursor-not-allowed opacity-30'

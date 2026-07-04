@@ -101,10 +101,10 @@
 @layer utilities {
   /* ── Gemini Markdown Prose ── */
   .gemini-prose {
-    @apply text-[16px] text-on-surface leading-[1.65] max-w-none font-sans;
+    @apply text-[15px] md:text-[16px] text-on-surface leading-[1.6] max-w-none font-sans;
   }
   .gemini-prose p {
-    @apply mb-4;
+    @apply mb-2.5;
   }
   .gemini-prose p:last-child {
     @apply mb-0;
@@ -116,10 +116,10 @@
     @apply italic text-on-surface-variant;
   }
   .gemini-prose ul {
-    @apply mb-4 space-y-1 list-disc pl-6;
+    @apply mb-2.5 space-y-0.5 list-disc pl-5;
   }
   .gemini-prose ol {
-    @apply mb-4 space-y-1 list-decimal pl-6;
+    @apply mb-2.5 space-y-0.5 list-decimal pl-5;
   }
   .gemini-prose li {
     @apply text-on-surface pl-1;
@@ -128,13 +128,13 @@
     @apply text-on-surface-variant;
   }
   .gemini-prose pre {
-    @apply bg-surface-container rounded-2xl p-4 text-[13px] overflow-x-auto my-4 border-none shadow-inner-soft;
+    @apply bg-zinc-900 text-zinc-100 rounded-xl p-4 text-[13px] overflow-x-auto my-3 shadow-md;
   }
   .gemini-prose code {
-    @apply font-mono bg-surface-container px-1.5 py-0.5 text-[13px] text-on-surface rounded-md font-medium;
+    @apply font-mono bg-on-surface/10 px-1.5 py-0.5 text-[12.5px] text-on-surface rounded-md font-medium;
   }
   .gemini-prose pre code {
-    @apply bg-transparent p-0 text-on-surface font-normal;
+    @apply bg-transparent p-0 text-inherit font-normal;
   }
   .gemini-prose blockquote {
     @apply border-l-4 border-gemini-blue pl-4 my-4 text-on-surface-variant italic bg-gemini-blue/5 py-2 rounded-r-xl;

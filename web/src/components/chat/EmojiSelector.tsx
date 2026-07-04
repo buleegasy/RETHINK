@@ -60,8 +60,16 @@ export const EmojiSelector: React.FC<EmojiSelectorProps> = ({ onSelect, onSkip }
               damping: 15,
               delay: 0.02 * idx 
             }}
+            role="button"
+            tabIndex={0}
             onClick={() => onSelect(item.emoji)}
-            className={`group relative aspect-square flex items-center justify-center rounded-3xl bg-surface-container/30 backdrop-blur-md border border-outline-variant/30 shadow-sm cursor-pointer hover:bg-surface-container/50 transition-colors duration-300 ${item.colorClass}`}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onSelect(item.emoji);
+              }
+            }}
+            className={`group relative aspect-square flex items-center justify-center rounded-3xl bg-surface-container/30 backdrop-blur-md border border-outline-variant/30 shadow-sm cursor-pointer hover:bg-surface-container/50 transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-gemini-blue focus-visible:outline-none ${item.colorClass}`}
           >
             {/* Hover aura effect */}
             <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-300 bg-gradient-to-br from-white to-transparent" />

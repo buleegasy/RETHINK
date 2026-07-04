@@ -57,6 +57,7 @@ const TypingIndicator = () => (
 const BubbleTail = ({ isUser }: { isUser: boolean }) => (
   <span
     aria-hidden
+    className={isUser ? 'bg-gemini-blue' : 'bg-surface-container'}
     style={{
       position: 'absolute',
       bottom: 0,
@@ -66,7 +67,6 @@ const BubbleTail = ({ isUser }: { isUser: boolean }) => (
       clipPath: isUser
         ? 'polygon(0 0, 100% 0, 0 100%)'   // user: bottom-right corner cut
         : 'polygon(0 0, 100% 0, 100% 100%)', // ai: bottom-left corner cut
-      background: isUser ? '#4285F4' : '#E8EDF2',
     }}
   />
 );
@@ -187,7 +187,7 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
         {isUser ? (
           /* ── User Bubble ── */
           <div
-            className={`relative ${userBubbleRadius} px-4 py-2.5 text-[15px] leading-relaxed font-sans bg-gemini-blue text-white shadow-sm`}
+            className={`relative ${userBubbleRadius} px-4 py-2.5 text-[15px] md:text-[16px] leading-relaxed font-sans bg-gemini-blue text-white shadow-sm`}
           >
             <p className="whitespace-pre-wrap">{chunks[0]}</p>
             {isLastInGroup && <BubbleTail isUser={true} />}
@@ -208,7 +208,7 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
 
             {/* Collapsible Tech Chain Panel */}
             {!isUser && tc && (
-              <div className="mt-1.5 w-full select-none animate-slide-up">
+              <div className="mt-3 w-full select-none animate-slide-up">
                 <button
                   onClick={() => setShowTechChain(!showTechChain)}
                   className="flex items-center gap-1.5 py-0.5 px-1.5 rounded text-[10px] font-mono text-on-surface-variant/40 hover:text-on-surface hover:bg-surface-container/80 transition-all duration-200 cursor-pointer"
@@ -220,11 +220,11 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
                 <AnimatePresence initial={false}>
                   {showTechChain && (
                     <motion.div
-                      initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                      animate={{ opacity: 1, height: 'auto', marginTop: 4 }}
-                      exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                      transition={{ duration: 0.2, ease: 'easeInOut' }}
-                      className="overflow-hidden"
+                      initial={{ opacity: 0, scaleY: 0, originY: 0 }}
+                      animate={{ opacity: 1, scaleY: 1, originY: 0 }}
+                      exit={{ opacity: 0, scaleY: 0, originY: 0 }}
+                      transition={{ duration: 0.2, ease: 'easeOut' }}
+                      className="overflow-hidden mt-1 w-full"
                     >
                       <div className="bg-surface-container/40 backdrop-blur-md border border-outline-variant/30 shadow-md rounded-xl p-3 text-[10.5px] font-mono text-on-surface max-w-[440px] w-full space-y-3">
                         
