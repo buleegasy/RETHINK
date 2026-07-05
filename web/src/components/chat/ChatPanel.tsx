@@ -16,12 +16,22 @@ export const ChatPanel: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   
   const [showEmojiSelector, setShowEmojiSelector] = useState(false);
+  const [isAtBottom, setIsAtBottom] = useState(true);
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (el) {
+      const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 15;
+      setIsAtBottom(isNearBottom);
+    }
+  };
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    const el = scrollRef.current;
+    if (el && isAtBottom) {
+      el.scrollTop = el.scrollHeight;
     }
-  }, [messages, isStreaming]);
+  }, [messages, isStreaming, isAtBottom]);
 
   const handleStart = () => {
     // 切换到表情包选择大屏
@@ -40,8 +50,12 @@ export const ChatPanel: React.FC = () => {
   };
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 pt-4 pb-4 md:px-8 md:pt-20 md:pb-8 scroll-smooth bg-transparent relative z-10 flex flex-col">
-      <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col gap-1">
+    <div 
+      ref={scrollRef} 
+      onScroll={handleScroll}
+      className="flex-1 overflow-y-auto px-3 pt-4 pb-4 md:px-8 md:pt-20 md:pb-8 scroll-smooth bg-transparent relative z-10 flex flex-col"
+    >
+      <div className="max-w-[1280px] mx-auto w-full flex-1 flex flex-col gap-1">
         <AnimatePresence mode="wait">
           {!hasCompletedOnboarding ? (
             !showEmojiSelector ? (

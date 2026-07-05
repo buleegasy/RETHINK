@@ -12,65 +12,133 @@ export default {
   theme: {
     extend: {
       colors: {
-        // ── Gemini MD3 Surface System ──
+        // Luminous Clarity Palette
         surface: {
-          DEFAULT: '#FFFFFF',
-          dim: '#F0F4F9',               // Gemini's signature bg
-          container: '#E8EDF2',          // Container backgrounds
-          'container-high': '#DDE3EA',   // Elevated containers
-          'container-highest': '#D1D7DE',
+          DEFAULT: '#faf9f6',
+          dim: '#dbdad7',
+          bright: '#faf9f6',
+          container: '#efeeeb',
+          'container-lowest': '#ffffff',
+          'container-low': '#f4f3f1',
+          'container-high': '#e9e8e5',
+          'container-highest': '#e3e2e0',
+          variant: '#e3e2e0',
+          tint: '#835500',
         },
         on: {
-          surface: '#1F1F1F',            // Primary text (near-black)
-          'surface-variant': '#5F6368',  // Secondary text (Google gray)
-          'surface-dim': '#9AA0A6',      // Tertiary / placeholder text
+          surface: '#1a1c1a',
+          'surface-variant': '#514536',
+          background: '#1a1c1a',
         },
-        // ── Gemini Brand ──
-        gemini: {
-          blue: '#4285F4',
-          'blue-hover': '#1A73E8',
-          'blue-light': '#8AB4F8',
-          'blue-pale': '#D2E3FC',
-          'blue-surface': '#E8F0FE',
-          purple: '#A142F4',
-          'purple-light': '#D7AEFB',
-        },
-        // ── CBT Stage Colors (Google palette) ──
-        stage: {
-          blue: '#4285F4',
-          green: '#34A853',
-          orange: '#F9AB00',
-          red: '#EA4335',
-          purple: '#A142F4',
-        },
-        // ── Semantic ──
-        error: {
-          DEFAULT: '#B3261E',
-          container: '#F9DEDC',
+        inverse: {
+          surface: '#2f312f',
+          'on-surface': '#f2f1ee',
+          primary: '#ffb954',
         },
         outline: {
-          DEFAULT: '#C4C7C5',
-          variant: '#E1E3E1',
+          DEFAULT: '#837564',
+          variant: '#d6c4b0',
         },
+        primary: {
+          DEFAULT: '#835500',
+          container: '#ffb74d',
+          fixed: '#ffddb4',
+          'fixed-dim': '#ffb954',
+        },
+        'on-primary': {
+          DEFAULT: '#ffffff',
+          container: '#714900',
+          fixed: '#291800',
+          'fixed-variant': '#633f00',
+        },
+        secondary: {
+          DEFAULT: '#3c6842',
+          container: '#bdefbe',
+          fixed: '#bdefbe',
+          'fixed-dim': '#a2d3a4',
+        },
+        'on-secondary': {
+          DEFAULT: '#ffffff',
+          container: '#426e47',
+          fixed: '#002109',
+          'fixed-variant': '#24502c',
+        },
+        tertiary: {
+          DEFAULT: '#7e4a8a',
+          container: '#edb0f7',
+          fixed: '#fdd6ff',
+          'fixed-dim': '#efb1f9',
+        },
+        'on-tertiary': {
+          DEFAULT: '#ffffff',
+          container: '#703e7c',
+          fixed: '#340141',
+          'fixed-variant': '#643370',
+        },
+        error: {
+          DEFAULT: '#ba1a1a',
+          container: '#ffdad6',
+        },
+        'on-error': {
+          DEFAULT: '#ffffff',
+          container: '#93000a',
+        },
+        background: '#faf9f6',
+        
+        // Aliases mapping old tokens to new semantic tokens to ensure no breaking changes
+        gemini: {
+          blue: '#835500',       // Map old blue to new primary (Amber)
+          'blue-hover': '#ffb74d',
+          'blue-light': '#ffddb4',
+          'blue-pale': '#f4f3f1',
+          'blue-surface': '#faf9f6',
+          purple: '#ce93d8',     // Map old purple to soft lavender
+          'purple-light': '#edb0f7',
+        },
+        neon: {
+          purple: '#ce93d8', // soft lavender
+          green: '#a5d6a7',  // sage green
+          blue: '#ffb74d',   // amber
+        },
+        stage: {
+          blue: '#ffb74d',
+          green: '#a5d6a7',
+          purple: '#ce93d8',
+          orange: '#ffb74d', 
+          red: '#ba1a1a',    
+        }
       },
       fontFamily: {
-        sans: ['"Google Sans Text"', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
-        display: ['"Google Sans"', '"Google Sans Text"', 'Inter', 'system-ui', 'sans-serif'],
-        serif: ['"Playfair Display"', 'serif'],
+        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        display: ['Sora', '"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        serif: ['Sora', 'sans-serif'],
       },
       borderRadius: {
-        'bubble': '32px',
-        'input': '32px',
-        'card': '24px',
-        'chip': '16px',
+        'sm': '0.25rem',
+        'DEFAULT': '0.5rem',
+        'md': '0.75rem',
+        'lg': '1rem',
+        'xl': '1.5rem',
+        'full': '9999px',
+        // Map old specific shapes
+        'bubble': '24px',  // Map to xl
+        'input': '8px',    // Map to DEFAULT
+        'card': '24px',    // Map to xl
+        'chip': '9999px',
+      },
+      spacing: {
+        'unit': '8px',
+        'gutter': '24px',
+        'margin-desktop': '64px',
+        'margin-mobile': '20px',
       },
       boxShadow: {
-        'sm': '0 1px 2px rgba(0, 0, 0, 0.03)',
-        'md': '0 2px 6px rgba(0, 0, 0, 0.05)',
-        'lg': '0 8px 16px rgba(0, 0, 0, 0.06)',
-        'xl': '0 12px 32px rgba(0, 0, 0, 0.08)',
-        'inner-soft': 'inset 0 1px 2px rgba(0, 0, 0, 0.04)',
-        'glow': '0 0 20px rgba(66, 133, 244, 0.25)',
+        'sm': '0 1px 2px rgba(131, 85, 0, 0.05)',
+        'md': '0 4px 12px rgba(131, 85, 0, 0.08)',
+        'lg': '0 8px 24px rgba(131, 85, 0, 0.1)',
+        'xl': '0 12px 32px rgba(131, 85, 0, 0.12)',
+        'inner-light': 'inset 0 1px 1px rgba(255, 255, 255, 0.8), inset 0 -1px 1px rgba(131, 117, 100, 0.1)',
+        'glow': '0 0 30px rgba(255, 183, 77, 0.2)', // Amber glow
       },
       transitionTimingFunction: {
         'md3-standard': 'cubic-bezier(0.2, 0.0, 0, 1.0)',

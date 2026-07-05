@@ -49,7 +49,7 @@ export const ReThinkLogo = ({
           /* The liquid droplets */
           .liquid-drop {
             position: absolute;
-            background: currentColor;
+            background: linear-gradient(135deg, #a56eff, #299dff, #00ffc3);
             border-radius: 50%; /* Pure circles merge perfectly via the goo filter */
             /* Smooth transitions for pulling apart and resizing */
             transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), 

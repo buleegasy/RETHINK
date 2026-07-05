@@ -1,10 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&family=Sora:wght@600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply bg-surface-dim text-on-surface font-sans antialiased;
+    @apply bg-[#faf9f6] text-on-surface font-sans antialiased;
     position: fixed;
     width: 100dvw;
     height: 100dvh;
@@ -26,28 +28,28 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-outline-variant/60 rounded-full transition-colors;
+    @apply bg-outline-variant/40 rounded-full transition-colors;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-outline/80;
+    @apply bg-outline/60;
   }
 
   /* Selection highlight */
   ::selection {
-    background-color: rgba(66, 133, 244, 0.2);
-    color: #1F1F1F;
+    background-color: rgba(255, 183, 77, 0.3);
+    color: #1a1c1a;
   }
 }
 
 @layer components {
-  /* ── Gemini sparkle gradient text (Clean Cyan-Blue) ── */
+  /* Sage Green -> Warm Amber -> Soft Lavender */
   .gemini-gradient-text {
-    background: linear-gradient(90deg, #4285F4 0%, #00BCD4 33%, #8AB4F8 66%, #4285F4 100%);
-    background-size: 300% 100%;
+    background: linear-gradient(90deg, #A5D6A7 0%, #FFB74D 50%, #CE93D8 100%);
+    background-size: 200% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: sparkleMesh 12s ease-in-out infinite;
+    animation: sparkleMesh 8s ease-in-out infinite;
   }
 
   /* ── Authentic Gemini Thinking Glow (Shimmer Mesh - Light & Soothing) ── */
@@ -83,7 +85,7 @@
 
   /* ── Gemini sparkle icon container (Clean Cyan-Blue) ── */
   .gemini-sparkle-icon {
-    background: linear-gradient(135deg, #4285F4, #00BCD4, #8AB4F8, #4285F4);
+    background: linear-gradient(135deg, #A5D6A7, #FFB74D, #CE93D8);
     background-size: 300% 300%;
     animation: sparkle 6s ease-in-out infinite;
   }
@@ -178,10 +180,10 @@
 
 @keyframes bubble-breath {
   0%, 100% {
-    box-shadow: 0 4px 12px rgba(66, 133, 244, 0.04), 0 0 8px rgba(66, 133, 244, 0.08);
+    box-shadow: 0 4px 12px rgba(255, 183, 77, 0.04), 0 0 8px rgba(165, 214, 167, 0.08);
   }
   50% {
-    box-shadow: 0 4px 20px rgba(66, 133, 244, 0.12), 0 0 16px rgba(0, 188, 212, 0.18);
+    box-shadow: 0 4px 20px rgba(255, 183, 77, 0.12), 0 0 16px rgba(206, 147, 216, 0.18);
   }
 }
 
@@ -197,8 +199,7 @@
   position: absolute;
   inset: -1.5px;
   border-radius: inherit;
-  /* Pastel color scheme matching Gemini UI aesthetics */
-  background: linear-gradient(90deg, #4285F4, #00BCD4, #8AB4F8, #D7AEFB, #4285F4);
+  background: linear-gradient(90deg, #A5D6A7, #FFB74D, #CE93D8, #A5D6A7);
   background-size: 300% 300%;
   animation: border-glow-flow 4s ease-in-out infinite;
   z-index: -1;

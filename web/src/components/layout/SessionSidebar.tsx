@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useChatStore } from '../../store/chatStore';
 import { useAuthStore } from '../../store/authStore';
 import { useSessionStore } from '../../store/sessionStore';
-
+import { CameraPanel } from '../chat/CameraPanel';
+import type { EmotionResult } from '../../hooks/useFaceEmotion';
 
 import { authApi } from '../../api/auth';
 
@@ -21,9 +22,10 @@ function formatTime(seconds: number) {
 interface SessionSidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  onEmotionChange?: (emotion: EmotionResult | null) => void;
 }
 
-export function SessionSidebar({ isOpen, onClose }: SessionSidebarProps) {
+export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSidebarProps) {
   const token = useAuthStore(state => state.token);
   const sessionId = useChatStore(state => state.sessionId);
   const loadSession = useChatStore(state => state.loadSession);
@@ -297,6 +299,11 @@ export function SessionSidebar({ isOpen, onClose }: SessionSidebarProps) {
                   );
                 })
               )}
+            </div>
+
+            {/* Embedded Camera Panel */}
+            <div className="mt-auto border-t border-outline-variant/20 pt-4 flex-shrink-0 w-full flex justify-center">
+              <CameraPanel onEmotionChange={onEmotionChange} />
             </div>
           </motion.aside>
         </motion.div>

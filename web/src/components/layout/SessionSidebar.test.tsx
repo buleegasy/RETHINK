@@ -1,5 +1,7 @@
 import { vi } from 'vitest';
 
+vi.mock('../chat/CameraPanel', () => ({ CameraPanel: () => <div data-testid="camera-panel">Camera Panel</div> }));
+
 // Define localStorage mock on global/window objects
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
@@ -159,5 +161,10 @@ describe('SessionSidebar Component Deletion Feature', () => {
     const remainingSessions = useSessionStore.getState().sessions;
     expect(remainingSessions).toHaveLength(2);
     expect(useChatStore.getState().sessionId).toBe('session-active');
+  });
+
+  it('renders CameraPanel at the bottom of the sidebar', () => {
+    render(<SessionSidebar isOpen={true} onClose={vi.fn()} />);
+    expect(screen.getByTestId('camera-panel')).toBeInTheDocument();
   });
 });

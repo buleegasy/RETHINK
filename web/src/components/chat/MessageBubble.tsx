@@ -57,7 +57,7 @@ const TypingIndicator = () => (
 const BubbleTail = ({ isUser }: { isUser: boolean }) => (
   <span
     aria-hidden
-    className={isUser ? 'bg-gemini-blue' : 'bg-surface-container'}
+    className={isUser ? 'bg-primary-container' : 'bg-surface-container/70 backdrop-blur-[20px]'}
     style={{
       position: 'absolute',
       bottom: 0,
@@ -91,8 +91,8 @@ const MessageChunk = React.memo<MessageChunkProps>(({
     <div
       className={`relative ${aiBubbleRadiusClass} text-on-surface px-4 py-2.5 text-[15px] leading-relaxed font-sans shadow-sm transition-all duration-300 ${
         isGlowActive
-          ? 'streaming-glow-bubble bg-surface-container/90 backdrop-blur-sm'
-          : 'bg-surface-container'
+          ? 'streaming-glow-bubble bg-surface-container/90 backdrop-blur-md'
+          : 'bg-surface-container/70 backdrop-blur-[20px] shadow-inner-light border border-white/20'
       }`}
     >
       <div className="gemini-prose">
@@ -187,7 +187,7 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
         {isUser ? (
           /* ── User Bubble ── */
           <div
-            className={`relative ${userBubbleRadius} px-4 py-2.5 text-[15px] md:text-[16px] leading-relaxed font-sans bg-gemini-blue text-white shadow-sm`}
+            className={`relative ${userBubbleRadius} px-4 py-2.5 text-[15px] md:text-[16px] leading-relaxed font-sans bg-primary-container text-white shadow-glow`}
           >
             <p className="whitespace-pre-wrap">{chunks[0]}</p>
             {isLastInGroup && <BubbleTail isUser={true} />}
@@ -364,7 +364,7 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
 
                         {/* ─── SYSTEM_ALERT ─── */}
                         {tc.riskLevel && tc.riskLevel !== 'low' && (
-                          <div className="flex gap-1.5 p-1.5 rounded bg-error/5 border border-error/15 text-stage-red text-[10px]">
+                          <div className="flex gap-1.5 p-1.5 rounded bg-error/10 border border-error/20 text-stage-red text-[10px]">
                             <ShieldAlert className="w-3.5 h-3.5 shrink-0 text-stage-red mt-0.5" />
                             <div>
                               <div className="font-semibold uppercase">危机系统警报: {tc.riskLevel}</div>

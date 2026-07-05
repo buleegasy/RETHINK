@@ -3,15 +3,12 @@ import type { KeyboardEvent } from 'react';
 import { motion } from 'framer-motion';
 import { useChatStore } from '../../store/chatStore';
 import { useVoiceInput } from '../../hooks/useVoiceInput';
-import { CameraPanel } from './CameraPanel';
-import type { EmotionResult } from '../../hooks/useFaceEmotion';
 
 interface InputBarProps {
   onSend: (text: string) => void;
-  onEmotionChange?: (emotion: EmotionResult | null) => void;
 }
 
-export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) => {
+export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
   const [input, setInput] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const isStreaming = useChatStore(state => state.isStreaming);
@@ -99,20 +96,17 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) =
   const canSend = input.trim() && !isStreaming;
 
   return (
-    <div className="absolute bottom-0 start-0 w-full ps-4 pe-4 md:ps-8 md:pe-8 pb-[calc(max(env(safe-area-inset-bottom),24px))] pt-8 bg-gradient-to-t from-surface-dim/95 via-surface-dim/40 to-transparent z-30 pointer-events-none">
-      <div className="fixed top-24 right-4 md:right-8 z-50 animate-fade-in pointer-events-auto">
-        <CameraPanel onEmotionChange={onEmotionChange} />
-      </div>
+    <div className="absolute bottom-0 start-0 w-full ps-4 pe-4 md:ps-8 md:pe-8 pb-[calc(max(env(safe-area-inset-bottom),24px))] pt-8 bg-gradient-to-t from-surface/95 via-surface/40 to-transparent z-30 pointer-events-none">
 
       <div className="max-w-2xl ms-auto me-auto flex flex-col items-center pointer-events-auto">
 
 
         {/* Input Container */}
-        <div className={`w-full relative transition-all duration-500 ${isStreaming ? 'opacity-50' : ''}`}>
-          <div className={`relative flex items-end bg-surface-container/80 backdrop-blur-md border rounded-input p-2 gap-1 transition-all duration-200 shadow-[0_8px_32px_rgba(0,0,0,0.06)] ${
+        <div className={`w-full relative transition-all duration-500 max-w-[1280px] mx-auto ${isStreaming ? 'opacity-50' : ''}`}>
+          <div className={`relative flex items-end bg-surface-container/60 backdrop-blur-[20px] shadow-inner-light rounded-input p-2 gap-1 transition-all duration-200 ${
             isFocused
-              ? 'border-gemini-blue ring-4 ring-gemini-blue/15'
-              : 'border-outline-variant/60'
+              ? 'border border-primary ring-4 ring-primary/20'
+              : 'border border-outline/20'
           }`}>
             
             {/* Voice Button or Spacer */}
@@ -125,7 +119,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend, onEmotionChange }) =
                 aria-label={isListening ? '停止录音' : '语音输入'}
                 className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full self-end ${
                   isListening
-                    ? 'text-stage-red animate-pulse-gentle'
+                    ? 'text-error animate-pulse-gentle'
                     : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60'
                 } ${isStreaming ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
               >

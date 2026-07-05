@@ -57,10 +57,10 @@ describe('AmbientGlow Component Tests', () => {
     const activeLayer = getByTestId('glow-layer-a');
     const colors = getBlobColors(activeLayer);
 
-    expect(colors).toContain(hexToRgbStr('#5C94FF')); // c1
-    expect(colors).toContain(hexToRgbStr('#24E0D1')); // c2
-    expect(colors).toContain(hexToRgbStr('#B388FF')); // c3
-    expect(colors).toContain(hexToRgbStr('#FF8CA8')); // c4
+    expect(colors).toContain(hexToRgbStr('#a56eff')); // c1
+    expect(colors).toContain(hexToRgbStr('#299dff')); // c2
+    expect(colors).toContain(hexToRgbStr('#7c4dff')); // c3
+    expect(colors).toContain(hexToRgbStr('#1a237e')); // c4
   });
 
   it('renders with Crisis_Escalation state colors', () => {
@@ -69,10 +69,10 @@ describe('AmbientGlow Component Tests', () => {
     const activeLayer = getByTestId('glow-layer-a');
     const colors = getBlobColors(activeLayer);
 
-    expect(colors).toContain(hexToRgbStr('#0D47A1')); // c1
-    expect(colors).toContain(hexToRgbStr('#006064')); // c2
-    expect(colors).toContain(hexToRgbStr('#1A237E')); // c3
-    expect(colors).toContain(hexToRgbStr('#004D40')); // c4
+    expect(colors).toContain(hexToRgbStr('#0a192f')); // c1
+    expect(colors).toContain(hexToRgbStr('#004d40')); // c2
+    expect(colors).toContain(hexToRgbStr('#002b4e')); // c3
+    expect(colors).toContain(hexToRgbStr('#0e0e0e')); // c4
   });
 
   it('renders with Active_Listening state colors', () => {
@@ -81,10 +81,10 @@ describe('AmbientGlow Component Tests', () => {
     const activeLayer = getByTestId('glow-layer-a');
     const colors = getBlobColors(activeLayer);
 
-    expect(colors).toContain(hexToRgbStr('#6B8AFF')); // c1
-    expect(colors).toContain(hexToRgbStr('#4AE5FF')); // c2
-    expect(colors).toContain(hexToRgbStr('#D088FF')); // c3
-    expect(colors).toContain(hexToRgbStr('#FF7EB3')); // c4
+    expect(colors).toContain(hexToRgbStr('#ff80ab')); // c1
+    expect(colors).toContain(hexToRgbStr('#a56eff')); // c2
+    expect(colors).toContain(hexToRgbStr('#8c9eff')); // c3
+    expect(colors).toContain(hexToRgbStr('#131313')); // c4
   });
 
   it('renders with Socratic_Questioning state colors', () => {
@@ -93,10 +93,10 @@ describe('AmbientGlow Component Tests', () => {
     const activeLayer = getByTestId('glow-layer-a');
     const colors = getBlobColors(activeLayer);
 
-    expect(colors).toContain(hexToRgbStr('#00B8D4')); // c1
-    expect(colors).toContain(hexToRgbStr('#1DE9B6')); // c2
-    expect(colors).toContain(hexToRgbStr('#8C9EFF')); // c3
-    expect(colors).toContain(hexToRgbStr('#00E676')); // c4
+    expect(colors).toContain(hexToRgbStr('#00ffc3')); // c1
+    expect(colors).toContain(hexToRgbStr('#299dff')); // c2
+    expect(colors).toContain(hexToRgbStr('#ffd700')); // c3
+    expect(colors).toContain(hexToRgbStr('#1de9b6')); // c4
   });
 
   it('renders with Anxiety emotion override colors', () => {
@@ -170,13 +170,13 @@ describe('AmbientGlow Component Tests', () => {
     mockChatStoreData.isStreaming = false;
     const { getByTestId, rerender } = render(<AmbientGlow />);
     let container = getByTestId('ambient-glow-container');
-    expect(container.getAttribute('style')).toContain('opacity: 0.6');
-
+    expect(container.getAttribute('style')).toContain('opacity: 0.35');
+ 
     // When isStreaming is true
     mockChatStoreData.isStreaming = true;
     rerender(<AmbientGlow />);
     container = getByTestId('ambient-glow-container');
-    expect(container.getAttribute('style')).toContain('opacity: 0.85');
+    expect(container.getAttribute('style')).toContain('opacity: 0.55');
   });
 
   it('cross-fades between states when FSM state changes', () => {
@@ -196,6 +196,6 @@ describe('AmbientGlow Component Tests', () => {
     expect(layerA.getAttribute('style')).toContain('opacity: 0');
     expect(layerB.getAttribute('style')).toContain('opacity: 1');
     const blobColors = getBlobColors(layerB);
-    expect(blobColors).toContain(hexToRgbStr('#2979FF')); // CBT_Stripping c1
+    expect(blobColors).toContain(hexToRgbStr('#299dff')); // CBT_Stripping c1
   });
 });

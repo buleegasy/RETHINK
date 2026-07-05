@@ -120,6 +120,7 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
 
   // 分析单帧情绪
   const analyzeFrame = useCallback(async () => {
+    console.log('[analyzeFrame] entered. api:', !!window.faceapi, 'video:', !!videoRef.current, 'active:', isActiveRef.current);
     const api = window.faceapi;
     if (!api || !videoRef.current || !isActiveRef.current) return;
 
@@ -127,6 +128,7 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
     if (typeof document !== 'undefined' && document.hidden) return;
 
     const video = videoRef.current;
+    console.log('[analyzeFrame] video readyState:', video.readyState, 'paused:', video.paused);
     if (video.readyState < 2 || video.paused) return;
 
     try {
@@ -134,6 +136,7 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
         .detectSingleFace(video, new api.SsdMobilenetv1Options({ minConfidence: 0.4 }))
         .withFaceLandmarks()
         .withFaceExpressions();
+      console.log('[analyzeFrame] detection resolved:', detection);
 
       if (!isActiveRef.current) return;
 
@@ -207,8 +210,8 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
         confidence: Math.round(topScore * 100),
         allEmotions,
       });
-    } catch {
-      // 单帧失败静默跳过
+    } catch (err) {
+      console.error('[analyzeFrame] error:', err);
     }
   }, [clearCanvas]);
 
@@ -292,6 +295,7 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
       // 每 800ms 分析一帧（平衡性能与实时性）
       intervalRef.current = setInterval(analyzeFrame, 800);
     } catch (e: unknown) {
+      console.error('[startCamera] error name:', e instanceof Error ? e.name : typeof e, 'message:', e instanceof Error ? e.message : String(e));
       stopCamera();
       if (e instanceof Error) {
         if (e.name === 'NotAllowedError') {
@@ -301,6 +305,8 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
         } else {
           setError('无法启动摄像头');
         }
+      } else {
+        setError('无法启动摄像头');
       }
     }
   }, [analyzeFrame, stopCamera]);

@@ -33,42 +33,42 @@ interface Palette {
 
 const FSM_PALETTES: Record<FSMState, Palette> = {
   Onboarding: {
-    c1: '#5C94FF', // Bright Cornflower Blue
-    c2: '#24E0D1', // Bright Turquoise
-    c3: '#B388FF', // Soft Lavender
-    c4: '#FF8CA8', // Soft Rose
-    intensity: 1.1,
+    c1: '#ffb74d', // Warm Amber
+    c2: '#a5d6a7', // Sage Green
+    c3: '#ce93d8', // Soft Lavender
+    c4: '#faf9f6', // Off-White
+    intensity: 1.0,
     speed: 0.12,
   },
   Active_Listening: {
-    c1: '#6B8AFF', // Empathy Blue
-    c2: '#4AE5FF', // Soft Cyan
-    c3: '#D088FF', // Bright Empathy Purple
-    c4: '#FF7EB3', // Warm Pink
+    c1: '#ce93d8', // Soft Lavender
+    c2: '#ffb74d', // Warm Amber
+    c3: '#f1f3f4', // Light Gray
+    c4: '#a5d6a7', // Sage Green
     intensity: 1.0,
     speed: 0.08,
   },
   CBT_Stripping: {
-    c1: '#2979FF', // Clear Analytical Blue
-    c2: '#00E5FF', // Bright Cyan
-    c3: '#7C4DFF', // Deep Purple
-    c4: '#00B0FF', // Light Blue
+    c1: '#a5d6a7', // Sage Green
+    c2: '#ffb74d', // Warm Amber
+    c3: '#ce93d8', // Soft Lavender
+    c4: '#faf9f6',
     intensity: 1.0,
     speed: 0.10,
   },
   Socratic_Questioning: {
-    c1: '#00B8D4', // Exploration Cyan
-    c2: '#1DE9B6', // Fresh Mint
-    c3: '#8C9EFF', // Insight Indigo
-    c4: '#00E676', // Bright Green
+    c1: '#ffb74d', 
+    c2: '#ffddb4', 
+    c3: '#a5d6a7', 
+    c4: '#ce93d8',
     intensity: 1.05,
     speed: 0.14,
   },
   Crisis_Escalation: {
-    c1: '#0D47A1', // Deep Safe Blue
-    c2: '#006064', // Deep Teal
-    c3: '#1A237E', // Dark Indigo
-    c4: '#004D40', // Dark Green
+    c1: '#3c6842', // Deep Sage Green (secondary)
+    c2: '#426e47', // Muted Sage
+    c3: '#2f312f', // inverse-surface
+    c4: '#835500', // primary brown
     intensity: 0.9,
     speed: 0.05,
   },
@@ -80,25 +80,25 @@ function applyEmotionMod(base: Palette, emotion?: string): Palette {
 
   switch (emotion) {
     case 'Anxiety':
-      p.c2 = '#00E5FF'; // Cyan
-      p.c1 = '#2979FF'; // Blue
-      p.c4 = '#1DE9B6'; // Mint
-      p.c3 = '#536DFE'; // Indigo
+      p.c2 = '#bdefbe'; // secondary-container (minty)
+      p.c1 = '#a2d3a4'; // secondary-fixed-dim
+      p.c4 = '#f4f3f1'; // surface-container-low
+      p.c3 = '#d6c4b0'; // outline-variant
       p.speed = Math.max(0.04, p.speed * 0.6); // slow down
       break;
     case 'Depression':
-      p.c4 = '#FF4081'; // Vibrant Pink
-      p.c3 = '#E040FB'; // Bright Purple
-      p.c1 = '#7C4DFF'; // Deep Purple
-      p.c2 = '#FF80AB'; // Light Pink
+      p.c4 = '#ffb74d'; // Amber
+      p.c3 = '#edb0f7'; // tertiary-container
+      p.c1 = '#ffb954'; // primary-fixed-dim
+      p.c2 = '#ffddb4'; // primary-fixed
       p.intensity = Math.min(1.3, p.intensity * 1.15);
       p.speed = p.speed * 1.3; // gentle speed up
       break;
     case 'Anger':
-      p.c1 = '#01579B'; 
-      p.c2 = '#006064'; 
-      p.c4 = '#004D40'; 
-      p.c3 = '#1A237E'; 
+      p.c1 = '#3c6842'; // secondary 
+      p.c2 = '#514536'; // on-surface-variant 
+      p.c4 = '#2f312f'; // inverse-surface 
+      p.c3 = '#837564'; // outline 
       p.speed = Math.max(0.04, p.speed * 0.5); // very slow
       break;
   }
@@ -225,7 +225,7 @@ export const AmbientGlow: React.FC = () => {
       className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
       style={{
         isolation: 'isolate',
-        opacity: isStreaming ? 0.85 : 0.6,
+        opacity: isStreaming ? 0.55 : 0.35,
         transition: 'opacity 1000ms ease-in-out',
       }}
       data-testid="ambient-glow-container"

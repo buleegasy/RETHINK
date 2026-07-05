@@ -21,7 +21,7 @@ export function GeminiWelcome({ onStart }: GeminiWelcomeProps) {
         className="relative flex items-center justify-center w-28 h-28 mb-8"
       >
         {/* Outer glowing aura */}
-        <div className="absolute inset-0 bg-amber-200/40 blur-3xl rounded-full animate-pulse-gentle" />
+        <div className="absolute inset-0 bg-neon-purple/20 blur-3xl rounded-full animate-pulse-gentle" />
         
         {/* Inner dynamic Lotus Bloom */}
         <ReThinkLogo className="w-20 h-20 relative z-10" />
@@ -32,7 +32,7 @@ export function GeminiWelcome({ onStart }: GeminiWelcomeProps) {
         initial={{ opacity: 0, y: 10, filter: 'blur(10px)' }}
         animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
         transition={{ delay: 0.15, duration: 1, ease: "easeOut" }}
-        className="text-3xl md:text-4xl font-serif font-light tracking-[0.1em] text-on-surface text-center px-4"
+        className="text-3xl md:text-4xl font-display font-bold tracking-[0.1em] text-on-surface text-center px-4"
       >
         <span className="leading-tight pb-1">
           你好，欢迎来到这里
