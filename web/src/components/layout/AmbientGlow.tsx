@@ -110,10 +110,10 @@ function applyEmotionMod(base: Palette, emotion?: string): Palette {
 // ═══════════════════════════════════════════════════════════════
 
 const BLOB_CONFIG = [
-  { bottom: '-15vh', left: '-5vw',  size: '50vw', animation: 'glow-drift-1', duration: '22s' },
-  { bottom: '-20vh', left: '25vw',  size: '60vw', animation: 'glow-drift-2', duration: '26s' },
-  { bottom: '-10vh', left: '55vw',  size: '55vw', animation: 'glow-drift-3', duration: '30s' },
-  { bottom: '-25vh', left: '75vw',  size: '45vw', animation: 'glow-drift-4', duration: '28s' },
+  { bottom: '-15vh', left: '-5vw',  size: '50vw', animation: 'glow-flow-1', duration: '22s' },
+  { bottom: '-20vh', left: '25vw',  size: '60vw', animation: 'glow-flow-2', duration: '26s' },
+  { bottom: '-10vh', left: '55vw',  size: '55vw', animation: 'glow-flow-3', duration: '30s' },
+  { bottom: '-25vh', left: '75vw',  size: '45vw', animation: 'glow-flow-4', duration: '28s' },
 ];
 
 // ═══════════════════════════════════════════════════════════════

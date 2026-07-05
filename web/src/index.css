@@ -221,36 +221,31 @@
 /* Each blob drifts in an irregular, non-repeating-feeling orbit.
    Using transform: translate() only — 100% GPU-composited, zero layout cost. */
 
-@keyframes glow-drift-1 {
+@keyframes glow-flow-1 {
   0%   { transform: translate(0, 0) scale(1); }
-  20%  { transform: translate(8vw, -12vh) scale(1.05); }
-  40%  { transform: translate(-5vw, -8vh) scale(0.95); }
-  60%  { transform: translate(12vw, 5vh) scale(1.08); }
-  80%  { transform: translate(-3vw, 10vh) scale(0.97); }
+  33%  { transform: translate(15vw, 0) scale(1.1); }
+  66%  { transform: translate(-10vw, 0) scale(0.9); }
   100% { transform: translate(0, 0) scale(1); }
 }
 
-@keyframes glow-drift-2 {
+@keyframes glow-flow-2 {
   0%   { transform: translate(0, 0) scale(1); }
-  25%  { transform: translate(-10vw, 8vh) scale(1.06); }
-  50%  { transform: translate(6vw, 14vh) scale(0.94); }
-  75%  { transform: translate(-8vw, -6vh) scale(1.03); }
+  33%  { transform: translate(-12vw, 0) scale(0.95); }
+  66%  { transform: translate(8vw, 0) scale(1.05); }
   100% { transform: translate(0, 0) scale(1); }
 }
 
-@keyframes glow-drift-3 {
+@keyframes glow-flow-3 {
   0%   { transform: translate(0, 0) scale(1); }
-  30%  { transform: translate(10vw, 10vh) scale(0.96); }
-  60%  { transform: translate(-12vw, -4vh) scale(1.07); }
-  90%  { transform: translate(4vw, -12vh) scale(0.98); }
+  33%  { transform: translate(10vw, 0) scale(1.08); }
+  66%  { transform: translate(-15vw, 0) scale(0.92); }
   100% { transform: translate(0, 0) scale(1); }
 }
 
-@keyframes glow-drift-4 {
+@keyframes glow-flow-4 {
   0%   { transform: translate(0, 0) scale(1); }
-  20%  { transform: translate(-6vw, -10vh) scale(1.04); }
-  45%  { transform: translate(10vw, 6vh) scale(0.93); }
-  70%  { transform: translate(-4vw, 12vh) scale(1.06); }
+  33%  { transform: translate(-15vw, 0) scale(0.9); }
+  66%  { transform: translate(12vw, 0) scale(1.1); }
   100% { transform: translate(0, 0) scale(1); }
 }
 

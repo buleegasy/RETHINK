@@ -96,7 +96,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
   const canSend = input.trim() && !isStreaming;
 
   return (
-    <div className="absolute bottom-0 start-0 w-full ps-4 pe-4 md:ps-8 md:pe-8 pb-[calc(max(env(safe-area-inset-bottom),24px))] pt-8 bg-gradient-to-t from-surface/95 via-surface/40 to-transparent z-30 pointer-events-none">
+    <div className="absolute bottom-0 start-0 w-full ps-4 pe-4 md:ps-8 md:pe-8 pb-[calc(max(env(safe-area-inset-bottom),24px))] pt-8 z-30 pointer-events-none">
 
       <div className="max-w-2xl ms-auto me-auto flex flex-col items-center pointer-events-auto">
 
