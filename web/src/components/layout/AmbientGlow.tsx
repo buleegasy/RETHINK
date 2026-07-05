@@ -106,59 +106,29 @@ function applyEmotionMod(base: Palette, emotion?: string): Palette {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Blob configuration — positions & animation assignments
+// Gradient Layer — renders a clean, soft bottom-up gradient
 // ═══════════════════════════════════════════════════════════════
 
-const BLOB_CONFIG = [
-  { top: '5%',  left: '10%', size: '55vmax', animation: 'glow-drift-1', duration: '22s' },
-  { top: '10%', left: '55%', size: '50vmax', animation: 'glow-drift-2', duration: '26s' },
-  { top: '50%', left: '5%',  size: '48vmax', animation: 'glow-drift-3', duration: '30s' },
-  { top: '45%', left: '50%', size: '52vmax', animation: 'glow-drift-4', duration: '28s' },
-];
-
-// ═══════════════════════════════════════════════════════════════
-// Blob Layer — renders 4 blurred, drifting color blobs
-// ═══════════════════════════════════════════════════════════════
-
-interface BlobLayerProps {
+interface GradientLayerProps {
   palette: Palette;
   opacity: number;
   testId: string;
 }
 
-const BlobLayer: React.FC<BlobLayerProps> = React.memo(({ palette, opacity, testId }) => {
-  const colors = [palette.c1, palette.c2, palette.c3, palette.c4];
-
+const GradientLayer: React.FC<GradientLayerProps> = React.memo(({ palette, opacity, testId }) => {
   return (
     <div
-      className="absolute inset-0 transition-opacity duration-[3000ms] ease-in-out"
-      style={{ opacity }}
+      className="absolute inset-0 transition-opacity duration-[2000ms] ease-in-out"
+      style={{
+        opacity,
+        background: `radial-gradient(circle at 50% 120%, ${palette.c2} 0%, ${palette.c1} 30%, transparent 70%)`
+      }}
       data-testid={testId}
-    >
-      {BLOB_CONFIG.map((blob, i) => (
-        <div
-          key={i}
-          style={{
-            position: 'absolute',
-            top: blob.top,
-            left: blob.left,
-            width: blob.size,
-            height: blob.size,
-            borderRadius: '50%',
-            backgroundColor: colors[i],
-            filter: 'blur(100px)',
-            opacity: 0.7,
-            animation: `${blob.animation} ${blob.duration} ease-in-out infinite`,
-            willChange: 'transform',
-            transition: 'background-color 3s ease-in-out',
-          }}
-        />
-      ))}
-    </div>
+    />
   );
 });
 
-BlobLayer.displayName = 'BlobLayer';
+GradientLayer.displayName = 'GradientLayer';
 
 // ═══════════════════════════════════════════════════════════════
 // Main Component
@@ -225,17 +195,17 @@ export const AmbientGlow: React.FC = () => {
       className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
       style={{
         isolation: 'isolate',
-        opacity: isStreaming ? 0.55 : 0.35,
+        opacity: isStreaming ? 0.7 : 0.5,
         transition: 'opacity 1000ms ease-in-out',
       }}
       data-testid="ambient-glow-container"
     >
-      <BlobLayer
+      <GradientLayer
         palette={layerState.paletteA}
         opacity={layerState.active === 'A' ? 1 : 0}
         testId="glow-layer-a"
       />
-      <BlobLayer
+      <GradientLayer
         palette={layerState.paletteB}
         opacity={layerState.active === 'B' ? 1 : 0}
         testId="glow-layer-b"

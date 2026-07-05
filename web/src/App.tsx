@@ -25,7 +25,7 @@ function App() {
   const logout = useAuthStore(state => state.logout);
   const fsmState = useChatStore(state => state.fsmState);
 
-  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isSidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
   
   // 计算进度
   const stageIndex = fsmState === 'Onboarding' ? 0 : FSM_ORDER.indexOf(fsmState as FSMState) + 1;
@@ -84,8 +84,12 @@ function App() {
       {isAuthenticated ? (
         <>
           <AmbientGlow />
+          
+          {/* ── Session History Sidebar ── */}
+          <SessionSidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} onEmotionChange={handleEmotionChange} />
+
           {/* 主对话区 (Workspace Layout) */}
-          <div className="flex flex-col flex-1 h-full relative z-10">
+          <div className="flex flex-col flex-1 h-full relative z-10 min-w-0">
             {/* ── 移动端顶部 Header ── */}
             <div className="md:hidden flex justify-center pt-[max(env(safe-area-inset-top),12px)] pb-2.5 shrink-0 z-20 border-b border-outline-variant/30">
               <div className="max-w-2xl mx-auto w-full px-4 flex items-center justify-between">
@@ -158,45 +162,6 @@ function App() {
                 onSend={handleSendWithEmotion} 
               />
             )}
-          </div>
-
-          {/* ── Session History Sidebar ── */}
-          <SessionSidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} onEmotionChange={handleEmotionChange} />
-          {/* ── Desktop Top Header Area (History & Profile) ── */}
-          <div className="absolute top-0 left-0 w-full z-40 pointer-events-none pt-6 px-4 md:px-8">
-            <div className="w-full flex justify-between items-start pointer-events-auto">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                type="button"
-                onClick={() => setSidebarOpen(true)}
-                aria-label="历史对话"
-                className="hidden md:flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer p-2 bg-surface-container/30 hover:bg-surface-container/60 border border-outline-variant/30 rounded-full w-10 h-10"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-              </motion.button>
-
-              {user ? (
-                <div className="hidden md:flex items-center gap-4 pt-2">
-                  <span className="text-[11px] tracking-wide text-on-surface-variant">
-                    {user.username}
-                  </span>
-                  <motion.button 
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={logout} 
-                    className="text-[11px] tracking-wide text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
-                  >
-                    退出
-                  </motion.button>
-                </div>
-              ) : (
-                <div />
-              )}
-            </div>
           </div>
 
           {/* 危机干预覆盖层 */}

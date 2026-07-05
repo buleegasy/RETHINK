@@ -27,6 +27,8 @@ interface SessionSidebarProps {
 
 export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSidebarProps) {
   const token = useAuthStore(state => state.token);
+  const user = useAuthStore(state => state.user);
+  const logout = useAuthStore(state => state.logout);
   const sessionId = useChatStore(state => state.sessionId);
   const loadSession = useChatStore(state => state.loadSession);
   const clearChat = useChatStore(state => state.clearChat);
@@ -166,29 +168,31 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
   if (!token) return null;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.25 }}
-          className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm"
-          onClick={onClose}
-        >
-          <motion.aside
-            ref={sidebarRef}
-            initial={{ x: '-100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-            className="h-full w-[min(360px,88vw)] bg-surface-container/60 backdrop-blur-xl border-e border-outline-variant/30 shadow-2xl p-4 flex flex-col font-sans"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-label="历史对话侧边栏"
-          >
-            <div className="flex items-center justify-between gap-3 mb-6">
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="md:hidden fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
+            onClick={onClose}
+          />
+        )}
+      </AnimatePresence>
+
+      <aside
+        ref={sidebarRef}
+        className={`fixed md:static inset-y-0 left-0 z-50 md:z-auto h-full w-[min(360px,88vw)] md:w-[280px] shrink-0 bg-surface-container/60 backdrop-blur-xl border-e border-outline-variant/30 shadow-2xl md:shadow-none p-4 flex flex-col font-sans overflow-hidden transition-transform duration-300 ease-out ${
+          isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        }`}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="历史对话侧边栏"
+      >
+        <div className="flex items-center justify-between gap-3 mb-6">
               <div>
                 <div className="text-[13px] font-mono tracking-widest text-on-surface flex items-center gap-2 uppercase">
                   <MessageSquareText className="w-4 h-4" strokeWidth={1.5} />
@@ -301,13 +305,27 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
               )}
             </div>
 
-            {/* Embedded Camera Panel */}
-            <div className="mt-auto border-t border-outline-variant/20 pt-4 flex-shrink-0 w-full flex justify-center">
+            {/* Embedded Camera Panel & Account Info */}
+            <div className="mt-auto border-t border-outline-variant/20 pt-4 flex-shrink-0 w-full flex flex-col items-center gap-4">
               <CameraPanel onEmotionChange={onEmotionChange} />
+              
+              {user && (
+                <div className="w-full flex items-center justify-between px-1">
+                  <span className="text-[13px] tracking-wide text-on-surface-variant font-medium truncate pe-2">
+                    {user.username}
+                  </span>
+                  <motion.button 
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={logout} 
+                    className="text-[11px] tracking-wide text-on-surface hover:text-error transition-colors cursor-pointer px-2 py-1 bg-surface-container/30 hover:bg-error/10 border border-outline-variant/30 rounded-full shrink-0"
+                  >
+                    退出
+                  </motion.button>
+                </div>
+              )}
             </div>
-          </motion.aside>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </aside>
+    </>
   );
 }
