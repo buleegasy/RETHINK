@@ -78,8 +78,8 @@ export function LoginWall() {
               initial={{ opacity: 0, y: 10, filter: 'blur(20px)' }}
               animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
               transition={{ duration: 2, ease: "easeOut", delay: 0.2 }}
-              className="font-serif text-4xl sm:text-5xl md:text-8xl tracking-[0.2em] font-light text-on-surface mb-6 drop-shadow-sm px-4 text-center"
-              style={{ textShadow: '0 4px 24px rgba(255,255,255,0.4)' }}
+              className="text-4xl sm:text-5xl md:text-8xl tracking-[0.2em] font-light text-on-surface mb-6 drop-shadow-sm px-4 text-center"
+              style={{ fontFamily: "'Times New Roman', Times, serif", textShadow: '0 4px 24px rgba(255,255,255,0.4)' }}
             >
               <DecryptText text="RETHINK" delay={300} />
             </motion.h1>
