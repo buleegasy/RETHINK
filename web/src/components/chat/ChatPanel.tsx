@@ -55,7 +55,7 @@ export const ChatPanel: React.FC = () => {
       onScroll={handleScroll}
       className="flex-1 overflow-y-auto px-3 pt-4 pb-4 md:px-8 md:pt-20 md:pb-8 scroll-smooth bg-transparent relative z-10 flex flex-col"
     >
-      <div className="max-w-[1280px] mx-auto w-full flex-1 flex flex-col gap-1">
+      <div className="max-w-3xl mx-auto w-full flex-1 flex flex-col gap-1">
         <AnimatePresence mode="wait">
           {!hasCompletedOnboarding ? (
             !showEmojiSelector ? (
@@ -98,7 +98,7 @@ export const ChatPanel: React.FC = () => {
                   <motion.div 
                     layout="position"
                     key={msg.id || idx} 
-                    className={needsGroupSep ? 'mt-4' : ''}
+                    className={needsGroupSep ? 'mt-8' : ''}
                   >
                     <MessageBubble
                       message={msg}

@@ -156,13 +156,13 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
       initial={{ opacity: 0, y: 12, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-      className={`group relative flex items-end gap-2 w-full ${isUser ? 'justify-end' : 'justify-start'}`}
+      className={`group relative flex items-start gap-2 w-full ${isUser ? 'justify-end' : 'justify-start'}`}
     >
 
-      {/* AI Avatar — only show on the last message in a group (WhatsApp style) */}
+      {/* AI Avatar — only show on the first message in a group */}
       {!isUser && (
-        <div className="w-8 h-8 shrink-0 mb-0.5 order-1">
-          {isLastInGroup ? (
+        <div className="w-8 h-8 shrink-0 mt-0.5 order-1">
+          {isFirstInGroup ? (
             <div className="relative w-8 h-8 flex items-center justify-center text-on-surface dark:text-surface">
               {isStreaming && (
                 <div className="absolute inset-0 bg-gemini-blue/20 blur-sm rounded-full animate-pulse" />
@@ -177,7 +177,7 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
       )}
 
       {/* Message column */}
-      <div className={`flex flex-col gap-0.5 max-w-[82%] md:max-w-[75%] lg:max-w-[65%] order-2 ${isUser ? 'items-end' : 'items-start'}`}>
+      <div className={`flex flex-col gap-1 max-w-[82%] md:max-w-[75%] lg:max-w-[65%] order-2 ${isUser ? 'items-end' : 'items-start'}`}>
 
         {isUser ? (
           /* ── User Bubble ── */
@@ -202,7 +202,7 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
 
             {/* Collapsible Tech Chain Panel */}
             {!isUser && tc && (
-              <div className="mt-1 w-full select-none animate-slide-up">
+              <div className="mt-1 w-full select-none animate-slide-up ms-4">
                 <button
                   onClick={() => setShowTechChain(!showTechChain)}
                   className="flex items-center gap-1.5 py-0.5 px-1.5 rounded text-[10px] font-mono text-on-surface-variant/70 hover:text-on-surface hover:bg-surface-container/80 transition-all duration-200 cursor-pointer"

@@ -98,11 +98,11 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
   return (
     <div className="absolute bottom-0 start-0 w-full ps-4 pe-4 md:ps-8 md:pe-8 pb-[calc(max(env(safe-area-inset-bottom),24px))] pt-8 z-30 pointer-events-none">
 
-      <div className="max-w-2xl ms-auto me-auto flex flex-col items-center pointer-events-auto">
+      <div className="max-w-3xl ms-auto me-auto flex flex-col items-center pointer-events-auto">
 
 
         {/* Input Container */}
-        <div className={`w-full relative transition-all duration-500 max-w-[1280px] mx-auto ${isStreaming ? 'opacity-50' : ''}`}>
+        <div className={`w-full relative transition-all duration-500 max-w-3xl mx-auto ${isStreaming ? 'opacity-50' : ''}`}>
           <div className={`relative flex items-end bg-surface-container/60 backdrop-blur-[20px] shadow-inner-light rounded-[32px] p-2 gap-1 transition-all duration-200 ${
             isFocused
               ? 'border border-primary/50 ring-4 ring-primary/20'

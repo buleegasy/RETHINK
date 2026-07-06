@@ -184,7 +184,7 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
 
       <aside
         ref={sidebarRef}
-        className={`fixed md:static inset-y-0 left-0 z-50 md:z-auto h-full w-[min(360px,88vw)] md:w-[280px] shrink-0 bg-surface-container/60 backdrop-blur-xl border-e border-outline-variant/30 shadow-2xl md:shadow-none p-4 flex flex-col font-sans overflow-hidden transition-transform duration-300 ease-out ${
+        className={`fixed md:static inset-y-0 left-0 z-50 md:z-auto h-full w-[min(360px,88vw)] md:w-[280px] shrink-0 bg-surface-container/60 backdrop-blur-xl border-e border-outline-variant/30 shadow-2xl md:shadow-none p-5 flex flex-col font-sans overflow-hidden transition-transform duration-300 ease-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -261,7 +261,7 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
                       }}
                       className={`group relative w-full text-start rounded-chip border ps-3 pe-3 py-2.5 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-gemini-blue/40 focus-visible:border-gemini-blue/60 focus-visible:outline-none ${
                         active
-                          ? 'border-outline-variant'
+                          ? 'bg-surface-container-highest border-transparent shadow-sm'
                           : 'bg-surface-container/35 border-outline-variant/20 hover:bg-surface-container/60'
                       }`}
                     >
@@ -306,24 +306,26 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
             </div>
 
             {/* Embedded Camera Panel & Account Info */}
-            <div className="mt-auto border-t border-outline-variant/20 pt-4 flex-shrink-0 w-full flex flex-col gap-3">
-              <CameraPanel onEmotionChange={onEmotionChange} />
-              
-              {user && (
-                <div className="w-full flex items-center justify-between">
-                  <span className="text-[13px] tracking-wide text-on-surface-variant font-medium truncate pe-2">
-                    {user.username}
-                  </span>
-                  <motion.button 
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={logout} 
-                    className="text-[11px] tracking-wide text-on-surface hover:text-error transition-colors cursor-pointer px-3 py-1.5 bg-surface-container/30 hover:bg-error/10 border border-outline-variant/30 rounded-full shrink-0"
-                  >
-                    退出
-                  </motion.button>
-                </div>
-              )}
+            <div className="mt-auto pt-4 flex-shrink-0 w-full flex flex-col">
+              <div className="w-full flex flex-col gap-3 bg-surface-container/40 border border-outline-variant/20 rounded-[20px] p-3 shadow-sm">
+                <CameraPanel onEmotionChange={onEmotionChange} />
+                
+                {user && (
+                  <div className="w-full flex items-center justify-between">
+                    <span className="text-[13px] tracking-wide text-on-surface-variant font-medium truncate pe-2 ps-1">
+                      {user.username}
+                    </span>
+                    <motion.button 
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={logout} 
+                      className="text-[11px] tracking-wide text-on-surface hover:text-error transition-colors cursor-pointer px-3 py-1 bg-surface-container/50 hover:bg-error/10 border border-outline-variant/30 rounded-full shrink-0"
+                    >
+                      退出
+                    </motion.button>
+                  </div>
+                )}
+              </div>
             </div>
           </aside>
     </>
