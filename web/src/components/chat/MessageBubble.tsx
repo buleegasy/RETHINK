@@ -53,20 +53,7 @@ const TypingIndicator = () => (
   </span>
 );
 
-const BubbleTail = () => (
-  <span
-    aria-hidden
-    className="bg-surface-container/70 backdrop-blur-[20px]"
-    style={{
-      position: 'absolute',
-      top: 0,
-      left: -7,
-      width: 14,
-      height: 14,
-      clipPath: 'polygon(100% 0, 0 0, 100% 100%)', // top-left tail
-    }}
-  />
-);
+
 
 interface MessageChunkProps {
   chunk: string;
@@ -100,7 +87,6 @@ const MessageChunk = React.memo<MessageChunkProps>(({
         </ReactMarkdown>
       </div>
       {isStreaming && isLastChunk && <TypingIndicator />}
-      {!isStreaming && isFirstInGroup && <BubbleTail />}
     </div>
   );
 });
@@ -141,7 +127,7 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
    * bubble in a group gets a tighter radius to suggest continuity.
    */
   const aiBubbleRadius = (idx: number) => {
-    if (idx === 0 && isFirstInGroup) return 'rounded-[22px] rounded-tl-[6px]';
+    if (idx === 0 && isFirstInGroup) return 'rounded-[22px] rounded-tl-[4px]';
     return 'rounded-[22px]';
   };
 
