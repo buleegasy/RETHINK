@@ -59,11 +59,11 @@ const BubbleTail = () => (
     className="bg-surface-container/70 backdrop-blur-[20px]"
     style={{
       position: 'absolute',
-      bottom: 0,
+      top: 0,
       left: -7,
       width: 14,
       height: 14,
-      clipPath: 'polygon(0 0, 100% 0, 100% 100%)', // ai: bottom-left corner cut
+      clipPath: 'polygon(100% 0, 0 0, 100% 100%)', // top-left tail
     }}
   />
 );
@@ -73,6 +73,7 @@ interface MessageChunkProps {
   aiBubbleRadiusClass: string;
   isStreaming: boolean;
   isLastChunk: boolean;
+  isFirstInGroup: boolean;
   isLastInGroup: boolean;
 }
 
@@ -81,6 +82,7 @@ const MessageChunk = React.memo<MessageChunkProps>(({
   aiBubbleRadiusClass,
   isStreaming,
   isLastChunk,
+  isFirstInGroup,
   isLastInGroup,
 }) => {
   const isGlowActive = isStreaming && isLastChunk;
@@ -98,7 +100,7 @@ const MessageChunk = React.memo<MessageChunkProps>(({
         </ReactMarkdown>
       </div>
       {isStreaming && isLastChunk && <TypingIndicator />}
-      {isLastInGroup && isLastChunk && <BubbleTail />}
+      {!isStreaming && isFirstInGroup && <BubbleTail />}
     </div>
   );
 });
@@ -139,12 +141,8 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
    * bubble in a group gets a tighter radius to suggest continuity.
    */
   const aiBubbleRadius = (idx: number) => {
-    const isFirst = idx === 0 && isFirstInGroup;
-    const isLast = idx === chunks.length - 1 && isLastInGroup;
-    if (isFirst && isLast) return 'rounded-[22px] rounded-bl-[6px]'; // single
-    if (isFirst)           return 'rounded-[22px] rounded-bl-[10px]';
-    if (isLast)            return 'rounded-[22px] rounded-bl-[6px]';
-    return 'rounded-[22px] rounded-l-[10px]';
+    if (idx === 0 && isFirstInGroup) return 'rounded-[22px] rounded-tl-[6px]';
+    return 'rounded-[22px]';
   };
 
   const userBubbleRadius = 'rounded-[22px]';
@@ -196,6 +194,7 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
                 aiBubbleRadiusClass={aiBubbleRadius(idx)}
                 isStreaming={isStreaming && idx === chunks.length - 1}
                 isLastChunk={idx === chunks.length - 1}
+                isFirstInGroup={idx === 0 && isFirstInGroup}
                 isLastInGroup={isLastInGroup}
               />
             ))}

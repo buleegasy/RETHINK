@@ -16,22 +16,22 @@ export const ChatPanel: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   
   const [showEmojiSelector, setShowEmojiSelector] = useState(false);
-  const [isAtBottom, setIsAtBottom] = useState(true);
+  const isAtBottomRef = useRef(true);
 
   const handleScroll = () => {
     const el = scrollRef.current;
     if (el) {
       const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 15;
-      setIsAtBottom(isNearBottom);
+      isAtBottomRef.current = isNearBottom;
     }
   };
 
   useEffect(() => {
     const el = scrollRef.current;
-    if (el && isAtBottom) {
+    if (el && isAtBottomRef.current) {
       el.scrollTop = el.scrollHeight;
     }
-  }, [messages, isStreaming, isAtBottom]);
+  }, [messages, isStreaming]);
 
   const handleStart = () => {
     // 切换到表情包选择大屏

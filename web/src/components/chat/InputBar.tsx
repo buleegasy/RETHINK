@@ -36,6 +36,11 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
   const lastInputLengthRef = useRef<number>(0);
 
   useEffect(() => {
+    // Progressive enhancement: only use JS resize if CSS field-sizing is unsupported
+    if (typeof CSS !== 'undefined' && CSS.supports && CSS.supports('field-sizing', 'content')) {
+      return;
+    }
+    
     const textarea = textareaRef.current;
     if (textarea) {
       const currentLength = input.length;
@@ -69,7 +74,9 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
       onSend(textToSend);
       setInput('');
       if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
+        if (!CSS.supports('field-sizing', 'content')) {
+          textareaRef.current.style.height = 'auto';
+        }
       }
     }
   };
@@ -144,9 +151,10 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
               placeholder={placeholder}
               disabled={isStreaming}
               rows={1}
-              className={`flex-1 bg-transparent ps-2 pe-2 md:ps-4 md:pe-4 py-2 m-0 text-[15px] md:text-[16px] leading-[24px] font-sans font-light tracking-wide text-on-surface placeholder-on-surface/50 border-none focus:outline-none resize-none overflow-y-auto max-h-[100px] md:max-h-[160px] transition-opacity duration-200 ${
+              className={`flex-1 bg-transparent ps-2 pe-2 md:ps-4 md:pe-4 py-2 m-0 text-[15px] md:text-[16px] leading-[24px] font-sans font-light tracking-wide text-on-surface placeholder-on-surface/50 border-none focus:outline-none resize-none overflow-y-auto max-h-[100px] md:max-h-[160px] min-h-[40px] transition-opacity duration-200 ${
                 isListening ? 'placeholder-stage-orange/60' : ''
               } ${isStreaming ? 'cursor-not-allowed' : ''}`}
+              style={{ fieldSizing: 'content' } as React.CSSProperties}
             />
 
             {/* Send Button */}
