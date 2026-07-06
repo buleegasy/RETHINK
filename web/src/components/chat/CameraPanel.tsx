@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useFaceEmotion, EMOTION_MAP } from '../../hooks/useFaceEmotion';
+import { AlertCircle } from 'lucide-react';
 import type { EmotionResult } from '../../hooks/useFaceEmotion';
 
 interface CameraPanelProps {
@@ -46,8 +47,8 @@ export const CameraPanel: React.FC<CameraPanelProps> = ({ onEmotionChange }) => 
   const emotionInfo = currentEmotion ? EMOTION_MAP[currentEmotion.label] : null;
 
   return (
-    <div className="w-auto flex items-center justify-start pointer-events-auto">
-      <div className="relative overflow-hidden rounded-2xl bg-surface-container/30 border border-outline-variant/30 shadow-sm flex items-center gap-2 md:gap-3 p-1.5 md:p-2 backdrop-blur-md">
+    <div className="w-full flex items-center justify-start pointer-events-auto">
+      <div className="relative overflow-hidden rounded-2xl bg-surface-container/30 border border-outline-variant/30 shadow-sm flex items-center gap-2 md:gap-3 p-1.5 md:p-2 backdrop-blur-md w-full">
         
         {/* 摄像头视图区域 (小圆形/胶囊状) */}
         <div className="relative w-14 h-14 md:w-16 md:h-16 shrink-0 rounded-full overflow-hidden bg-surface-container-high shadow-inner ring-1 ring-outline-variant/40">
@@ -67,7 +68,7 @@ export const CameraPanel: React.FC<CameraPanelProps> = ({ onEmotionChange }) => 
           {(isModelLoading || !isCameraActive || error) && (
             <div className="absolute inset-0 flex items-center justify-center bg-surface-dim/80 z-20 backdrop-blur-sm">
               {error ? (
-                <span className="text-xs text-error font-light tracking-widest">!</span>
+                <AlertCircle className="w-4 h-4 text-error" strokeWidth={2.5} />
               ) : (
                 <div className="w-5 h-5 border-2 border-outline-variant border-t-on-surface-variant rounded-full animate-spin" />
               )}

@@ -198,7 +198,7 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
                   <MessageSquareText className="w-4 h-4" strokeWidth={1.5} />
                   历史对话
                 </div>
-                <div className="text-[11px] text-on-surface-variant font-light mt-1 tracking-wide">
+                <div className="text-[11px] text-on-surface/70 font-normal mt-1 tracking-wide">
                   同一账号的对话会保存在这里
                 </div>
               </div>
@@ -259,9 +259,9 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
                           void openSession(session.id);
                         }
                       }}
-                      className={`relative w-full text-start rounded-chip border ps-3 pe-3 py-2.5 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-gemini-blue/40 focus-visible:border-gemini-blue/60 focus-visible:outline-none ${
+                      className={`group relative w-full text-start rounded-chip border ps-3 pe-3 py-2.5 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-gemini-blue/40 focus-visible:border-gemini-blue/60 focus-visible:outline-none ${
                         active
-                          ? 'border-transparent'
+                          ? 'border-outline-variant'
                           : 'bg-surface-container/35 border-outline-variant/20 hover:bg-surface-container/60'
                       }`}
                     >
@@ -291,7 +291,7 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
                                 e.stopPropagation();
                                 void handleDeleteSession(session.id);
                               }}
-                              className="p-1 rounded-full text-on-surface-variant/60 hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
+                              className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-1 rounded-full text-on-surface-variant/60 hover:text-error hover:bg-error/10 transition-all cursor-pointer"
                               aria-label="删除此对话"
                             >
                               <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
@@ -306,11 +306,11 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
             </div>
 
             {/* Embedded Camera Panel & Account Info */}
-            <div className="mt-auto border-t border-outline-variant/20 pt-4 flex-shrink-0 w-full flex flex-col items-center gap-4">
+            <div className="mt-auto border-t border-outline-variant/20 pt-4 flex-shrink-0 w-full flex flex-col gap-3">
               <CameraPanel onEmotionChange={onEmotionChange} />
               
               {user && (
-                <div className="w-full flex items-center justify-between px-1">
+                <div className="w-full flex items-center justify-between">
                   <span className="text-[13px] tracking-wide text-on-surface-variant font-medium truncate pe-2">
                     {user.username}
                   </span>
@@ -318,7 +318,7 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={logout} 
-                    className="text-[11px] tracking-wide text-on-surface hover:text-error transition-colors cursor-pointer px-2 py-1 bg-surface-container/30 hover:bg-error/10 border border-outline-variant/30 rounded-full shrink-0"
+                    className="text-[11px] tracking-wide text-on-surface hover:text-error transition-colors cursor-pointer px-3 py-1.5 bg-surface-container/30 hover:bg-error/10 border border-outline-variant/30 rounded-full shrink-0"
                   >
                     退出
                   </motion.button>

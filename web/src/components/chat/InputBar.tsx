@@ -144,7 +144,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
               placeholder={placeholder}
               disabled={isStreaming}
               rows={1}
-              className={`flex-1 bg-transparent ps-2 pe-2 md:ps-4 md:pe-4 py-2 m-0 text-[15px] md:text-[16px] leading-[24px] font-sans font-light tracking-wide text-on-surface placeholder-on-surface-dim border-none focus:outline-none resize-none overflow-y-auto max-h-[100px] md:max-h-[160px] transition-opacity duration-200 ${
+              className={`flex-1 bg-transparent ps-2 pe-2 md:ps-4 md:pe-4 py-2 m-0 text-[15px] md:text-[16px] leading-[24px] font-sans font-light tracking-wide text-on-surface placeholder-on-surface/50 border-none focus:outline-none resize-none overflow-y-auto max-h-[100px] md:max-h-[160px] transition-opacity duration-200 ${
                 isListening ? 'placeholder-stage-orange/60' : ''
               } ${isStreaming ? 'cursor-not-allowed' : ''}`}
             />
@@ -159,7 +159,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
               className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full self-end ${
                 canSend
                   ? 'text-on-surface hover:bg-surface-container-high/60 cursor-pointer'
-                  : 'text-outline cursor-not-allowed opacity-30'
+                  : 'text-on-surface-variant/50 cursor-not-allowed'
               }`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
@@ -178,7 +178,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
               语音识别出错：{voiceError}
             </p>
           )}
-          <span className="text-xs font-sans text-on-surface-variant">
+          <span className="text-xs font-sans text-on-surface/70">
             RE-THINK 生成的内容可能不准确。请在需要时寻求专业医疗帮助。
           </span>
         </div>

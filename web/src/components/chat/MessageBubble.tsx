@@ -53,20 +53,17 @@ const TypingIndicator = () => (
   </span>
 );
 
-/** iOS-style tail rendered as an absolutely positioned triangle */
-const BubbleTail = ({ isUser }: { isUser: boolean }) => (
+const BubbleTail = () => (
   <span
     aria-hidden
-    className={isUser ? 'bg-primary-container' : 'bg-surface-container/70 backdrop-blur-[20px]'}
+    className="bg-surface-container/70 backdrop-blur-[20px]"
     style={{
       position: 'absolute',
       bottom: 0,
-      ...(isUser ? { right: -7 } : { left: -7 }),
+      left: -7,
       width: 14,
       height: 14,
-      clipPath: isUser
-        ? 'polygon(0 0, 100% 0, 0 100%)'   // user: bottom-right corner cut
-        : 'polygon(0 0, 100% 0, 100% 100%)', // ai: bottom-left corner cut
+      clipPath: 'polygon(0 0, 100% 0, 100% 100%)', // ai: bottom-left corner cut
     }}
   />
 );
@@ -101,7 +98,7 @@ const MessageChunk = React.memo<MessageChunkProps>(({
         </ReactMarkdown>
       </div>
       {isStreaming && isLastChunk && <TypingIndicator />}
-      {isLastInGroup && isLastChunk && <BubbleTail isUser={false} />}
+      {isLastInGroup && isLastChunk && <BubbleTail />}
     </div>
   );
 });
@@ -150,9 +147,7 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
     return 'rounded-[22px] rounded-l-[10px]';
   };
 
-  const userBubbleRadius = isLastInGroup
-    ? 'rounded-[22px] rounded-br-[6px]'
-    : 'rounded-[22px] rounded-r-[10px]';
+  const userBubbleRadius = 'rounded-[22px]';
 
   if (message.isHidden) return null;
 
@@ -161,7 +156,7 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
       initial={{ opacity: 0, y: 12, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-      className={`group relative flex items-center gap-2 w-full ${isUser ? 'justify-end' : 'justify-start'}`}
+      className={`group relative flex items-end gap-2 w-full ${isUser ? 'justify-end' : 'justify-start'}`}
     >
 
       {/* AI Avatar — only show on the last message in a group (WhatsApp style) */}
@@ -182,15 +177,14 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
       )}
 
       {/* Message column */}
-      <div className={`flex flex-col gap-1 max-w-[82%] md:max-w-[75%] lg:max-w-[65%] order-2 ${isUser ? 'items-end' : 'items-start'}`}>
+      <div className={`flex flex-col gap-0.5 max-w-[82%] md:max-w-[75%] lg:max-w-[65%] order-2 ${isUser ? 'items-end' : 'items-start'}`}>
 
         {isUser ? (
           /* ── User Bubble ── */
           <div
-            className={`relative ${userBubbleRadius} px-4 py-2.5 text-[15px] md:text-[16px] leading-relaxed font-sans bg-primary-container text-white shadow-glow`}
+            className={`relative ${userBubbleRadius} px-4 py-2.5 text-[15px] md:text-[16px] leading-relaxed font-sans bg-primary-container text-[#1a1c1a] shadow-glow`}
           >
             <p className="whitespace-pre-wrap">{chunks[0]}</p>
-            {isLastInGroup && <BubbleTail isUser={true} />}
           </div>
         ) : (
           <>
@@ -208,10 +202,10 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
 
             {/* Collapsible Tech Chain Panel */}
             {!isUser && tc && (
-              <div className="mt-3 w-full select-none animate-slide-up">
+              <div className="mt-1 w-full select-none animate-slide-up">
                 <button
                   onClick={() => setShowTechChain(!showTechChain)}
-                  className="flex items-center gap-1.5 py-0.5 px-1.5 rounded text-[10px] font-mono text-on-surface-variant/40 hover:text-on-surface hover:bg-surface-container/80 transition-all duration-200 cursor-pointer"
+                  className="flex items-center gap-1.5 py-0.5 px-1.5 rounded text-[10px] font-mono text-on-surface-variant/70 hover:text-on-surface hover:bg-surface-container/80 transition-all duration-200 cursor-pointer"
                 >
                   <span>{showTechChain ? '收起推演日志' : '展开系统推演'}</span>
                   {showTechChain ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}

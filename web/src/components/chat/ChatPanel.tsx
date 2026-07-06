@@ -85,7 +85,7 @@ export const ChatPanel: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4 }}
-              className="flex flex-col gap-1 w-full mt-auto"
+              className="flex flex-col gap-0.5 w-full mt-auto"
             >
               {messages.map((msg, idx) => {
                 const prev = messages[idx - 1];
