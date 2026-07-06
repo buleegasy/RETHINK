@@ -33,44 +33,24 @@ interface Palette {
 
 const FSM_PALETTES: Record<FSMState, Palette> = {
   Onboarding: {
-    c1: '#ffb74d', // Warm Amber
-    c2: '#a5d6a7', // Sage Green
-    c3: '#ce93d8', // Soft Lavender
-    c4: '#faf9f6', // Off-White
-    intensity: 1.0,
-    speed: 0.12,
+    c1: 'var(--aura-calm-1)', c2: 'var(--aura-calm-2)', c3: 'var(--aura-calm-1)', c4: 'var(--aura-calm-2)',
+    intensity: 1.0, speed: 0.12,
   },
   Active_Listening: {
-    c1: '#ce93d8', // Soft Lavender
-    c2: '#ffb74d', // Warm Amber
-    c3: '#f1f3f4', // Light Gray
-    c4: '#a5d6a7', // Sage Green
-    intensity: 1.0,
-    speed: 0.08,
+    c1: 'var(--aura-calm-1)', c2: 'var(--aura-calm-2)', c3: 'var(--aura-calm-1)', c4: 'var(--aura-calm-2)',
+    intensity: 1.0, speed: 0.08,
   },
   CBT_Stripping: {
-    c1: '#a5d6a7', // Sage Green
-    c2: '#ffb74d', // Warm Amber
-    c3: '#ce93d8', // Soft Lavender
-    c4: '#faf9f6',
-    intensity: 1.0,
-    speed: 0.10,
+    c1: 'var(--aura-calm-1)', c2: 'var(--aura-calm-2)', c3: 'var(--aura-calm-1)', c4: 'var(--aura-calm-2)',
+    intensity: 1.0, speed: 0.10,
   },
   Socratic_Questioning: {
-    c1: '#ffb74d', 
-    c2: '#ffddb4', 
-    c3: '#a5d6a7', 
-    c4: '#ce93d8',
-    intensity: 1.05,
-    speed: 0.14,
+    c1: 'var(--aura-calm-1)', c2: 'var(--aura-calm-2)', c3: 'var(--aura-calm-1)', c4: 'var(--aura-calm-2)',
+    intensity: 1.05, speed: 0.14,
   },
   Crisis_Escalation: {
-    c1: '#3c6842', // Deep Sage Green (secondary)
-    c2: '#426e47', // Muted Sage
-    c3: '#2f312f', // inverse-surface
-    c4: '#835500', // primary brown
-    intensity: 0.9,
-    speed: 0.05,
+    c1: 'var(--aura-cool-1)', c2: 'var(--aura-cool-2)', c3: 'var(--aura-cool-1)', c4: 'var(--aura-cool-2)',
+    intensity: 0.9, speed: 0.05,
   },
 };
 
@@ -80,26 +60,22 @@ function applyEmotionMod(base: Palette, emotion?: string): Palette {
 
   switch (emotion) {
     case 'Anxiety':
-      p.c2 = '#bdefbe'; // secondary-container (minty)
-      p.c1 = '#a2d3a4'; // secondary-fixed-dim
-      p.c4 = '#f4f3f1'; // surface-container-low
-      p.c3 = '#d6c4b0'; // outline-variant
+    case 'Anger':
+      // Cool aura for anxiety and anger (optical sedative)
+      p.c1 = 'var(--aura-cool-1)';
+      p.c2 = 'var(--aura-cool-2)';
+      p.c3 = 'var(--aura-cool-1)';
+      p.c4 = 'var(--aura-cool-2)';
       p.speed = Math.max(0.04, p.speed * 0.6); // slow down
       break;
     case 'Depression':
-      p.c4 = '#ffb74d'; // Amber
-      p.c3 = '#edb0f7'; // tertiary-container
-      p.c1 = '#ffb954'; // primary-fixed-dim
-      p.c2 = '#ffddb4'; // primary-fixed
+      // Warm aura for sadness (visual serotonin)
+      p.c1 = 'var(--aura-warm-1)';
+      p.c2 = 'var(--aura-warm-2)';
+      p.c3 = 'var(--aura-warm-1)';
+      p.c4 = 'var(--aura-warm-2)';
       p.intensity = Math.min(1.3, p.intensity * 1.15);
       p.speed = p.speed * 1.3; // gentle speed up
-      break;
-    case 'Anger':
-      p.c1 = '#3c6842'; // secondary 
-      p.c2 = '#514536'; // on-surface-variant 
-      p.c4 = '#2f312f'; // inverse-surface 
-      p.c3 = '#837564'; // outline 
-      p.speed = Math.max(0.04, p.speed * 0.5); // very slow
       break;
   }
   return p;
@@ -146,11 +122,12 @@ const BlobLayer: React.FC<BlobLayerProps> = React.memo(({ palette, opacity, test
             height: blob.size,
             borderRadius: '50%',
             backgroundColor: colors[i],
-            filter: 'blur(120px)',
-            opacity: 0.8,
+            filter: 'blur(140px)', // updated to 140px per spec
+            opacity: 1, // updated to 1 per spec since colors have alpha
             animation: `${blob.animation} ${blob.duration} ease-in-out infinite`,
             willChange: 'transform',
-            transition: 'background-color 3s ease-in-out',
+            transition: 'background-color var(--duration-mood-shift) var(--ease-mindful)',
+
           }}
         />
       ))}

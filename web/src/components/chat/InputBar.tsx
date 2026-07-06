@@ -110,11 +110,11 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
 
         {/* Input Container */}
         <div className={`w-full relative transition-all duration-500 max-w-3xl mx-auto ${isStreaming ? 'opacity-50' : ''}`}>
-          <div className={`relative flex items-end bg-surface-container/60 backdrop-blur-[20px] shadow-inner-light rounded-[32px] p-2 gap-1 transition-all duration-200 ${
+          <div className={`relative flex items-end bg-[rgba(255,255,255,0.9)] backdrop-blur-[16px] rounded-full p-2 gap-1 transition-all duration-[600ms] ${
             isFocused
-              ? 'border border-primary/50 ring-4 ring-primary/20'
-              : 'border border-transparent hover:border-outline/20 shadow-sm'
-          }`}>
+              ? 'border-[rgba(0,0,0,0.1)] ring-4 ring-black/5 shadow-[0_24px_64px_rgba(0,0,0,0.12)]'
+              : 'border border-[rgba(0,0,0,0.05)] shadow-[0_12px_48px_rgba(0,0,0,0.08)] hover:border-black/10'
+          }`} style={{ transitionTimingFunction: 'var(--ease-mindful)' }}>
             
             {/* Voice Button or Spacer */}
             {isVoiceSupported ? (

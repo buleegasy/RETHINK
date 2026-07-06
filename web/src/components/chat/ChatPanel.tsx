@@ -55,7 +55,7 @@ export const ChatPanel: React.FC = () => {
       onScroll={handleScroll}
       className="flex-1 overflow-y-auto px-3 pt-4 pb-4 md:px-8 md:pt-20 md:pb-8 scroll-smooth bg-transparent relative z-10 flex flex-col"
     >
-      <div className="max-w-3xl mx-auto w-full flex-1 flex flex-col gap-1">
+      <div className="max-w-[800px] mx-auto w-full flex-1 flex flex-col gap-1">
         <AnimatePresence mode="wait">
           {!hasCompletedOnboarding ? (
             !showEmojiSelector ? (
@@ -85,7 +85,7 @@ export const ChatPanel: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4 }}
-              className="flex flex-col gap-0.5 w-full mt-auto"
+              className="flex flex-col gap-1 w-full mt-auto"
             >
               {messages.map((msg, idx) => {
                 const prev = messages[idx - 1];

@@ -5,8 +5,27 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --bg-neutral: #FDFDFB; 
+    --user-bubble-bg: #423E39; 
+    --user-bubble-text: #F8F7F3; 
+    --ai-bubble-bg: rgba(255, 255, 255, 0.75);
+    --ai-bubble-text: #3A3F42; 
+
+    --aura-calm-1: rgba(215, 222, 217, 0.45);
+    --aura-calm-2: rgba(238, 235, 227, 0.5);
+    --aura-cool-1: rgba(186, 214, 204, 0.45);
+    --aura-cool-2: rgba(197, 220, 235, 0.4);
+    --aura-warm-1: rgba(224, 182, 169, 0.45);
+    --aura-warm-2: rgba(235, 206, 157, 0.45);
+
+    --ease-mindful: cubic-bezier(0.45, 0.05, 0.15, 1);
+    --duration-mood-shift: 4000ms;
+  }
+
   body {
-    @apply bg-[#faf9f6] text-on-surface font-sans antialiased;
+    @apply text-on-surface font-sans antialiased;
+    background-color: var(--bg-neutral);
     position: fixed;
     width: 100dvw;
     height: 100dvh;
@@ -167,14 +186,19 @@
 }
 
 @keyframes border-glow-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes fade-in-up {
   0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
   }
   100% {
-    background-position: 0% 50%;
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 

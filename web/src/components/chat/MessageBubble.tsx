@@ -75,10 +75,10 @@ const MessageChunk = React.memo<MessageChunkProps>(({
   const isGlowActive = isStreaming && isLastChunk;
   return (
     <div
-      className={`relative ${aiBubbleRadiusClass} text-on-surface px-4 py-2.5 text-[15px] leading-relaxed font-sans shadow-sm transition-all duration-300 ${
+      className={`relative ${aiBubbleRadiusClass} px-4 py-2.5 text-[15px] leading-relaxed font-sans shadow-[0_8px_32px_-4px_rgba(0,0,0,0.04)] border border-black/5 transition-all duration-300 text-[var(--ai-bubble-text)] ${
         isGlowActive
           ? 'streaming-glow-bubble bg-surface-container/90 backdrop-blur-md'
-          : 'bg-surface-container/70 backdrop-blur-[20px] shadow-inner-light border border-white/20'
+          : 'bg-[var(--ai-bubble-bg)] backdrop-blur-[24px]'
       }`}
     >
       <div className="gemini-prose">
@@ -127,20 +127,18 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
    * bubble in a group gets a tighter radius to suggest continuity.
    */
   const aiBubbleRadius = (idx: number) => {
-    if (idx === 0 && isFirstInGroup) return 'rounded-[22px] rounded-tl-[4px]';
-    return 'rounded-[22px]';
+    if (idx === 0 && isFirstInGroup) return 'rounded-[4px_24px_24px_24px]';
+    return 'rounded-[24px]';
   };
 
-  const userBubbleRadius = 'rounded-[22px]';
+  const userBubbleRadius = isFirstInGroup ? 'rounded-[24px_4px_24px_24px]' : 'rounded-[24px]';
 
   if (message.isHidden) return null;
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 12, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+    <div 
       className={`group relative flex items-start gap-2 w-full ${isUser ? 'justify-end' : 'justify-start'}`}
+      style={{ animation: 'fade-in-up 800ms var(--ease-mindful) forwards' }}
     >
 
       {/* AI Avatar — only show on the first message in a group */}
@@ -166,7 +164,7 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
         {isUser ? (
           /* ── User Bubble ── */
           <div
-            className={`relative ${userBubbleRadius} px-4 py-2.5 text-[15px] md:text-[16px] leading-relaxed font-sans bg-primary-container text-[#1a1c1a] shadow-glow`}
+            className={`relative ${userBubbleRadius} px-4 py-2.5 text-[15px] md:text-[16px] leading-relaxed font-sans bg-[var(--user-bubble-bg)] text-[var(--user-bubble-text)]`}
           >
             <p className="whitespace-pre-wrap">{chunks[0]}</p>
           </div>
@@ -360,7 +358,7 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
           </>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 };
 
