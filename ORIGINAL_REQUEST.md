@@ -459,6 +459,38 @@ Ensure the Desktop Header (containing the History Clock icon and Logout button) 
 - [ ] Code analysis confirms the `ChatPanel` container uses appropriate flexbox rules (e.g., `justify-end` or `mt-auto` strategies) to anchor messages to the bottom when the list is sparse.
 - [ ] The `App.tsx` desktop header wrapper is verified to possess `w-full` and `justify-between` without any `max-w-*` constraints bounding its width.
 
-### Visual & Regression (Agent-as-Judge)
 - [ ] Visual inspection confirms that no UI elements are overlapping awkwardly (e.g., the camera does not cover text bubbles).
 - [ ] The layout remains fully responsive, and the `InputBar` remains correctly aligned and fixed at the bottom.
+
+## Follow-up — 2026-07-08T09:32:51+08:00
+
+# Teamwork Project Prompt — Draft
+
+> Status: Launched
+> Goal: Craft prompt → get user approval → delegate to teamwork_preview
+
+Refine and polish the RE-THINK chat interface with strict alignment and meticulous attention to detail, using browser inspection to identify and fix visual layout issues.
+
+Working directory: /Users/chenhaoran/工程文件/心理大赛/web
+Integrity mode: development
+
+## Requirements
+
+### R1. Visual Inspection via Browser
+The team must use a browser subagent to visually inspect the local development version of the chat interface, including the sidebar, message bubbles, input bar, and header elements.
+
+### R2. Strict Alignment & Polish
+Identify and fix any misalignment, inconsistent padding/margins, orphaned text, or visual glitches in the React components to achieve a meticulously polished UI.
+
+### R3. Development Environment
+You must start and manage the local Vite development server (`npm run dev`) to allow the browser subagent to access the application. 
+
+## Acceptance Criteria
+
+### Browser Verification
+- [ ] A browser subagent has successfully navigated to the local dev server and captured screenshots of the chat interface.
+- [ ] The browser subagent has analyzed the screenshots and confirmed that all identified alignment issues have been resolved.
+
+### Build Quality
+- [ ] The project builds successfully (`npm run build`) without errors after the UI modifications.
+
