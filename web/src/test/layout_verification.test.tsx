@@ -166,7 +166,7 @@ describe('Empirical Layout Verification Tests', () => {
       expect(mainChatPanel.className).toContain('flex-col');
 
       // Intermediate centering & flex container
-      const flexInnerContainer = mainChatPanel.querySelector('.max-w-2xl') as HTMLElement;
+      const flexInnerContainer = mainChatPanel.querySelector('.max-w-3xl') as HTMLElement;
       expect(flexInnerContainer).toBeInTheDocument();
       expect(flexInnerContainer.className).toContain('flex-1');
       expect(flexInnerContainer.className).toContain('flex');

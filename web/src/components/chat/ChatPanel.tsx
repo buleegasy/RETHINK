@@ -55,7 +55,7 @@ export const ChatPanel: React.FC = () => {
       onScroll={handleScroll}
       className="flex-1 overflow-y-auto px-3 pt-4 pb-4 md:px-8 md:pt-20 md:pb-8 scroll-smooth bg-transparent relative z-10 flex flex-col"
     >
-      <div className="max-w-[800px] mx-auto w-full flex-1 flex flex-col gap-1">
+      <div className="max-w-3xl mx-auto w-full flex-1 flex flex-col gap-1">
         <AnimatePresence mode="wait">
           {!hasCompletedOnboarding ? (
             !showEmojiSelector ? (
@@ -65,6 +65,7 @@ export const ChatPanel: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
                 transition={{ duration: 0.3 }}
+                className="flex-1 flex flex-col justify-center w-full h-full"
               >
                 <GeminiWelcome onStart={handleStart} />
               </motion.div>

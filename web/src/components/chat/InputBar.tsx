@@ -33,7 +33,6 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
   const isListening = voiceState === 'listening';
 
   const lastHeightRef = useRef<number>(0);
-  const lastInputLengthRef = useRef<number>(0);
 
   useEffect(() => {
     // Progressive enhancement: only use JS resize if CSS field-sizing is unsupported
@@ -43,27 +42,12 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
     
     const textarea = textareaRef.current;
     if (textarea) {
-      const currentLength = input.length;
-      const prevLength = lastInputLengthRef.current;
-      lastInputLengthRef.current = currentLength;
       const maxH = window.innerWidth < 768 ? 100 : 160;
-
-      if (currentLength < prevLength || currentLength === 0) {
-        // Only set height to 'auto' to recalculate when the input length decreases (e.g. deletion, clear)
-        textarea.style.height = 'auto';
-        const scrollHeight = textarea.scrollHeight;
-        const targetHeight = Math.min(scrollHeight, maxH);
-        textarea.style.height = `${targetHeight}px`;
-        lastHeightRef.current = targetHeight;
-      } else {
-        // When typing forward, scrollHeight will naturally expand if text wraps
-        const scrollHeight = textarea.scrollHeight;
-        const targetHeight = Math.min(scrollHeight, maxH);
-        if (lastHeightRef.current !== targetHeight) {
-          textarea.style.height = `${targetHeight}px`;
-          lastHeightRef.current = targetHeight;
-        }
-      }
+      textarea.style.height = 'auto';
+      const scrollHeight = textarea.scrollHeight;
+      const targetHeight = Math.min(scrollHeight, maxH);
+      textarea.style.height = `${targetHeight}px`;
+      lastHeightRef.current = targetHeight;
     }
   }, [input]);
 
@@ -110,7 +94,9 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
 
         {/* Input Container */}
         <div className={`w-full relative transition-all duration-500 max-w-3xl mx-auto ${isStreaming ? 'opacity-50' : ''}`}>
-          <div className={`relative flex items-end bg-[rgba(255,255,255,0.9)] backdrop-blur-[16px] rounded-full p-2 gap-1 transition-all duration-[600ms] ${
+          <div className={`relative flex items-end bg-[rgba(255,255,255,0.9)] backdrop-blur-[16px] p-2 gap-1 transition-all duration-[600ms] ${
+            (input.includes('\n') || input.length > 60) ? 'rounded-3xl' : 'rounded-full'
+          } ${
             isFocused
               ? 'border-[rgba(0,0,0,0.1)] ring-4 ring-black/5 shadow-[0_24px_64px_rgba(0,0,0,0.12)]'
               : 'border border-[rgba(0,0,0,0.05)] shadow-[0_12px_48px_rgba(0,0,0,0.08)] hover:border-black/10'

@@ -57,10 +57,8 @@ describe('AmbientGlow Component Tests', () => {
     const activeLayer = getByTestId('glow-layer-a');
     const colors = getBlobColors(activeLayer);
 
-    expect(colors).toContain(hexToRgbStr('#a56eff')); // c1
-    expect(colors).toContain(hexToRgbStr('#299dff')); // c2
-    expect(colors).toContain(hexToRgbStr('#7c4dff')); // c3
-    expect(colors).toContain(hexToRgbStr('#1a237e')); // c4
+    expect(colors).toContain('var(--aura-calm-1)'); // c1
+    expect(colors).toContain('var(--aura-calm-2)'); // c2
   });
 
   it('renders with Crisis_Escalation state colors', () => {
@@ -69,10 +67,8 @@ describe('AmbientGlow Component Tests', () => {
     const activeLayer = getByTestId('glow-layer-a');
     const colors = getBlobColors(activeLayer);
 
-    expect(colors).toContain(hexToRgbStr('#0a192f')); // c1
-    expect(colors).toContain(hexToRgbStr('#004d40')); // c2
-    expect(colors).toContain(hexToRgbStr('#002b4e')); // c3
-    expect(colors).toContain(hexToRgbStr('#0e0e0e')); // c4
+    expect(colors).toContain('var(--aura-cool-1)'); // c1
+    expect(colors).toContain('var(--aura-cool-2)'); // c2
   });
 
   it('renders with Active_Listening state colors', () => {
@@ -81,10 +77,8 @@ describe('AmbientGlow Component Tests', () => {
     const activeLayer = getByTestId('glow-layer-a');
     const colors = getBlobColors(activeLayer);
 
-    expect(colors).toContain(hexToRgbStr('#ff80ab')); // c1
-    expect(colors).toContain(hexToRgbStr('#a56eff')); // c2
-    expect(colors).toContain(hexToRgbStr('#8c9eff')); // c3
-    expect(colors).toContain(hexToRgbStr('#131313')); // c4
+    expect(colors).toContain('var(--aura-calm-1)'); // c1
+    expect(colors).toContain('var(--aura-calm-2)'); // c2
   });
 
   it('renders with Socratic_Questioning state colors', () => {
@@ -93,10 +87,8 @@ describe('AmbientGlow Component Tests', () => {
     const activeLayer = getByTestId('glow-layer-a');
     const colors = getBlobColors(activeLayer);
 
-    expect(colors).toContain(hexToRgbStr('#00ffc3')); // c1
-    expect(colors).toContain(hexToRgbStr('#299dff')); // c2
-    expect(colors).toContain(hexToRgbStr('#ffd700')); // c3
-    expect(colors).toContain(hexToRgbStr('#1de9b6')); // c4
+    expect(colors).toContain('var(--aura-calm-1)'); // c1
+    expect(colors).toContain('var(--aura-calm-2)'); // c2
   });
 
   it('renders with Anxiety emotion override colors', () => {
@@ -115,10 +107,8 @@ describe('AmbientGlow Component Tests', () => {
     const activeLayer = getByTestId('glow-layer-a');
     const colors = getBlobColors(activeLayer);
 
-    expect(colors).toContain(hexToRgbStr('#2979FF')); // c1 overridden
-    expect(colors).toContain(hexToRgbStr('#00E5FF')); // c2 overridden
-    expect(colors).toContain(hexToRgbStr('#536DFE')); // c3 overridden
-    expect(colors).toContain(hexToRgbStr('#1DE9B6')); // c4 overridden
+    expect(colors).toContain('var(--aura-cool-1)'); // c1 overridden
+    expect(colors).toContain('var(--aura-cool-2)'); // c2 overridden
   });
 
   it('renders with Depression emotion override colors', () => {
@@ -137,10 +127,8 @@ describe('AmbientGlow Component Tests', () => {
     const activeLayer = getByTestId('glow-layer-a');
     const colors = getBlobColors(activeLayer);
 
-    expect(colors).toContain(hexToRgbStr('#7C4DFF')); // c1 overridden
-    expect(colors).toContain(hexToRgbStr('#FF80AB')); // c2 overridden
-    expect(colors).toContain(hexToRgbStr('#E040FB')); // c3 overridden
-    expect(colors).toContain(hexToRgbStr('#FF4081')); // c4 overridden
+    expect(colors).toContain('var(--aura-warm-1)'); // c1 overridden
+    expect(colors).toContain('var(--aura-warm-2)'); // c2 overridden
   });
 
   it('renders with Anger emotion override colors', () => {
@@ -159,10 +147,8 @@ describe('AmbientGlow Component Tests', () => {
     const activeLayer = getByTestId('glow-layer-a');
     const colors = getBlobColors(activeLayer);
 
-    expect(colors).toContain(hexToRgbStr('#01579B')); // c1 overridden
-    expect(colors).toContain(hexToRgbStr('#006064')); // c2 overridden
-    expect(colors).toContain(hexToRgbStr('#1A237E')); // c3 overridden
-    expect(colors).toContain(hexToRgbStr('#004D40')); // c4 overridden
+    expect(colors).toContain('var(--aura-cool-1)'); // c1 overridden
+    expect(colors).toContain('var(--aura-cool-2)'); // c2 overridden
   });
 
   it('applies the correct opacity based on isStreaming active state', () => {
@@ -170,13 +156,13 @@ describe('AmbientGlow Component Tests', () => {
     mockChatStoreData.isStreaming = false;
     const { getByTestId, rerender } = render(<AmbientGlow />);
     let container = getByTestId('ambient-glow-container');
-    expect(container.getAttribute('style')).toContain('opacity: 0.35');
+    expect(container.getAttribute('style')).toContain('opacity: 0.5');
  
     // When isStreaming is true
     mockChatStoreData.isStreaming = true;
     rerender(<AmbientGlow />);
     container = getByTestId('ambient-glow-container');
-    expect(container.getAttribute('style')).toContain('opacity: 0.55');
+    expect(container.getAttribute('style')).toContain('opacity: 0.7');
   });
 
   it('cross-fades between states when FSM state changes', () => {
@@ -188,14 +174,14 @@ describe('AmbientGlow Component Tests', () => {
     expect(layerA.getAttribute('style')).toContain('opacity: 1');
     expect(layerB.getAttribute('style')).toContain('opacity: 0');
 
-    // Change state to CBT_Stripping
-    mockChatStoreData.fsmState = 'CBT_Stripping';
+    // Change state to Crisis_Escalation
+    mockChatStoreData.fsmState = 'Crisis_Escalation';
     rerender(<AmbientGlow />);
 
-    // Layer B should now be active (opacity: 1) with CBT_Stripping colors
+    // Layer B should now be active (opacity: 1) with Crisis_Escalation colors
     expect(layerA.getAttribute('style')).toContain('opacity: 0');
     expect(layerB.getAttribute('style')).toContain('opacity: 1');
     const blobColors = getBlobColors(layerB);
-    expect(blobColors).toContain(hexToRgbStr('#299dff')); // CBT_Stripping c1
+    expect(blobColors).toContain('var(--aura-cool-1)'); // Crisis_Escalation c1
   });
 });

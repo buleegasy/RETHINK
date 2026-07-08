@@ -111,7 +111,7 @@ export default {
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
         display: ['Sora', '"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-        serif: ['Sora', 'sans-serif'],
+        serif: ['"Playfair Display"', 'Georgia', 'serif'],
       },
       borderRadius: {
         'sm': '0.25rem',

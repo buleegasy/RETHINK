@@ -30,6 +30,7 @@ export const chatApi = {
       headers,
       body: JSON.stringify({
         ...payload,
+        emotionPayload: payload.facialEmotion,
         stream: true,
       }),
     });

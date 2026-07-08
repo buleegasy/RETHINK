@@ -184,8 +184,10 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
 
       <aside
         ref={sidebarRef}
-        className={`fixed md:static inset-y-0 left-0 z-50 md:z-auto h-full w-[min(360px,88vw)] md:w-[280px] shrink-0 bg-surface-container/60 backdrop-blur-xl border-e border-outline-variant/30 shadow-2xl md:shadow-none p-5 flex flex-col font-sans overflow-hidden transition-transform duration-300 ease-out ${
-          isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        className={`fixed md:static inset-y-0 left-0 z-50 h-full shrink-0 bg-surface-container/60 backdrop-blur-xl border-e border-outline-variant/30 shadow-2xl md:shadow-none flex flex-col font-sans overflow-hidden transition-all duration-300 ease-out ${
+          isOpen
+            ? 'translate-x-0 w-[min(360px,88vw)] md:w-[280px] p-5 opacity-100 visible md:visible'
+            : '-translate-x-full w-0 p-0 border-transparent opacity-0 pointer-events-none invisible md:invisible md:w-0 md:p-0 md:border-transparent'
         }`}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
@@ -222,7 +224,9 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
               type="button"
               onClick={() => {
                 clearChat();
-                onClose();
+                if (window.innerWidth < 768) {
+                  onClose();
+                }
               }}
               className="w-full mb-4 h-10 rounded-full bg-on-surface/90 text-surface text-xs font-medium tracking-[0.2em] uppercase flex items-center justify-center gap-2 hover:bg-on-surface active:scale-[0.99] transition-all shadow-sm cursor-pointer"
             >
@@ -308,7 +312,7 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
             {/* Embedded Camera Panel & Account Info */}
             <div className="mt-auto pt-4 flex-shrink-0 w-full flex flex-col">
               <div className="w-full flex flex-col gap-3 bg-surface-container/40 border border-outline-variant/20 rounded-[20px] p-3 shadow-sm">
-                <CameraPanel onEmotionChange={onEmotionChange} />
+                {isOpen && <CameraPanel onEmotionChange={onEmotionChange} />}
                 
                 {user && (
                   <div className="w-full flex items-center justify-between">

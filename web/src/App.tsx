@@ -34,10 +34,10 @@ function App() {
   const emotionHistoryRef = useRef<EmotionResult[]>([]);
 
   const handleEmotionChange = useCallback((emotion: EmotionResult | null) => {
-    if (emotion) {
+    if (emotion && hasCompletedOnboarding) {
       emotionHistoryRef.current.push(emotion);
     }
-  }, []);
+  }, [hasCompletedOnboarding]);
 
   const handleSendWithEmotion = useCallback((text: string, profile?: UserProfile) => {
     let emotionPayload = undefined;
@@ -90,8 +90,45 @@ function App() {
 
           {/* 主对话区 (Workspace Layout) */}
           <div className="flex flex-col flex-1 h-full relative z-10 min-w-0">
+            {/* ── 桌面端顶部 Header (用于 E2E & unit tests) ── */}
+            <div className="absolute top-0 left-0 w-full pointer-events-none z-20 hidden md:flex">
+              <div className="w-full flex justify-between items-center px-4 md:px-8 py-4 pointer-events-auto">
+                <div className="flex items-center gap-4">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setSidebarOpen(true)}
+                    className="text-on-surface-variant hover:text-on-surface min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors cursor-pointer"
+                    aria-label="历史对话"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                      <line x1="4" y1="12" x2="20" y2="12"></line>
+                      <line x1="4" y1="6" x2="20" y2="6"></line>
+                      <line x1="4" y1="18" x2="20" y2="18"></line>
+                    </svg>
+                  </motion.button>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  {stageIndex > 0 && (
+                    <div className="text-xs tracking-wide text-on-surface-variant bg-surface-container-high/40 px-2.5 py-1 rounded-full border border-outline-variant/10">
+                      进度: {stageIndex}/4
+                    </div>
+                  )}
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={logout}
+                    className="text-xs text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-xl bg-surface-container-high/40 hover:bg-surface-container-high/80 border border-outline-variant/10 transition-all cursor-pointer"
+                  >
+                    退出
+                  </motion.button>
+                </div>
+              </div>
+            </div>
+
             {/* ── 移动端顶部 Header ── */}
-            <div className="md:hidden flex justify-center pt-[max(env(safe-area-inset-top),12px)] pb-2.5 shrink-0 z-20 border-b border-outline-variant/30">
+            <div className="md:hidden flex justify-center pt-[max(env(safe-area-inset-top),12px)] pb-2.5 shrink-0 z-20 border-b border-outline-variant/30 bg-surface-dim/80 backdrop-blur-md">
               <div className="max-w-2xl mx-auto w-full px-4 flex items-center justify-between">
                 {/* 左侧：Hamburger 菜单 */}
                 <div className="flex items-center w-[80px] justify-start">

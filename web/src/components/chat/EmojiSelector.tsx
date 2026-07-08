@@ -29,7 +29,7 @@ const EMOJI_OPTIONS = [
 
 export const EmojiSelector: React.FC<EmojiSelectorProps> = ({ onSelect, onSkip }) => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[75vh] w-full px-4 select-none">
+    <div className="flex flex-col items-center justify-center min-h-fit md:min-h-[75vh] py-8 md:py-0 w-full px-4 select-none">
       {/* Header Text */}
       <motion.div
         initial={{ opacity: 0, y: -15, filter: 'blur(10px)' }}

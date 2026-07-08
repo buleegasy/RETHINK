@@ -100,7 +100,7 @@ export const CameraPanel: React.FC<CameraPanelProps> = ({ onEmotionChange }) => 
                   style={{ width: `${currentEmotion.confidence}%` }}
                 />
               </div>
-              <p className="text-[8px] font-light tracking-widest text-on-surface-dim mt-1.5">本地检测</p>
+              <p className="text-[10px] font-normal tracking-widest text-on-surface-dim mt-1.5">本地检测</p>
             </>
           ) : (
             <p className="text-[10px] font-light tracking-widest text-on-surface-variant/80">面孔检测中...</p>

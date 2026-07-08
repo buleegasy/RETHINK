@@ -61,14 +61,15 @@ describe('MessageBubble Component', () => {
     const chunkDiv = screen.getByText('This is a message from assistant.').closest('div')?.parentElement;
     expect(chunkDiv).toHaveClass('streaming-glow-bubble');
     expect(chunkDiv).toHaveClass('bg-surface-container/90');
-    expect(chunkDiv).toHaveClass('backdrop-blur-sm');
+    expect(chunkDiv).toHaveClass('backdrop-blur-md');
     expect(chunkDiv).toHaveClass('transition-all');
     expect(chunkDiv).toHaveClass('duration-300');
 
     // Rerender with isStreaming=false
     rerender(<MessageBubble message={message} isStreaming={false} />);
     expect(chunkDiv).not.toHaveClass('streaming-glow-bubble');
-    expect(chunkDiv).toHaveClass('bg-surface-container');
+    expect(chunkDiv).toHaveClass('bg-[var(--ai-bubble-bg)]');
+    expect(chunkDiv).toHaveClass('backdrop-blur-[24px]');
     expect(chunkDiv).not.toHaveClass('bg-surface-container/90');
   });
 
