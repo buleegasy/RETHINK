@@ -204,19 +204,12 @@ export function LoginWall() {
       <AnimatePresence>
         {!isLoginModalOpen && (
           <>
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1 }}
-              className="absolute top-6 left-6 right-6 md:top-8 md:left-8 md:right-8 flex justify-between items-center text-[9px] md:text-[10px] tracking-[0.3em] uppercase text-on-surface-variant/40 font-medium z-10 pointer-events-none"
-            >
-              <span>智能系统 01</span>
-              <span>心境空间</span>
-            </motion.div>
             
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1 }}
               className="absolute bottom-6 left-6 right-6 md:bottom-8 md:left-8 md:right-8 flex justify-center text-[9px] md:text-[10px] tracking-[0.2em] uppercase text-on-surface-variant/30 font-medium z-10 pointer-events-none"
             >
-              <span>© 2026 RETHINK 心理疏导智能体</span>
+              <span>by陈浩然</span>
             </motion.div>
           </>
         )}
