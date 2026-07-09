@@ -202,19 +202,20 @@
   }
 }
 
+/* ── Heartbeat Pulse (synced to resting heartrate ~66bpm = 1.8s) ── */
 @keyframes bubble-breath {
   0%, 100% {
     box-shadow: 0 4px 12px rgba(255, 183, 77, 0.04), 0 0 8px rgba(165, 214, 167, 0.08);
   }
   50% {
-    box-shadow: 0 4px 20px rgba(255, 183, 77, 0.12), 0 0 16px rgba(206, 147, 216, 0.18);
+    box-shadow: 0 4px 24px rgba(255, 183, 77, 0.16), 0 0 20px rgba(206, 147, 216, 0.22);
   }
 }
 
-/* Premium Streaming Glow Border Effect */
+/* ── P1: Premium Streaming Glow Border Effect (Conic Gradient) ── */
 .streaming-glow-bubble {
   position: relative;
-  animation: bubble-breath 4s ease-in-out infinite;
+  animation: bubble-breath 1.8s cubic-bezier(0.45, 0.05, 0.15, 1) infinite;
   z-index: 1;
 }
 
@@ -223,18 +224,124 @@
   position: absolute;
   inset: -1.5px;
   border-radius: inherit;
-  background: linear-gradient(90deg, #A5D6A7, #FFB74D, #CE93D8, #A5D6A7);
-  background-size: 300% 300%;
-  animation: border-glow-flow 4s ease-in-out infinite;
+  background: conic-gradient(from var(--glow-angle, 0deg), #A5D6A7, #FFB74D, #CE93D8, #A5D6A7);
+  animation: conic-glow-rotate 2.5s linear infinite;
   z-index: -1;
   padding: 1.5px;
   pointer-events: none;
-  
-  /* Masking trick to show only the border outline and keep center transparent */
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
   -webkit-mask-composite: xor;
+}
+
+.streaming-glow-bubble::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--glow-angle, 0deg), 
+    rgba(165, 214, 167, 0.15), 
+    rgba(255, 183, 77, 0.15), 
+    rgba(206, 147, 216, 0.15), 
+    rgba(165, 214, 167, 0.15)
+  );
+  animation: conic-glow-rotate 2.5s linear infinite;
+  filter: blur(12px);
+  z-index: -2;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+@keyframes conic-glow-rotate {
+  to { --glow-angle: 360deg; }
+}
+
+/* Register the custom property for conic-gradient animation */
+@property --glow-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* ── P0: InputBar Streaming Glow ── */
+.inputbar-streaming-glow {
+  position: relative;
+}
+
+.inputbar-streaming-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--glow-angle, 0deg), #A5D6A7, #FFB74D, #CE93D8, #A5D6A7);
+  animation: conic-glow-rotate 4s linear infinite;
+  padding: 2px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-mindful);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+}
+
+.inputbar-streaming-glow::after {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--glow-angle, 0deg), 
+    rgba(165, 214, 167, 0.12), 
+    rgba(255, 183, 77, 0.12), 
+    rgba(206, 147, 216, 0.12), 
+    rgba(165, 214, 167, 0.12)
+  );
+  animation: conic-glow-rotate 4s linear infinite;
+  filter: blur(16px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-mindful);
+}
+
+.inputbar-streaming-glow.is-glowing::before {
+  opacity: 0.85;
+}
+
+.inputbar-streaming-glow.is-glowing::after {
+  opacity: 0.6;
+  animation: conic-glow-rotate 4s linear infinite, inputbar-halo-breath 1.8s cubic-bezier(0.45, 0.05, 0.15, 1) infinite;
+}
+
+@keyframes inputbar-halo-breath {
+  0%, 100% { opacity: 0.4; filter: blur(16px); }
+  50% { opacity: 0.7; filter: blur(20px); }
+}
+
+/* ── P3: Message Entrance Sweep (scan-line highlight) ── */
+.ai-bubble-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.ai-bubble-sweep::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 60%
+  );
+  transform: translateX(-100%);
+  animation: entrance-sweep 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.15s forwards;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+@keyframes entrance-sweep {
+  to { transform: translateX(100%); }
 }
 
 /* =====================================================================

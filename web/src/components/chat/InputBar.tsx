@@ -93,20 +93,29 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
 
 
         {/* Input Container */}
-        <div className={`w-full relative transition-all duration-500 max-w-3xl mx-auto ${isStreaming ? 'opacity-50' : ''}`}>
-          <div className={`relative flex items-end bg-[rgba(255,255,255,0.9)] backdrop-blur-[16px] p-2 gap-1 transition-all duration-[600ms] ${
-            (input.includes('\n') || input.length > 60) ? 'rounded-3xl' : 'rounded-full'
-          } ${
-            isFocused
-              ? 'border-[rgba(0,0,0,0.1)] ring-4 ring-black/5 shadow-[0_24px_64px_rgba(0,0,0,0.12)]'
-              : 'border border-[rgba(0,0,0,0.05)] shadow-[0_12px_48px_rgba(0,0,0,0.08)] hover:border-black/10'
-          }`} style={{ transitionTimingFunction: 'var(--ease-mindful)' }}>
+        <div className={`w-full relative max-w-3xl mx-auto`}>
+          <motion.div 
+            animate={{
+              boxShadow: isFocused
+                ? '0 32px 80px rgba(0,0,0,0.15)'
+                : '0 12px 48px rgba(0,0,0,0.08)'
+            }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            className={`inputbar-streaming-glow ${isStreaming ? 'is-glowing' : ''} relative flex items-end bg-[rgba(255,255,255,0.9)] backdrop-blur-[16px] p-2 gap-1 ${
+              (input.includes('\n') || input.length > 60) ? 'rounded-3xl' : 'rounded-full'
+            } ${
+              isFocused
+                ? 'border-[rgba(0,0,0,0.1)] ring-4 ring-black/5'
+                : 'border border-[rgba(0,0,0,0.05)] hover:border-black/10'
+            }`}
+          >
             
             {/* Voice Button or Spacer */}
             {isVoiceSupported ? (
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 onClick={handleVoiceToggle}
                 disabled={isStreaming}
                 aria-label={isListening ? '停止录音' : '语音输入'}
@@ -147,6 +156,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
             <motion.button
               whileHover={canSend ? { scale: 1.1 } : {}}
               whileTap={canSend ? { scale: 0.9 } : {}}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
               onClick={handleSend}
               disabled={!canSend}
               aria-label="发送消息"
@@ -162,7 +172,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
               </svg>
             </motion.button>
 
-          </div>
+          </motion.div>
         </div>
 
         {/* Bottom Disclaimer */}

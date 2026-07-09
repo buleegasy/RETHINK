@@ -100,6 +100,9 @@ export const ChatPanel: React.FC = () => {
                     layout="position"
                     key={msg.id || idx} 
                     className={needsGroupSep ? 'mt-8' : ''}
+                    transition={{
+                      layout: { type: "spring", stiffness: 150, damping: 20, mass: 0.8 }
+                    }}
                   >
                     <MessageBubble
                       message={msg}

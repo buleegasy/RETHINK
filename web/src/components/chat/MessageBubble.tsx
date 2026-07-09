@@ -46,10 +46,16 @@ interface MessageBubbleProps {
 }
 
 const TypingIndicator = () => (
-  <span className="inline-flex items-center gap-0.5 ml-1">
-    <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60 animate-bounce" style={{ animationDelay: '0ms' }} />
-    <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60 animate-bounce" style={{ animationDelay: '150ms' }} />
-    <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60 animate-bounce" style={{ animationDelay: '300ms' }} />
+  <span className="inline-flex items-center gap-0.5 ml-1 relative">
+    {/* Typing dots */}
+    {[0, 1, 2].map((i) => (
+      <motion.span
+        key={i}
+        animate={{ opacity: [0.4, 1, 0.4], y: [0, -3, 0] }}
+        transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.15, ease: "easeInOut" }}
+        className="w-1.5 h-1.5 rounded-full bg-current relative z-10"
+      />
+    ))}
   </span>
 );
 
@@ -73,12 +79,16 @@ const MessageChunk = React.memo<MessageChunkProps>(({
   isLastInGroup,
 }) => {
   const isGlowActive = isStreaming && isLastChunk;
+  // P3: Show entrance sweep only on non-streaming chunks (already rendered)
+  const showSweep = !isStreaming && !isLastChunk;
   return (
     <div
       className={`relative ${aiBubbleRadiusClass} px-4 py-2.5 text-[15px] leading-relaxed font-sans shadow-[0_8px_32px_-4px_rgba(0,0,0,0.04)] border border-black/5 transition-all duration-300 text-[var(--ai-bubble-text)] ${
         isGlowActive
           ? 'streaming-glow-bubble bg-surface-container/90 backdrop-blur-md'
           : 'bg-[var(--ai-bubble-bg)] backdrop-blur-[24px]'
+      } ${
+        showSweep ? 'ai-bubble-sweep' : ''
       }`}
     >
       <div className="gemini-prose">
@@ -136,9 +146,12 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
   if (message.isHidden) return null;
 
   return (
-    <div 
+    <motion.div 
+      layout="position"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: 'spring', damping: 22, stiffness: 120 }}
       className={`group relative flex items-start gap-2 w-full ${isUser ? 'justify-end' : 'justify-start'}`}
-      style={{ animation: 'fade-in-up 800ms var(--ease-mindful) forwards' }}
     >
 
       {/* AI Avatar — only show on the first message in a group */}
@@ -197,10 +210,10 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
                 <AnimatePresence initial={false}>
                   {showTechChain && (
                     <motion.div
-                      initial={{ opacity: 0, scaleY: 0, originY: 0 }}
-                      animate={{ opacity: 1, scaleY: 1, originY: 0 }}
-                      exit={{ opacity: 0, scaleY: 0, originY: 0 }}
-                      transition={{ duration: 0.2, ease: 'easeOut' }}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.25, ease: 'easeInOut' }}
                       className="overflow-hidden mt-1 w-full"
                     >
                       <div className="bg-surface-container/40 backdrop-blur-md border border-outline-variant/30 shadow-md rounded-xl p-3 text-[10.5px] font-mono text-on-surface max-w-[440px] w-full space-y-3">
@@ -358,7 +371,7 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
           </>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
