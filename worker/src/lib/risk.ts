@@ -72,7 +72,7 @@ export function assessRisk(input: RiskAssessmentInput): RiskAssessment {
     };
   }
 
-  if ((input.intentConfidence ?? 0) < 45) {
+  if ((input.intentConfidence ?? 0) < 0.45) {
     return {
       level: 'medium',
       reason: '意图不够清晰，保守提升风险等级以便后续观察。',

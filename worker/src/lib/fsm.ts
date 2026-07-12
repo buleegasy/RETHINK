@@ -412,7 +412,7 @@ function detectABCCompletion(text: string): boolean {
   const hasC = consequenceIndicators.some(kw => text.includes(kw));
 
   // 至少命中 A+B 或者三者都命中
-  return (hasA && hasB) || (hasA && hasB && hasC);
+  return (hasA && hasB) || (hasB && hasC);
 }
 
 /**
