@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useChatStore } from '../store/chatStore';
 import type { ChatMessage, SSEChunk, FSMState, UserProfile, TechChain } from '../types';
 import { chatApi } from '../api/chat';
+
 export function useChat() {
   const [error, setError] = useState<string | null>(null);
   
@@ -12,12 +13,17 @@ export function useChat() {
   const setIsStreaming = useChatStore(state => state.setIsStreaming);
   const setSessionId = useChatStore(state => state.setSessionId);
 
-  const sendMessage = async (
+  const sendMessage = useCallback(async (
     text: string, 
     profile?: UserProfile, 
     facialEmotion?: { label: string; labelZh: string; confidence: number },
     options?: { isHidden?: boolean }
   ) => {
+    // Concurrency guard: return immediately if already streaming
+    if (useChatStore.getState().isStreaming) {
+      return;
+    }
+
     if (!text.trim() && !profile) return;
 
     setError(null);
@@ -53,6 +59,81 @@ export function useChat() {
       let done = false;
       let buffer = '';
 
+      const processLine = (line: string) => {
+        if (line.startsWith('data: ')) {
+          const dataStr = line.substring(6).trim();
+          if (!dataStr) return;
+          
+          try {
+            const parsed: SSEChunk = JSON.parse(dataStr);
+            if (parsed.error) {
+              throw new Error(parsed.error);
+            }
+            
+            // 更新文字
+            if (parsed.delta) {
+              updateLastMessage(parsed.delta);
+            }
+            // 更新 CBT 阶段（向后兼容）
+            if (parsed.stage) {
+              setStage(parsed.stage);
+            }
+            // 更新 FSM 状态
+            if (parsed.fsmState) {
+              setFSMState(parsed.fsmState as FSMState);
+              if (parsed.fsmState === 'Crisis_Escalation') {
+                done = true;
+                reader.cancel().catch(e => console.warn(e));
+              }
+            }
+            // 更新 UI 控制参数
+            if (parsed.uiControl) {
+              useChatStore.getState().setUIControl(parsed.uiControl);
+            }
+            // 更新破冰层级
+            if (parsed.icebreakerLayer) {
+              useChatStore.getState().setIcebreakerLayer(parsed.icebreakerLayer);
+            }
+            // 存储后端返回的 sessionId
+            const currentSessionId = useChatStore.getState().sessionId;
+            if (parsed.sessionId && !currentSessionId) {
+              setSessionId(parsed.sessionId);
+            }
+            
+            // 当收到最终块时，存储技术链元数据（含 FSM 信息）
+            if (parsed.done && (parsed.intent || parsed.model)) {
+              const techChain: TechChain = {
+                intent: (parsed.intent === 'casual' || parsed.intent === 'emotional' || parsed.intent === 'crisis' || parsed.intent === 'ambiguous')
+                  ? parsed.intent
+                  : 'ambiguous',
+                ragRetrievalMode: parsed.ragRetrievalMode,
+                riskLevel: parsed.riskLevel,
+                riskReason: parsed.riskReason,
+                ragQueried: parsed.ragQueried,
+                ragQuery: parsed.ragQuery,
+                ragDecisionReason: parsed.ragDecisionReason,
+                ragChunks: parsed.ragChunks || 0,
+                ragSources: parsed.ragSources || [],
+                ragScores: parsed.ragScores || [],
+                ragSnippets: parsed.ragSnippets || [],
+                retrievedEvidence: parsed.retrieved_evidence,
+                reasoningDeduction: parsed.reasoning_deduction,
+                intentConfidence: parsed.intentConfidence,
+                intentTriggers: parsed.intentTriggers || [],
+                intentEmotion: parsed.intentEmotion,
+                model: parsed.model || 'unknown',
+                fsmState: parsed.fsmState,
+                fsmTrigger: parsed.fsmTrigger,
+              };
+              useChatStore.getState().setLastMessageTechChain(techChain);
+            }
+          } catch (e) {
+            // 忽略非 JSON 数据行
+            console.warn('Failed to parse SSE data:', dataStr, e);
+          }
+        }
+      };
+
       while (!done) {
         const { value, done: readerDone } = await reader.read();
         done = readerDone;
@@ -65,82 +146,16 @@ export function useChat() {
           buffer = lines.pop() || '';
           
           for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const dataStr = line.substring(6).trim();
-              if (!dataStr) continue;
-              
-              try {
-                const parsed: SSEChunk = JSON.parse(dataStr);
-                if (parsed.error) {
-                  throw new Error(parsed.error);
-                }
-                
-                // 更新文字
-                if (parsed.delta) {
-                  updateLastMessage(parsed.delta);
-                }
-                // 更新 CBT 阶段（向后兼容）
-                if (parsed.stage) {
-                  setStage(parsed.stage);
-                }
-                // 更新 FSM 状态
-                if (parsed.fsmState) {
-                  setFSMState(parsed.fsmState as FSMState);
-                  if (parsed.fsmState === 'Crisis_Escalation') {
-                    done = true;
-                    reader.cancel().catch(e => console.warn(e));
-                    break;
-                  }
-                }
-                // 更新 UI 控制参数
-                if (parsed.uiControl) {
-                  useChatStore.getState().setUIControl(parsed.uiControl);
-                }
-                // 更新破冰层级
-                if (parsed.icebreakerLayer) {
-                  useChatStore.getState().setIcebreakerLayer(parsed.icebreakerLayer);
-                }
-                // 存储后端返回的 sessionId
-                const currentSessionId = useChatStore.getState().sessionId;
-                if (parsed.sessionId && !currentSessionId) {
-                  setSessionId(parsed.sessionId);
-                }
-                
-                // 当收到最终块时，存储技术链元数据（含 FSM 信息）
-                if (parsed.done && (parsed.intent || parsed.model)) {
-                  const techChain: TechChain = {
-                    intent: (parsed.intent === 'casual' || parsed.intent === 'emotional' || parsed.intent === 'crisis' || parsed.intent === 'ambiguous')
-                      ? parsed.intent
-                      : 'ambiguous',
-                    ragRetrievalMode: parsed.ragRetrievalMode,
-                    riskLevel: parsed.riskLevel,
-                    riskReason: parsed.riskReason,
-                    ragQueried: parsed.ragQueried,
-                    ragQuery: parsed.ragQuery,
-                    ragDecisionReason: parsed.ragDecisionReason,
-                    ragChunks: parsed.ragChunks || 0,
-                    ragSources: parsed.ragSources || [],
-                    ragScores: parsed.ragScores || [],
-                    ragSnippets: parsed.ragSnippets || [],
-                    retrievedEvidence: parsed.retrieved_evidence,
-                    reasoningDeduction: parsed.reasoning_deduction,
-                    intentConfidence: parsed.intentConfidence,
-                    intentTriggers: parsed.intentTriggers || [],
-                    intentEmotion: parsed.intentEmotion,
-                    model: parsed.model || 'unknown',
-                    fsmState: parsed.fsmState,
-                    fsmTrigger: parsed.fsmTrigger,
-                  };
-                  useChatStore.getState().setLastMessageTechChain(techChain);
-                }
-              } catch (e) {
-                // 忽略非 JSON 数据行
-                console.warn('Failed to parse SSE data:', dataStr, e);
-              }
-            }
+            processLine(line);
           }
         }
       }
+
+      // Fix boundary case: if the HTTP stream ends without a final trailing \n, parse the remaining content in buffer
+      if (buffer.startsWith('data: ')) {
+        processLine(buffer);
+      }
+
     } catch (err) {
       console.error('Chat error:', err);
       setError(err instanceof Error ? err.message : '发送失败，请重试');
@@ -148,7 +163,7 @@ export function useChat() {
     } finally {
       setIsStreaming(false);
     }
-  };
+  }, [addMessage, updateLastMessage, setStage, setFSMState, setIsStreaming, setSessionId]);
 
   return { sendMessage, error };
 }

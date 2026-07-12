@@ -101,6 +101,29 @@ export async function ingestDocument(
     await env.VECTORIZE.upsert(batch);
   }
 
+  // 3.1 Mirror knowledge chunks in D1 table
+  try {
+    const statements = chunks.map(chunk =>
+      env.DB.prepare(`
+        INSERT INTO knowledge_chunks (id, document_id, document_title, heading_path, chunk_index, content, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, unixepoch())
+        ON CONFLICT(id) DO UPDATE SET
+          document_id = excluded.document_id,
+          document_title = excluded.document_title,
+          heading_path = excluded.heading_path,
+          chunk_index = excluded.chunk_index,
+          content = excluded.content
+      `).bind(chunk.id, chunk.documentId, chunk.documentTitle, chunk.headingPath || '', chunk.chunkIndex, chunk.content)
+    );
+    for (let i = 0; i < statements.length; i += BATCH_SIZE) {
+      const batchStatements = statements.slice(i, i + BATCH_SIZE);
+      await env.DB.batch(batchStatements);
+    }
+  } catch (e) {
+    console.error('Failed to save knowledge chunks to D1:', e);
+    throw e;
+  }
+
   // 4. 记录文档元数据到 D1
   try {
     await env.DB.prepare(`
@@ -137,38 +160,69 @@ export async function retrieveContext(
   minScore: number = 0.5,
   options?: RAGRetrievalOptions
 ): Promise<RAGContext> {
-  // 1. 将用户查询向量化
-  const queryEmbeddings = await generateEmbeddings(env, [userQuery]);
-  const queryVector = queryEmbeddings[0];
+  try {
+    // 1. 将用户查询向量化
+    const queryEmbeddings = await generateEmbeddings(env, [userQuery]);
+    const queryVector = queryEmbeddings[0];
 
-  // 2. 在 Vectorize 中查询最相似的向量
-  const results = await env.VECTORIZE.query(queryVector, {
-    topK,
-    returnMetadata: 'all',
-  });
+    // 2. 在 Vectorize 中查询最相似的向量
+    const results = await env.VECTORIZE.query(queryVector, {
+      topK,
+      returnMetadata: 'all',
+    });
 
-  // 3. 过滤低分结果，并结合场景做轻量重排
-  const rankedMatches = results.matches
-    .filter(m => m.score >= minScore)
-    .map(match => {
-      const metadata = match.metadata as Record<string, unknown> | undefined;
-      return {
-        match,
-        adjustedScore: scoreRAGMatch(match, userQuery, options),
-        sourceKey: getSourceKey(metadata),
-        sourceTitle: String(metadata?.documentTitle || 'unknown'),
-      };
-    })
-    .sort((a, b) => b.adjustedScore - a.adjustedScore);
+    // 3. 过滤低分结果，并结合场景做轻量重排
+    const rankedMatches = results.matches
+      .filter(m => m.score >= minScore)
+      .map(match => {
+        const metadata = match.metadata as Record<string, unknown> | undefined;
+        return {
+          match,
+          adjustedScore: scoreRAGMatch(match, userQuery, options),
+          sourceKey: getSourceKey(metadata),
+          sourceTitle: String(metadata?.documentTitle || 'unknown'),
+        };
+      })
+      .sort((a, b) => b.adjustedScore - a.adjustedScore);
 
-  const finalTopK = options?.finalTopK ?? topK;
-  const filteredMatches = diversifyRankedMatches(
-    rankedMatches,
-    finalTopK,
-    options?.safetyFirst ? 1 : 2,
-    options?.safetyFirst ?? false,
-  );
+    const finalTopK = options?.finalTopK ?? topK;
+    const filteredMatches = diversifyRankedMatches(
+      rankedMatches,
+      finalTopK,
+      options?.safetyFirst ? 1 : 2,
+      options?.safetyFirst ?? false,
+    );
 
+    const context: RAGContext = {
+      chunks: [],
+      scores: [],
+      sourceDocuments: [],
+      chunkIds: [],
+    };
+
+    for (const { match, adjustedScore } of filteredMatches) {
+      const metadata = match.metadata as Record<string, string> | undefined;
+      if (metadata) {
+        context.chunks.push(metadata.text || '');
+        context.scores.push(Math.min(0.99, Math.max(0, adjustedScore)));
+        context.sourceDocuments.push(metadata.documentTitle || 'unknown');
+        context.chunkIds.push(match.id);
+      }
+    }
+
+    return context;
+  } catch (error) {
+    console.warn('[RAG Fallback] Vector retrieval failed, falling back to SQLite keyword search:', error);
+    return await retrieveContextFallbackSQLite(env, userQuery, topK, options);
+  }
+}
+
+async function retrieveContextFallbackSQLite(
+  env: Env,
+  userQuery: string,
+  topK: number = 5,
+  options?: RAGRetrievalOptions
+): Promise<RAGContext> {
   const context: RAGContext = {
     chunks: [],
     scores: [],
@@ -176,14 +230,89 @@ export async function retrieveContext(
     chunkIds: [],
   };
 
-  for (const { match, adjustedScore } of filteredMatches) {
-    const metadata = match.metadata as Record<string, string> | undefined;
-    if (metadata) {
-      context.chunks.push(metadata.text || '');
-      context.scores.push(Math.min(0.99, Math.max(0, adjustedScore)));
-      context.sourceDocuments.push(metadata.documentTitle || 'unknown');
-      context.chunkIds.push(match.id);
+  try {
+    const cleaned = userQuery.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()？，。！：]/g, ' ').trim();
+    const keywords = cleaned.split(/\s+/).filter(w => w.length >= 1);
+
+    if (keywords.length === 0) {
+      return context;
     }
+
+    const activeKeywords = keywords.slice(0, 5);
+    const whereClauses = activeKeywords.map(() => 'content LIKE ?');
+    const sql = `
+      SELECT id, document_id, document_title, heading_path, chunk_index, content
+      FROM knowledge_chunks
+      WHERE ${whereClauses.join(' OR ')}
+      LIMIT 100
+    `;
+
+    const binds = activeKeywords.map(k => `%${k}%`);
+    const dbResult = await env.DB.prepare(sql).bind(...binds).all<{
+      id: string;
+      document_id: string;
+      document_title: string;
+      heading_path?: string;
+      chunk_index: number;
+      content: string;
+    }>();
+
+    const matches = dbResult.results || [];
+    if (matches.length === 0) {
+      return context;
+    }
+
+    const scoredMatches = matches.map(m => {
+      let hitCount = 0;
+      const lowerContent = m.content.toLowerCase();
+      for (const kw of activeKeywords) {
+        if (lowerContent.includes(kw.toLowerCase())) {
+          hitCount++;
+        }
+      }
+      const score = Math.min(0.99, 0.5 + (hitCount / activeKeywords.length) * 0.4);
+      
+      const dummyMatch = {
+        id: m.id,
+        score,
+        metadata: {
+          documentId: m.document_id,
+          documentTitle: m.document_title,
+          headingPath: m.heading_path || '',
+          chunkIndex: m.chunk_index,
+          text: m.content,
+        }
+      };
+
+      return {
+        match: dummyMatch as any,
+        adjustedScore: scoreRAGMatch(dummyMatch as any, userQuery, options),
+        sourceKey: m.document_title || m.document_id || 'unknown',
+        sourceTitle: m.document_title,
+      };
+    });
+
+    scoredMatches.sort((a, b) => b.adjustedScore - a.adjustedScore);
+
+    const finalTopK = options?.finalTopK ?? topK;
+    const filteredMatches = diversifyRankedMatches(
+      scoredMatches,
+      finalTopK,
+      options?.safetyFirst ? 1 : 2,
+      options?.safetyFirst ?? false,
+    );
+
+    for (const { match, adjustedScore } of filteredMatches) {
+      const metadata = match.metadata as Record<string, string> | undefined;
+      if (metadata) {
+        context.chunks.push(metadata.text || '');
+        context.scores.push(Math.min(0.99, Math.max(0, adjustedScore)));
+        context.sourceDocuments.push(metadata.documentTitle || 'unknown');
+        context.chunkIds.push(match.id);
+      }
+    }
+  } catch (e) {
+    console.error('[RAG Fallback] Fallback SQLite search failed:', e);
   }
 
   return context;
@@ -471,7 +600,11 @@ export async function deleteDocument(env: Env, documentId: string): Promise<void
       }
     }
 
-    // 3. 从 D1 删除元数据
+    // 3. 从 D1 删除镜像 chunks
+    await env.DB.prepare('DELETE FROM knowledge_chunks WHERE document_id = ?')
+      .bind(documentId).run();
+
+    // 4. 从 D1 删除元数据
     await env.DB.prepare('DELETE FROM knowledge_documents WHERE id = ?')
       .bind(documentId).run();
   } catch (e) {

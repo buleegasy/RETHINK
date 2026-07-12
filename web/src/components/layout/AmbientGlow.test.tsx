@@ -1,4 +1,3 @@
-import React from 'react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render } from '@testing-library/react';
 
@@ -37,13 +36,7 @@ const getBlobColors = (layer: HTMLElement): string[] => {
   );
 };
 
-// Helper to convert hex to the rgb string JSDOM returns
-const hexToRgbStr = (hex: string): string => {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgb(${r}, ${g}, ${b})`;
-};
+
 
 describe('AmbientGlow Component Tests', () => {
   beforeEach(() => {

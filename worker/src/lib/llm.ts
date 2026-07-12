@@ -300,5 +300,24 @@ export function getLLMClient(env: Env) {
 }
 
 export function getModelName(env: Env, requestedModel?: string): string {
-  return 'anthropic/claude-haiku-4.5';
+  if (!requestedModel) {
+    return 'google/gemini-2.5-flash';
+  }
+  const mapping: Record<string, string> = {
+    'deepseek-v4-flash': 'google/gemini-2.5-flash',
+    'deepseek-r1': 'deepseek/deepseek-r1',
+    'claude-3-5-sonnet': 'anthropic/claude-3.5-sonnet',
+    'gpt-4o-mini': 'openai/gpt-4o-mini',
+  };
+  return mapping[requestedModel] || requestedModel;
+}
+
+export function getModelSequence(env: Env, requestedModel?: string): string[] {
+  const primary = getModelName(env, requestedModel);
+  const backups = [
+    'google/gemini-2.5-flash',
+    'meta-llama/llama-3.3-70b-instruct',
+    'openai/gpt-4o-mini',
+  ];
+  return Array.from(new Set([primary, ...backups]));
 }

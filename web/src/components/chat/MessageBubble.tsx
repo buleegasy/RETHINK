@@ -66,8 +66,6 @@ interface MessageChunkProps {
   aiBubbleRadiusClass: string;
   isStreaming: boolean;
   isLastChunk: boolean;
-  isFirstInGroup: boolean;
-  isLastInGroup: boolean;
 }
 
 const MessageChunk = React.memo<MessageChunkProps>(({
@@ -75,8 +73,6 @@ const MessageChunk = React.memo<MessageChunkProps>(({
   aiBubbleRadiusClass,
   isStreaming,
   isLastChunk,
-  isFirstInGroup,
-  isLastInGroup,
 }) => {
   const isGlowActive = isStreaming && isLastChunk;
   // P3: Show entrance sweep only on non-streaming chunks (already rendered)
@@ -108,7 +104,6 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
   message,
   isStreaming,
   isFirstInGroup = true,
-  isLastInGroup = true,
 }) => {
   const isUser = message.role === 'user';
   const [showTechChain, setShowTechChain] = useState(false);
@@ -159,10 +154,10 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
         <div className="w-8 h-8 shrink-0 mt-0.5 order-1">
           {isFirstInGroup ? (
             <div className="relative w-8 h-8 flex items-center justify-center text-on-surface dark:text-surface">
-              {isStreaming && (
+              {!!isStreaming && (
                 <div className="absolute inset-0 bg-gemini-blue/20 blur-sm rounded-full animate-pulse" />
               )}
-              <ReThinkLogo className="w-8 h-8 relative z-10" isThinking={isStreaming} />
+              <ReThinkLogo className="w-8 h-8 relative z-10" isThinking={!!isStreaming} />
             </div>
           ) : (
             /* Spacer when avatar is hidden for middle-of-group messages */
@@ -189,10 +184,8 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
                 key={idx}
                 chunk={chunk}
                 aiBubbleRadiusClass={aiBubbleRadius(idx)}
-                isStreaming={isStreaming && idx === chunks.length - 1}
+                isStreaming={!!isStreaming && idx === chunks.length - 1}
                 isLastChunk={idx === chunks.length - 1}
-                isFirstInGroup={idx === 0 && isFirstInGroup}
-                isLastInGroup={isLastInGroup}
               />
             ))}
 

@@ -82,7 +82,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
 
   const placeholder = isListening
     ? (interimTranscript ? interimTranscript : '正在听...')
-    : (isStreaming ? '思考中...' : '向 RE-THINK 提问');
+    : (isStreaming ? '思考中...' : '想聊一聊吗');
 
   const canSend = input.trim() && !isStreaming;
 

@@ -41,17 +41,22 @@ authRouter.post('/register', async (c) => {
       return c.json({ error: 'Captcha verification failed. Please try again.' }, 400);
     }
 
-    // 2. Validate Invitation Code in D1
-    const invite = await c.env.DB.prepare('SELECT * FROM invitation_codes WHERE code = ?')
+    // 2. Validate and Update Invitation Code in D1 atomically
+    const updateResult = await c.env.DB.prepare(
+      'UPDATE invitation_codes SET used_count = used_count + 1 WHERE code = ? AND used_count < max_uses'
+    )
       .bind(invitationCode)
-      .first<any>();
+      .run();
 
-    if (!invite) {
-      return c.json({ error: 'Invalid invitation code' }, 400);
-    }
-
-    if (invite.used_count >= invite.max_uses) {
-      return c.json({ error: 'Invitation code has reached its maximum usage limit' }, 400);
+    if (updateResult.meta.changes === 0) {
+      const checkInvite = await c.env.DB.prepare('SELECT * FROM invitation_codes WHERE code = ?')
+        .bind(invitationCode)
+        .first<any>();
+      if (!checkInvite) {
+        return c.json({ error: 'Invalid invitation code' }, 400);
+      } else {
+        return c.json({ error: 'Invitation code has reached its maximum usage limit' }, 400);
+      }
     }
 
     const email = `${username}@rethink.local`;
@@ -60,35 +65,47 @@ authRouter.post('/register', async (c) => {
     let idToken = `mock-token-${username}`;
     let localId = username;
 
-    if (c.env.FIREBASE_API_KEY && c.env.FIREBASE_API_KEY !== 'mock_firebase_key_for_testing') {
-      const fbUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${c.env.FIREBASE_API_KEY}`;
-      const response = await fetch(fbUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          password,
-          returnSecureToken: true
-        })
-      });
+    try {
+      if (c.env.FIREBASE_API_KEY && c.env.FIREBASE_API_KEY !== 'mock_firebase_key_for_testing') {
+        const fbUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${c.env.FIREBASE_API_KEY}`;
+        const response = await fetch(fbUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            password,
+            returnSecureToken: true
+          })
+        });
 
-      const fbData = await response.json() as any;
-      if (!response.ok || fbData.error) {
-        const errMsg = fbData.error?.message || 'Firebase Registration Failed';
-        console.error('Firebase error:', fbData.error);
-        return c.json({ error: errMsg }, response.status as any);
+        const fbData = await response.json() as any;
+        if (!response.ok || fbData.error) {
+          const errMsg = fbData.error?.message || 'Firebase Registration Failed';
+          console.error('Firebase error:', fbData.error);
+
+          // Rollback by decrementing used_count
+          await c.env.DB.prepare('UPDATE invitation_codes SET used_count = used_count - 1 WHERE code = ?')
+            .bind(invitationCode)
+            .run();
+
+          return c.json({ error: errMsg }, (response.status || 400) as any);
+        }
+
+        idToken = fbData.idToken;
+        localId = fbData.localId;
+      } else {
+        console.log(`[Mock Auth] Successfully registered mock user: ${username}`);
       }
+    } catch (fbErr: any) {
+      console.error('Firebase signup error:', fbErr);
 
-      idToken = fbData.idToken;
-      localId = fbData.localId;
-    } else {
-      console.log(`[Mock Auth] Successfully registered mock user: ${username}`);
+      // Rollback by decrementing used_count
+      await c.env.DB.prepare('UPDATE invitation_codes SET used_count = used_count - 1 WHERE code = ?')
+        .bind(invitationCode)
+        .run();
+
+      return c.json({ error: fbErr.message || 'Firebase Registration Failed' }, 500);
     }
-
-    // 4. Update Invitation Code Usage in D1
-    await c.env.DB.prepare('UPDATE invitation_codes SET used_count = used_count + 1 WHERE code = ?')
-      .bind(invitationCode)
-      .run();
 
     return c.json({
       success: true,

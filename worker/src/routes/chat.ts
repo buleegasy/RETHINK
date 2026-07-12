@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
-import { getLLMClient, getModelName, buildSystemPromptFSM } from '../lib/llm';
+import { getLLMClient, getModelName, getModelSequence, buildSystemPromptFSM } from '../lib/llm';
 import { detectStage, stageToIndex } from '../lib/cbt-stages';
 import { classifyIntent } from '../lib/intent-router';
 import { assessRisk } from '../lib/risk';
@@ -216,13 +216,32 @@ chatRouter.post('/', requireAuth, async (c) => {
   // ── 6. 非流式响应 ──
   if (!stream) {
     try {
-      const response = await client.chat.completions.create({
-        model,
-        messages: fullMessages,
-        stream: false,
-        temperature: 0.6,
-        response_format: { type: 'json_object' },
-      });
+      const modelsToTry = getModelSequence(c.env, requestedModel);
+      let response: any = null;
+      let lastError: any = null;
+      let usedModel = model;
+
+      for (const currentModel of modelsToTry) {
+        try {
+          console.log(`[LLM] Trying model: ${currentModel}`);
+          response = await client.chat.completions.create({
+            model: currentModel,
+            messages: fullMessages,
+            stream: false,
+            temperature: 0.6,
+            response_format: { type: 'json_object' },
+          });
+          usedModel = currentModel;
+          break;
+        } catch (err) {
+          console.warn(`[LLM] Model ${currentModel} failed:`, err);
+          lastError = err;
+        }
+      }
+
+      if (!response) {
+        throw lastError || new Error('All fallback models failed');
+      }
 
       const responseText = response.choices[0]?.message?.content || '';
       let finalJsonStr = responseText.trim();
@@ -286,6 +305,7 @@ chatRouter.post('/', requireAuth, async (c) => {
         fsmTrigger: postTransition.trigger,
         retrievedEvidence,
         reasoningDeduction,
+        model: usedModel,
       };
       const updatedMessages: ChatMessage[] = [...messages, { role: 'assistant', content: cleanReply, techChain: finalTechChain as any }];
       await saveToD1(c.env.DB, sessionId, updatedMessages, stageToIndex(stage) + 1, fsmCtx, user.uid);
@@ -302,6 +322,7 @@ chatRouter.post('/', requireAuth, async (c) => {
         retrieved_evidence: retrievedEvidence,
         icebreakerLayer: fsmCtx.icebreaker.layer,
         ...ragMeta,
+        model: usedModel,
       });
     } catch (err: any) {
       return c.json({ error: err.message }, 500);
@@ -311,13 +332,32 @@ chatRouter.post('/', requireAuth, async (c) => {
   // ── 7. SSE 流式响应 ──
   return streamSSE(c, async (streamEvent) => {
     try {
-      const completionStream = await client.chat.completions.create({
-        model: model,
-        messages: fullMessages,
-        stream: true,
-        temperature: 0.6,
-        response_format: { type: 'json_object' },
-      });
+      const modelsToTry = getModelSequence(c.env, requestedModel);
+      let completionStream: any = null;
+      let lastError: any = null;
+      let usedModel = model;
+
+      for (const currentModel of modelsToTry) {
+        try {
+          console.log(`[LLM Stream] Trying model: ${currentModel}`);
+          completionStream = await client.chat.completions.create({
+            model: currentModel,
+            messages: fullMessages,
+            stream: true,
+            temperature: 0.6,
+            response_format: { type: 'json_object' },
+          });
+          usedModel = currentModel;
+          break;
+        } catch (err) {
+          console.warn(`[LLM Stream] Model ${currentModel} failed:`, err);
+          lastError = err;
+        }
+      }
+
+      if (!completionStream) {
+        throw lastError || new Error('All fallback models failed in stream mode');
+      }
 
       let fullResponse = '';
       let extractedReply = '';
@@ -409,6 +449,7 @@ chatRouter.post('/', requireAuth, async (c) => {
                       intent: intentResult.type,
                       fsmState: fsmCtx.currentState,
                       ...ragMeta,
+                      model: usedModel,
                     })
                   });
                 }
@@ -491,6 +532,7 @@ chatRouter.post('/', requireAuth, async (c) => {
           retrieved_evidence: retrievedEvidence,
           icebreakerLayer: fsmCtx.icebreaker.layer,
           ...ragMeta,
+          model: usedModel,
         })
       });
 

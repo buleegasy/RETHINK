@@ -188,7 +188,7 @@ test.describe('RE-THINK E2E Layout Suite', () => {
     await page.locator('button:has-text("跳过，直接输入文字")').click();
     
     // Wait for chat panel to load
-    await expect(page.locator('textarea[placeholder="向 RE-THINK 提问"]')).toBeVisible();
+    await expect(page.locator('textarea[placeholder="想聊一聊吗"]')).toBeVisible();
   }
 
   // TIER 1: FEATURE COVERAGE
@@ -322,7 +322,7 @@ test.describe('RE-THINK E2E Layout Suite', () => {
     test('T2-3: Large history loads and input textarea max-height limit', async ({ page }) => {
       await loginAndBypassOnboarding(page);
       
-      const textarea = page.locator('textarea[placeholder="向 RE-THINK 提问"]');
+      const textarea = page.locator('textarea[placeholder="想聊一聊吗"]');
       await textarea.fill('A\n'.repeat(50));
       
       const box = await textarea.boundingBox();
@@ -332,7 +332,7 @@ test.describe('RE-THINK E2E Layout Suite', () => {
     test('T2-4: Whitespace only message sends are blocked', async ({ page }) => {
       await loginAndBypassOnboarding(page);
       
-      const textarea = page.locator('textarea[placeholder="向 RE-THINK 提问"]');
+      const textarea = page.locator('textarea[placeholder="想聊一聊吗"]');
       await textarea.fill('     ');
       
       const sendButton = page.locator('button[aria-label="发送消息"]');
@@ -355,7 +355,7 @@ test.describe('RE-THINK E2E Layout Suite', () => {
     test('T3-1: Focus input and open sidebar', async ({ page }) => {
       await loginAndBypassOnboarding(page);
       
-      const textarea = page.locator('textarea[placeholder="向 RE-THINK 提问"]');
+      const textarea = page.locator('textarea[placeholder="想聊一聊吗"]');
       await textarea.focus();
       await textarea.fill('测试输入');
       
@@ -424,7 +424,7 @@ test.describe('RE-THINK E2E Layout Suite', () => {
         });
       });
       
-      const textarea = page.locator('textarea[placeholder="向 RE-THINK 提问"]');
+      const textarea = page.locator('textarea[placeholder="想聊一聊吗"]');
       await textarea.fill('今天天气不错');
       await page.locator('button[aria-label="发送消息"]').click();
       
@@ -440,7 +440,7 @@ test.describe('RE-THINK E2E Layout Suite', () => {
       await loginAndBypassOnboarding(page);
       
       const chatContainer = page.locator('div.flex-1.overflow-y-auto.bg-transparent');
-      const textarea = page.locator('textarea[placeholder="向 RE-THINK 提问"]');
+      const textarea = page.locator('textarea[placeholder="想聊一聊吗"]');
       
       await page.route('**/api/chat', async (route) => {
         const responsePayload = 'data: {"delta": "这是一行流式文本内容。"}\n\n' +
@@ -483,7 +483,7 @@ test.describe('RE-THINK E2E Layout Suite', () => {
 
       await loginAndBypassOnboarding(page);
       
-      const textarea = page.locator('textarea[placeholder="向 RE-THINK 提问"]');
+      const textarea = page.locator('textarea[placeholder="想聊一聊吗"]');
       await textarea.fill('我想自杀');
       await page.locator('button[aria-label="发送消息"]').click();
       
