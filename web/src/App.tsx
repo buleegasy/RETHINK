@@ -93,19 +93,21 @@ function App() {
             <div className="absolute top-0 left-0 w-full pointer-events-none z-20 hidden md:flex">
               <div className="w-full flex justify-between items-center px-4 md:px-8 py-4 pointer-events-auto">
                 <div className="flex items-center gap-4">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setSidebarOpen(prev => !prev)}
-                    className="text-on-surface-variant hover:text-on-surface min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors cursor-pointer"
-                    aria-label="历史对话"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                      <line x1="4" y1="12" x2="20" y2="12"></line>
-                      <line x1="4" y1="6" x2="20" y2="6"></line>
-                      <line x1="4" y1="18" x2="20" y2="18"></line>
-                    </svg>
-                  </motion.button>
+                  {!isSidebarOpen && (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setSidebarOpen(prev => !prev)}
+                      className="text-on-surface-variant hover:text-on-surface min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors cursor-pointer"
+                      aria-label="历史对话"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                        <line x1="4" y1="12" x2="20" y2="12"></line>
+                        <line x1="4" y1="6" x2="20" y2="6"></line>
+                        <line x1="4" y1="18" x2="20" y2="18"></line>
+                      </svg>
+                    </motion.button>
+                  )}
                 </div>
                 
                 <div className="flex items-center gap-4">
@@ -114,14 +116,6 @@ function App() {
                       进度: {stageIndex}/4
                     </div>
                   )}
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={logout}
-                    className="text-xs text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-xl bg-surface-container-high/40 hover:bg-surface-container-high/80 border border-outline-variant/10 transition-all cursor-pointer"
-                  >
-                    退出
-                  </motion.button>
                 </div>
               </div>
             </div>
@@ -131,19 +125,21 @@ function App() {
               <div className="max-w-2xl mx-auto w-full px-4 flex items-center justify-between">
                 {/* 左侧：Hamburger 菜单 */}
                 <div className="flex items-center w-[80px] justify-start">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setSidebarOpen(prev => !prev)}
-                    className="text-on-surface-variant hover:text-on-surface min-w-[44px] min-h-[44px] flex items-center justify-start transition-colors cursor-pointer"
-                    aria-label="打开侧边栏"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-on-surface-variant">
-                      <line x1="4" y1="12" x2="20" y2="12"></line>
-                      <line x1="4" y1="6" x2="20" y2="6"></line>
-                      <line x1="4" y1="18" x2="20" y2="18"></line>
-                    </svg>
-                  </motion.button>
+                  {!isSidebarOpen && (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setSidebarOpen(prev => !prev)}
+                      className="text-on-surface-variant hover:text-on-surface min-w-[44px] min-h-[44px] flex items-center justify-start transition-colors cursor-pointer"
+                      aria-label="打开侧边栏"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-on-surface-variant">
+                        <line x1="4" y1="12" x2="20" y2="12"></line>
+                        <line x1="4" y1="6" x2="20" y2="6"></line>
+                        <line x1="4" y1="18" x2="20" y2="18"></line>
+                      </svg>
+                    </motion.button>
+                  )}
                 </div>
 
                 {/* 中间：品牌 */}
@@ -160,14 +156,6 @@ function App() {
                       {stageIndex}/4
                     </div>
                   )}
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={logout}
-                    className="text-[11px] text-on-surface-variant hover:text-on-surface px-2 min-h-[44px] flex items-center justify-center transition-colors cursor-pointer"
-                  >
-                    退出
-                  </motion.button>
                 </div>
               </div>
             </div>
