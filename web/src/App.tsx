@@ -96,7 +96,7 @@ function App() {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => setSidebarOpen(true)}
+                    onClick={() => setSidebarOpen(prev => !prev)}
                     className="text-on-surface-variant hover:text-on-surface min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors cursor-pointer"
                     aria-label="历史对话"
                   >
@@ -134,7 +134,7 @@ function App() {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => setSidebarOpen(true)}
+                    onClick={() => setSidebarOpen(prev => !prev)}
                     className="text-on-surface-variant hover:text-on-surface min-w-[44px] min-h-[44px] flex items-center justify-start transition-colors cursor-pointer"
                     aria-label="打开侧边栏"
                   >

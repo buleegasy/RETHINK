@@ -131,7 +131,9 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
       const data = await authApi.getSessionDetail(id);
       if (data.session) {
         loadSession(data.session);
-        onClose();
+        if (window.innerWidth < 768) {
+          onClose();
+        }
       }
     } catch (err) {
       const msg = (err as { message?: string })?.message || '打开会话失败';
