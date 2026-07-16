@@ -119,7 +119,8 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
                 onClick={handleVoiceToggle}
                 disabled={isStreaming}
                 aria-label={isListening ? '停止录音' : '语音输入'}
-                className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full self-end ${
+                title={isStreaming ? 'AI 思考中，暂时无法输入' : (isListening ? '停止录音' : '语音输入')}
+                className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full self-end focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gemini-blue focus-visible:ring-offset-1 ${
                   isListening
                     ? 'text-error animate-pulse-gentle'
                     : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60'
@@ -160,7 +161,8 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
               onClick={handleSend}
               disabled={!canSend}
               aria-label="发送消息"
-              className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full self-end ${
+              title={!canSend ? (isStreaming ? 'AI 思考中...' : '请输入内容') : '发送消息 (Enter)'}
+              className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full self-end focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gemini-blue focus-visible:ring-offset-1 ${
                 canSend
                   ? 'text-on-surface hover:bg-surface-container-high/60 cursor-pointer'
                   : 'text-on-surface-variant/50 cursor-not-allowed'
