@@ -38,11 +38,11 @@ local_protocol = "http"
 API_BASE_URL = "https://openrouter.ai/api/v1"
 MODEL_NAME = "deepseek/deepseek-v4-flash"
 FIREBASE_PROJECT_ID = "rethink-852d8"
-TURNSTILE_SECRET_KEY = "0x4AAAAAADgdD_ejrxz30SEOsNvp_lcJkvc"
-ADMIN_SECRET_TOKEN = "V4rYW^V4"
 
 # ==========================
 # 生产环境 Secrets（通过 wrangler secret put 设置）
+# TURNSTILE_SECRET_KEY = "0x4AA..."  (Turnstile Secret Key)
+# ADMIN_SECRET_TOKEN = "..."         (Admin Secret Token)
 # API_KEY = "sk-or-v1-xxxx"          (OpenRouter API Key)
 # FIREBASE_API_KEY = "AIzaSy..."     (Firebase Auth Web API Key)
 # ==========================

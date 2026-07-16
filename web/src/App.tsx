@@ -21,7 +21,7 @@ function App() {
   const hasCompletedOnboarding = useChatStore(state => state.hasCompletedOnboarding);
   
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
-  const logout = useAuthStore(state => state.logout);
+  // const logout = useAuthStore(state => state.logout);
   const fsmState = useChatStore(state => state.fsmState);
 
   const [isSidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
