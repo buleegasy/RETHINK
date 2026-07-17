@@ -194,7 +194,9 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
               <div className="mt-1 w-full select-none animate-slide-up ms-4">
                 <button
                   onClick={() => setShowTechChain(!showTechChain)}
-                  className="flex items-center gap-1.5 py-0.5 px-1.5 rounded text-[10px] font-mono text-on-surface-variant/70 hover:text-on-surface hover:bg-surface-container/80 transition-all duration-200 cursor-pointer"
+                  className="flex items-center gap-1.5 py-0.5 px-1.5 rounded text-[10px] font-mono text-on-surface-variant/70 hover:text-on-surface hover:bg-surface-container/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gemini-blue/40 transition-all duration-200 cursor-pointer"
+                  aria-expanded={showTechChain}
+                  aria-label={showTechChain ? '收起推演日志' : '展开系统推演'}
                 >
                   <span>{showTechChain ? '收起推演日志' : '展开系统推演'}</span>
                   {showTechChain ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
@@ -326,7 +328,9 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
                                     <div key={i} className="text-[10px] space-y-0.5">
                                       <button
                                         onClick={() => setExpandedRag(isExpanded ? null : i)}
-                                        className="flex items-center gap-1.5 text-[9.5px] text-on-surface-variant hover:text-on-surface transition-colors text-left cursor-pointer font-mono"
+                                        className="flex items-center gap-1.5 text-[9.5px] text-on-surface-variant hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gemini-blue/40 transition-colors text-left cursor-pointer font-mono rounded px-1"
+                                        aria-expanded={isExpanded}
+                                        aria-label={`展开检索来源: ${source}`}
                                       >
                                         <span className={score >= 0.8 ? 'text-stage-green' : 'text-stage-orange'}>{isExpanded ? '▼' : '▶'}</span>
                                         <span className="text-on-surface font-semibold truncate max-w-[150px]">{source}</span>

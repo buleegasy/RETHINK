@@ -246,7 +246,7 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
                   onClose();
                 }
               }}
-              className="w-full mb-4 h-10 rounded-full bg-on-surface/90 text-surface text-xs font-medium tracking-[0.2em] uppercase flex items-center justify-center gap-2 hover:bg-on-surface active:scale-[0.99] transition-all shadow-sm cursor-pointer"
+              className="w-full mb-4 h-10 rounded-full bg-on-surface/90 text-surface text-xs font-medium tracking-[0.2em] uppercase flex items-center justify-center gap-2 hover:bg-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gemini-blue/40 active:scale-[0.99] transition-all shadow-sm cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" strokeWidth={1.5} />
               新对话
@@ -313,7 +313,7 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
                                 e.stopPropagation();
                                 void handleDeleteSession(session.id);
                               }}
-                              className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-1 rounded-full text-on-surface-variant/60 hover:text-error hover:bg-error/10 transition-all cursor-pointer"
+                              className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error/40 p-1 rounded-full text-on-surface-variant/60 hover:text-error hover:bg-error/10 transition-all cursor-pointer"
                               aria-label="删除此对话"
                             >
                               <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />

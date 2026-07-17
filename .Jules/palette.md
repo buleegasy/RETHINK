@@ -1,0 +1,3 @@
+## 2024-07-17 - Keyboard Focus and Aria Expansion Accessibility
+**Learning:** Found a recurring pattern in the chat interface where expandable elements (like RAG sources and FSM tech chains) lacked proper keyboard navigation cues (`focus-visible` rings) and ARIA states (`aria-expanded`, `aria-label`). Similarly, icon-only action buttons didn't communicate their disabled reasons to screen readers or mouse users (via `title`).
+**Action:** Applied consistent `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gemini-blue/40` classes to buttons and interactive list items. Added dynamic `title` texts that update based on streaming states to inform users why buttons are disabled. Ensured `aria-expanded` is toggled alongside the state for collapsible sections.
