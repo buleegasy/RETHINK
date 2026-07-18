@@ -1,7 +1,21 @@
 import { Hono } from 'hono';
 import { HonoSchema } from '../types';
 
+
+// Helper function for constant-time string comparison to prevent timing attacks
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  let mismatch = 0;
+  for (let i = 0; i < a.length; i++) {
+    mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return mismatch === 0;
+}
+
 const adminRouter = new Hono<HonoSchema>();
+
 
 // Inline middleware to check admin token
 adminRouter.use('*', async (c, next) => {
@@ -11,7 +25,7 @@ adminRouter.use('*', async (c, next) => {
   }
 
   const providedToken = c.req.header('x-admin-token');
-  if (providedToken !== adminToken) {
+  if (typeof providedToken !== "string" || !timingSafeEqual(providedToken, adminToken)) {
     return c.json({ error: 'Unauthorized: Invalid admin token' }, 401);
   }
 
