@@ -186,6 +186,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 whileHover={{ rotate: 90, scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                aria-label="关闭"
                 className="absolute top-4 right-4 md:top-6 md:right-6 p-2 text-on-surface-variant/60 hover:text-on-surface hover:bg-surface-container rounded-full transition-colors z-20 min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer"
               >
                 <X className="w-5 h-5" />
@@ -201,6 +202,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 <motion.button
                   whileTap={{ scale: 0.98 }}
                   type="button"
+                  aria-pressed={!isSignUp}
                   className={`flex-1 text-center py-2.5 text-xs tracking-widest uppercase font-medium rounded-full transition-colors duration-300 cursor-pointer ${
                     !isSignUp ? 'bg-surface/80 shadow-sm text-on-surface border border-outline-variant/30' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container/40'
                   }`}
@@ -211,6 +213,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 <motion.button
                   whileTap={{ scale: 0.98 }}
                   type="button"
+                  aria-pressed={isSignUp}
                   className={`flex-1 text-center py-2.5 text-xs tracking-widest uppercase font-medium rounded-full transition-colors duration-300 cursor-pointer ${
                     isSignUp ? 'bg-surface/80 shadow-sm text-on-surface border border-outline-variant/30' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container/40'
                   }`}
