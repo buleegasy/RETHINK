@@ -1,0 +1,3 @@
+## 2025-02-18 - Prevent Streaming Re-renders with Specific Zustand Selectors
+**Learning:** When streaming text into an array like `messages`, components listening to the whole array re-render on every token. For example, `AmbientGlow` was subscribing to the entire `messages` array just to find the latest `techChain` object, causing heavy UI lag during SSE streams.
+**Action:** Extract specific fields using narrow selectors directly in the `useStore` hook. Zustand's default strict equality check will skip re-rendering if the specific return value hasn't changed, even if the parent array updates.
