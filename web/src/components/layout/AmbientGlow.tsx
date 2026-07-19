@@ -143,18 +143,18 @@ BlobLayer.displayName = 'BlobLayer';
 
 export const AmbientGlow: React.FC = () => {
   const fsmState   = useChatStore(state => state.fsmState);
-  const messages   = useChatStore(state => state.messages);
   const isStreaming = useChatStore(state => state.isStreaming);
 
-  // Extract latest emotion from AI response
-  const lastTechChain = useMemo(() => {
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].role === 'assistant' && messages[i].techChain) {
-        return messages[i].techChain;
+  // Extract latest emotion from AI response by using a targeted selector.
+  // This prevents the entire AmbientGlow from re-rendering on every text chunk during streaming.
+  const lastTechChain = useChatStore(state => {
+    for (let i = state.messages.length - 1; i >= 0; i--) {
+      if (state.messages[i].role === 'assistant' && state.messages[i].techChain) {
+        return state.messages[i].techChain;
       }
     }
     return null;
-  }, [messages]);
+  });
 
   const emotion   = lastTechChain?.intentEmotion;
   const riskLevel = lastTechChain?.riskLevel;
