@@ -9,9 +9,9 @@ let cachedKeysTime = 0;
  * Verifies a Firebase ID token (RS256 JWT) using Google's public JWK set.
  */
 export async function verifyFirebaseToken(token: string, projectId: string, apiKey: string): Promise<AuthUser> {
-  // Support mock tokens for local testing when Firebase API key is mock or token starts with mock-token-
-  if (apiKey === 'mock_firebase_key_for_testing' || token.startsWith('mock-token-')) {
-    const uid = token.startsWith('mock-token-') ? token.substring(11) : 'mock-user-123';
+  // Support mock tokens for local testing when Firebase API key is mock and token starts with mock-token-
+  if (apiKey === 'mock_firebase_key_for_testing' && token.startsWith('mock-token-')) {
+    const uid = token.substring(11);
     return {
       uid,
       email: `${uid}@rethink.local`
