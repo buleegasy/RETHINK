@@ -239,7 +239,8 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
                                 min={code.uses}
                                 value={editMaxUses}
                                 onChange={(e) => setEditMaxUses(parseInt(e.target.value) || code.uses)}
-                                className="w-16 bg-black/40 border border-white/20 rounded px-2 py-1 text-xs"
+                                className="w-16 bg-black/40 border border-white/20 rounded px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
+                                aria-label="Edit max uses"
                               />
                             </div>
                           ) : (
@@ -259,15 +260,17 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
                               <>
                                 <button
                                   onClick={() => handleUpdate(code.code)}
-                                  className="p-1.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors"
+                                  className="p-1.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400/50"
                                   title="Save"
+                                  aria-label="Save changes"
                                 >
                                   <Check className="w-4 h-4" />
                                 </button>
                                 <button
                                   onClick={() => setEditingCode(null)}
-                                  className="p-1.5 bg-white/5 text-white/60 rounded-lg hover:bg-white/10 transition-colors"
+                                  className="p-1.5 bg-white/5 text-white/60 rounded-lg hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                                   title="Cancel"
+                                  aria-label="Cancel editing"
                                 >
                                   <X className="w-4 h-4" />
                                 </button>
@@ -278,16 +281,18 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
                                   setEditingCode(code.code);
                                   setEditMaxUses(code.max_uses);
                                 }}
-                                className="p-1.5 bg-white/5 text-white/60 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
+                                className="p-1.5 bg-white/5 text-white/60 rounded-lg hover:bg-white/10 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                                 title="Edit Max Uses"
+                                aria-label="Edit max uses"
                               >
                                 <Edit2 className="w-4 h-4" />
                               </button>
                             )}
                             <button
                               onClick={() => handleDelete(code.code)}
-                              className="p-1.5 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors ml-2"
+                              className="p-1.5 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors ml-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50"
                               title="Delete Code"
+                              aria-label="Delete code"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
