@@ -15,6 +15,8 @@ const INTENT_LABEL: Record<string, string> = {
   ambiguous: '意图不明',
 };
 
+const REMARK_PLUGINS = [remarkGfm];
+
 /** 情绪子类型 → 中文 */
 const EMOTION_LABEL: Record<string, string> = {
   Anxiety:    '焦虑',
@@ -88,7 +90,7 @@ const MessageChunk = React.memo<MessageChunkProps>(({
       }`}
     >
       <div className="gemini-prose">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        <ReactMarkdown remarkPlugins={REMARK_PLUGINS}>
           {chunk}
         </ReactMarkdown>
       </div>
