@@ -31,6 +31,14 @@ surveyRouter.post('/submit', async (c) => {
     // 将完整数据转为字符串存储
     const dataStr = JSON.stringify(body);
     
+    // 🛡️ Security Enhancement: Input length limits to prevent DoS
+    if (dataStr.length > 50000) {
+      return c.json({ error: 'Payload too large' }, 413);
+    }
+    if (typeof openFeedback === 'string' && openFeedback.length > 5000) {
+      return c.json({ error: 'Feedback too long' }, 400);
+    }
+
     // 写入 D1 数据库
     await c.env.DB.prepare(
       'INSERT OR REPLACE INTO surveys (id, data, open_feedback, created_at) VALUES (?, ?, ?, ?)'
