@@ -900,6 +900,16 @@
     const refreshBtn = document.getElementById('refreshBtn');
 
     async function loadData(isAutoRefresh = false) {
+      let adminToken = localStorage.getItem('rethink_admin_token');
+      if (!adminToken) {
+        adminToken = prompt('请输入管理员 Token 以查看数据 (Admin Token Required):');
+        if (adminToken) {
+          localStorage.setItem('rethink_admin_token', adminToken);
+        } else {
+          return; // cancel loading
+        }
+      }
+
       if (!isAutoRefresh) {
         loadingPanel.style.display = 'block';
         emptyPanel.style.display = 'none';
@@ -910,7 +920,18 @@
       const apiUrl = isLocalhost ? 'http://localhost:8787/api/survey/results' : 'https://api-proxy-9mv.pages.dev/api/survey/results';
 
       try {
-        const response = await fetch(apiUrl + (apiUrl.includes('?') ? '&' : '?') + 't=' + new Date().getTime());
+        const response = await fetch(apiUrl + (apiUrl.includes('?') ? '&' : '?') + 't=' + new Date().getTime(), {
+          headers: {
+            'x-admin-token': adminToken
+          }
+        });
+
+        if (response.status === 401) {
+          localStorage.removeItem('rethink_admin_token');
+          alert('管理员 Token 无效，请重新输入。 (Invalid Admin Token)');
+          return;
+        }
+
         if (!response.ok) throw new Error('Failed to fetch data');
         const data = await response.json();
         
