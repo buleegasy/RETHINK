@@ -12,3 +12,8 @@
 **Vulnerability:** The `/api/survey/results` endpoint (`worker/src/routes/survey.ts`) was completely unauthenticated. This allowed anyone to access the survey results, which include sensitive PII data like users' locations, demographics, and mental health feedback.
 **Learning:** Endpoints returning sensitive information or administrative views should never be publicly accessible and must require explicit authentication or authorization, even in early project stages.
 **Prevention:** Always verify that internal, administrative, or sensitive data endpoints are protected by an authentication check (e.g., verifying an `x-admin-token` or checking user roles) before querying and returning data.
+
+## 2026-07-22 - Missing Input Length Limits Exposing DoS Risk
+**Vulnerability:** The survey submission endpoint `/api/survey/submit` (`worker/src/routes/survey.ts`) did not validate the length of user-provided fields (like `openFeedback`) or the overall JSON payload before writing to the D1 database.
+**Learning:** Failing to enforce payload length boundaries in unauthenticated or lightly authenticated routes makes the system highly susceptible to Denial of Service (DoS) and database exhaustion attacks.
+**Prevention:** Always enforce strict size limits on external inputs, particularly for endpoints that accept free-form text or JSON objects, using both field-level checks (e.g., `val.length > 5000`) and overall payload checks.
