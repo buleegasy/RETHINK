@@ -69,6 +69,7 @@ export const EmojiSelector: React.FC<EmojiSelectorProps> = ({ onSelect, onSkip }
                 onSelect(item.emoji);
               }
             }}
+            aria-label={`选择表情 ${item.emoji}`}
             className={`group relative aspect-square flex items-center justify-center rounded-3xl bg-surface-container/30 backdrop-blur-md border border-outline-variant/30 shadow-sm cursor-pointer hover:bg-surface-container/50 transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-gemini-blue focus-visible:outline-none ${item.colorClass}`}
           >
             {/* Hover aura effect */}
@@ -88,7 +89,7 @@ export const EmojiSelector: React.FC<EmojiSelectorProps> = ({ onSelect, onSkip }
         animate={{ opacity: 0.4 }}
         whileHover={{ opacity: 0.8 }}
         onClick={onSkip}
-        className="mt-12 text-on-surface-variant text-xs font-light tracking-widest uppercase cursor-pointer hover:text-on-surface transition-all duration-300 border-none bg-transparent outline-none"
+        className="mt-12 text-on-surface-variant text-xs font-light tracking-widest uppercase cursor-pointer hover:text-on-surface transition-all duration-300 border-none bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-gemini-blue focus-visible:outline-none rounded px-3 py-1.5"
       >
         跳过，直接输入文字
       </motion.button>
