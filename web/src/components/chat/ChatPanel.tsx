@@ -5,6 +5,42 @@ import { MessageBubble } from './MessageBubble';
 import { GeminiWelcome } from './GeminiWelcome';
 import { EmojiSelector } from './EmojiSelector';
 import { useChat } from '../../hooks/useChat';
+import type { ChatMessage } from '../../types';
+
+interface MessageRowProps {
+  msg: ChatMessage;
+  idx: number;
+  prev: ChatMessage | undefined;
+  next: ChatMessage | undefined;
+  isStreaming: boolean;
+  messagesLength: number;
+}
+
+const MessageRow = React.memo(({ msg, idx, prev, next, isStreaming, messagesLength }: MessageRowProps) => {
+  const isFirstInGroup = !prev || prev.isHidden || prev.role !== msg.role;
+  const isLastInGroup = !next || next.isHidden || next.role !== msg.role;
+  // Add extra top margin when a new "speaker" starts
+  const needsGroupSep = isFirstInGroup && idx > 0;
+
+  return (
+    <motion.div
+      layout="position"
+      className={needsGroupSep ? 'mt-8' : ''}
+      transition={{
+        layout: { type: "spring", stiffness: 150, damping: 20, mass: 0.8 }
+      }}
+    >
+      <MessageBubble
+        message={msg}
+        isStreaming={isStreaming && idx === messagesLength - 1 && msg.role === 'assistant'}
+        isFirstInGroup={isFirstInGroup}
+        isLastInGroup={isLastInGroup}
+      />
+    </motion.div>
+  );
+});
+
+MessageRow.displayName = 'MessageRow';
 
 export const ChatPanel: React.FC = () => {
   const messages = useChatStore(state => state.messages);
@@ -88,31 +124,17 @@ export const ChatPanel: React.FC = () => {
               transition={{ duration: 0.4 }}
               className="flex flex-col gap-1 w-full mt-auto"
             >
-              {messages.map((msg, idx) => {
-                const prev = messages[idx - 1];
-                const next = messages[idx + 1];
-                const isFirstInGroup = !prev || prev.isHidden || prev.role !== msg.role;
-                const isLastInGroup = !next || next.isHidden || next.role !== msg.role;
-                // Add extra top margin when a new "speaker" starts
-                const needsGroupSep = isFirstInGroup && idx > 0;
-                return (
-                  <motion.div 
-                    layout="position"
-                    key={msg.id || idx} 
-                    className={needsGroupSep ? 'mt-8' : ''}
-                    transition={{
-                      layout: { type: "spring", stiffness: 150, damping: 20, mass: 0.8 }
-                    }}
-                  >
-                    <MessageBubble
-                      message={msg}
-                      isStreaming={isStreaming && idx === messages.length - 1 && msg.role === 'assistant'}
-                      isFirstInGroup={isFirstInGroup}
-                      isLastInGroup={isLastInGroup}
-                    />
-                  </motion.div>
-                );
-              })}
+              {messages.map((msg, idx) => (
+                <MessageRow
+                  key={msg.id || idx}
+                  msg={msg}
+                  idx={idx}
+                  prev={messages[idx - 1]}
+                  next={messages[idx + 1]}
+                  isStreaming={isStreaming}
+                  messagesLength={messages.length}
+                />
+              ))}
               <div className="h-[140px] md:h-[180px] shrink-0" />
             </motion.div>
           )}
