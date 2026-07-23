@@ -138,6 +138,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
             {/* Textarea */}
             <textarea
               ref={textareaRef}
+              aria-label="输入消息"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
