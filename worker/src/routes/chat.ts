@@ -368,17 +368,25 @@ chatRouter.post('/', requireAuth, async (c) => {
 
       // 辅助函数：寻找第一个非转义的引号
       const getUnescapedQuoteIndex = (str: string): number => {
-        let isEscaped = false;
-        for (let i = 0; i < str.length; i++) {
-          if (str[i] === '\\') {
-            isEscaped = !isEscaped;
-          } else if (str[i] === '"' && !isEscaped) {
-            return i;
-          } else {
-            isEscaped = false;
+        let index = 0;
+        while (true) {
+          index = str.indexOf('"', index);
+          if (index === -1) {
+            return -1;
           }
+          let backslashCount = 0;
+          for (let i = index - 1; i >= 0; i--) {
+            if (str[i] === '\\') {
+              backslashCount++;
+            } else {
+              break;
+            }
+          }
+          if (backslashCount % 2 === 0) {
+            return index;
+          }
+          index++;
         }
-        return -1;
       };
 
       for await (const chunk of completionStream) {
