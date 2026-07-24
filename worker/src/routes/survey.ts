@@ -1,5 +1,18 @@
 import { Hono } from 'hono';
+import { z } from 'zod';
 import type { Env } from '../types';
+
+interface SurveyDbRow {
+  id: string;
+  data: string;
+  open_feedback: string;
+  created_at: number;
+}
+
+const surveySubmitSchema = z.object({
+  respondentId: z.string({ required_error: 'respondentId is required' }).min(1, 'respondentId is required'),
+  openFeedback: z.string().optional().default(''),
+}).passthrough();
 
 export const surveyRouter = new Hono<{ Bindings: Env }>();
 
@@ -9,19 +22,20 @@ export const surveyRouter = new Hono<{ Bindings: Env }>();
  */
 surveyRouter.post('/submit', async (c) => {
   try {
-    let body: any = {};
-    try { body = await c.req.json<any>(); } catch (e) {}
+    const rawBody = await c.req.json().catch(() => null);
+    const parsed = surveySubmitSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'respondentId is required';
+      return c.json({ error: errorMsg }, 400);
+    }
     
+    const body = { ...parsed.data };
     const id = body.respondentId;
     const openFeedback = body.openFeedback || '';
     
-    if (!id) {
-      return c.json({ error: 'respondentId is required' }, 400);
-    }
-    
     // Add IP and region metadata
-    const cf = c.req.raw.cf;
-    body.metadata = {
+    const cf = c.req.raw.cf as { country?: string; region?: string; city?: string } | undefined;
+    (body as Record<string, unknown>).metadata = {
       country: c.req.header('X-Client-Country') || cf?.country || 'Unknown',
       region: c.req.header('X-Client-Region') || cf?.region || 'Unknown',
       city: c.req.header('X-Client-City') || cf?.city || 'Unknown',
@@ -39,9 +53,10 @@ surveyRouter.post('/submit', async (c) => {
     .run();
     
     return c.json({ success: true, id });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = (err as Error)?.message || 'Survey Submit Error';
     console.error('Survey Submit Error:', err);
-    return c.json({ error: err.message }, 500);
+    return c.json({ error: message }, 500);
   }
 });
 
@@ -54,11 +69,11 @@ surveyRouter.get('/results', async (c) => {
     const { results } = await c.env.DB.prepare(
       'SELECT id, data, open_feedback, created_at FROM surveys ORDER BY created_at DESC'
     )
-    .all();
+    .all<SurveyDbRow>();
     
     // 解析每个记录的 data 字段为 JSON 对象
-    const parsedResults = results.map((row: any) => {
-      let parsedData = {};
+    const parsedResults = results.map((row) => {
+      let parsedData: Record<string, unknown> = {};
       try {
         parsedData = JSON.parse(row.data);
       } catch (e) {
@@ -76,8 +91,9 @@ surveyRouter.get('/results', async (c) => {
       total: parsedResults.length,
       results: parsedResults
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = (err as Error)?.message || 'Survey Fetch Error';
     console.error('Survey Fetch Error:', err);
-    return c.json({ error: err.message }, 500);
+    return c.json({ error: message }, 500);
   }
 });

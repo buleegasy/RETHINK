@@ -1,5 +1,7 @@
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
+import { z } from 'zod';
+import type OpenAI from 'openai';
 import { getLLMClient, getModelName, getModelSequence, buildSystemPromptFSM } from '../lib/llm';
 import { detectStage, stageToIndex } from '../lib/cbt-stages';
 import { classifyIntent } from '../lib/intent-router';
@@ -12,53 +14,103 @@ import {
   type FSMContext,
   type FSMState,
 } from '../lib/fsm';
+import { evaluateSandplay } from '../lib/sandplay-evaluator';
 import { requireAuth } from '../lib/auth-utils';
-import type { Env, ChatRequest, ChatMessage, SessionRow, HonoSchema, AuthUser } from '../types';
+import type { Env, ChatRequest, ChatMessage, SessionRow, HonoSchema, AuthUser, MessageTechChain } from '../types';
+
+const chatMessageSchema = z.object({
+  id: z.string().optional(),
+  role: z.enum(['system', 'user', 'assistant']),
+  content: z.string(),
+  techChain: z.record(z.unknown()).optional(),
+});
+
+const userProfileSchema = z.object({
+  weather: z.enum(['Storm', 'Thunder', 'Fog', 'Sunny']),
+  safetyIsland: z.enum(['Arcade', 'DeepSea', 'MusicFestival']),
+  stressor: z.enum(['Academic', 'SelfEsteem', 'Relationship']),
+});
+
+const facialEmotionSchema = z.object({
+  label: z.string(),
+  labelZh: z.string(),
+  confidence: z.number(),
+});
+
+const miniatureItemSchema = z.object({
+  id: z.string(),
+  assetKey: z.string(),
+  category: z.enum(['self', 'emotion', 'obstacle', 'resource']),
+  label: z.string(),
+  position: z.object({ x: z.number(), y: z.number() }),
+  scale: z.number(),
+  rotation: z.number(),
+});
+
+const sandplayStateSchema = z.object({
+  terrain: z.enum(['desert', 'starry_sky', 'stormy_sea', 'forest']),
+  miniatures: z.array(miniatureItemSchema),
+  createdAt: z.string(),
+});
+
+const chatRequestSchema = z.object({
+  sessionId: z.string().optional(),
+  messages: z.array(chatMessageSchema, { required_error: 'messages cannot be empty' })
+    .min(1, 'messages cannot be empty'),
+  stream: z.boolean().optional().default(true),
+  profile: userProfileSchema.optional(),
+  facialEmotion: facialEmotionSchema.optional(),
+  model: z.string().optional(),
+  sandplayState: sandplayStateSchema.optional(),
+});
 
 export const chatRouter = new Hono<HonoSchema>();
 
 chatRouter.post('/', requireAuth, async (c) => {
-  const user = c.get('user') as AuthUser;
-  let body: Partial<ChatRequest> = {};
-  try { body = await c.req.json<ChatRequest>(); } catch (e) {}
-  const { messages, stream = true, sessionId = crypto.randomUUID(), profile, facialEmotion, model: requestedModel } = body;
-
-  if (!messages || messages.length === 0) {
-    return c.json({ error: 'messages cannot be empty' }, 400);
+  const user = c.get('user');
+  const rawBody = await c.req.json().catch(() => null);
+  const parsed = chatRequestSchema.safeParse(rawBody);
+  if (!parsed.success) {
+    const errorMsg = parsed.error.issues[0]?.message || 'messages cannot be empty';
+    return c.json({ error: errorMsg }, 400);
   }
+  const { messages, stream, sessionId: providedSessionId, profile, facialEmotion, model: requestedModel, sandplayState } = parsed.data;
+  const sessionId = providedSessionId || crypto.randomUUID();
 
   // ── 1. 从 D1 获取历史会话 + FSM 状态 ──
   let currentStageIndex = 0;
   let fsmCtx: FSMContext = createDefaultContext();
 
   try {
-    const session = await c.env.DB.prepare('SELECT * FROM sessions WHERE id = ?')
-      .bind(sessionId)
-      .first<any>();
+    if (c.env?.DB) {
+      const session = await c.env.DB.prepare('SELECT * FROM sessions WHERE id = ?')
+        .bind(sessionId)
+        .first<SessionRow>();
 
-    if (session) {
-      if (session.user_id && session.user_id !== user.uid) {
-        return c.json({ error: 'Forbidden: Session does not belong to you' }, 403);
-      }
-      
-      // Auto-bind anonymous session to logged-in user
-      if (!session.user_id) {
-        await c.env.DB.prepare('UPDATE sessions SET user_id = ?, updated_at = unixepoch() WHERE id = ?')
-          .bind(user.uid, sessionId)
-          .run();
-      }
+      if (session) {
+        if (session.user_id && session.user_id !== user.uid) {
+          return c.json({ error: 'Forbidden: Session does not belong to you' }, 403);
+        }
+        
+        // Auto-bind anonymous session to logged-in user
+        if (!session.user_id && c.env.DB) {
+          await c.env.DB.prepare('UPDATE sessions SET user_id = ?, updated_at = unixepoch() WHERE id = ?')
+            .bind(user.uid, sessionId)
+            .run();
+        }
 
-      currentStageIndex = session.current_stage - 1;
-      // 恢复 FSM 上下文
-      if (session.fsm_state) {
-        fsmCtx.currentState = session.fsm_state as FSMState;
-      }
-      if (session.fsm_context) {
-        try {
-          const parsed = JSON.parse(session.fsm_context);
-          fsmCtx = { ...fsmCtx, ...parsed, currentState: fsmCtx.currentState };
-        } catch {
-          console.warn('Failed to parse FSM context JSON, using defaults');
+        currentStageIndex = session.current_stage - 1;
+        // 恢复 FSM 上下文
+        if (session.fsm_state) {
+          fsmCtx.currentState = session.fsm_state as FSMState;
+        }
+        if (session.fsm_context) {
+          try {
+            const parsed = JSON.parse(session.fsm_context);
+            fsmCtx = { ...fsmCtx, ...parsed, currentState: fsmCtx.currentState };
+          } catch {
+            console.warn('Failed to parse FSM context JSON, using defaults');
+          }
         }
       }
     }
@@ -183,8 +235,18 @@ chatRouter.post('/', requireAuth, async (c) => {
     userMessage: userLastMessage,
   });
 
+  let sandplayDesc = undefined;
+  if (sandplayState) {
+    try {
+      sandplayDesc = evaluateSandplay(sandplayState);
+      console.log('[Sandplay] Evaluated description length:', sandplayDesc.length);
+    } catch(e) {
+      console.warn('[Sandplay] Evaluator error:', e);
+    }
+  }
+
   // ── 5. 构建 System Prompt（基于 FSM 状态） ──
-  const systemPrompt = buildSystemPromptFSM(fsmCtx.currentState, intentResult.type, ragContext, profile, facialEmotion, fsmCtx.icebreaker);
+  const systemPrompt = buildSystemPromptFSM(fsmCtx.currentState, intentResult.type, ragContext, profile, facialEmotion, fsmCtx.icebreaker, sandplayDesc);
 
   const client = getLLMClient(c.env);
   const model = getModelName(c.env, requestedModel);
@@ -217,8 +279,8 @@ chatRouter.post('/', requireAuth, async (c) => {
   if (!stream) {
     try {
       const modelsToTry = getModelSequence(c.env, requestedModel);
-      let response: any = null;
-      let lastError: any = null;
+      let response: OpenAI.Chat.Completions.ChatCompletion | null = null;
+      let lastError: unknown = null;
       let usedModel = model;
 
       for (const currentModel of modelsToTry) {
@@ -255,6 +317,9 @@ chatRouter.post('/', requireAuth, async (c) => {
       let uiControl = undefined;
       let reasoningDeduction = undefined;
       let retrievedEvidence = undefined;
+      let sandplay_invite = undefined;
+      let sandplay_close = undefined;
+      let sandplay_suggestion = undefined;
 
       try {
         const parsed = JSON.parse(finalJsonStr);
@@ -277,6 +342,10 @@ chatRouter.post('/', requireAuth, async (c) => {
         if (parsed.retrieved_evidence) {
           retrievedEvidence = parsed.retrieved_evidence;
         }
+        
+        if (parsed.sandplay_invite) sandplay_invite = parsed.sandplay_invite;
+        if (parsed.sandplay_close) sandplay_close = parsed.sandplay_close;
+        if (parsed.sandplay_suggestion) sandplay_suggestion = parsed.sandplay_suggestion;
 
         
         // 解析破冰画像增量更新 (Onboarding 阶段)
@@ -307,7 +376,7 @@ chatRouter.post('/', requireAuth, async (c) => {
         reasoningDeduction,
         model: usedModel,
       };
-      const updatedMessages: ChatMessage[] = [...messages, { role: 'assistant', content: cleanReply, techChain: finalTechChain as any }];
+      const updatedMessages: ChatMessage[] = [...messages, { role: 'assistant', content: cleanReply, techChain: finalTechChain as unknown as MessageTechChain }];
       await saveToD1(c.env.DB, sessionId, updatedMessages, stageToIndex(stage) + 1, fsmCtx, user.uid);
 
       return c.json({
@@ -321,11 +390,15 @@ chatRouter.post('/', requireAuth, async (c) => {
         reasoning_deduction: reasoningDeduction,
         retrieved_evidence: retrievedEvidence,
         icebreakerLayer: fsmCtx.icebreaker.layer,
+        sandplay_invite,
+        sandplay_close,
+        sandplay_suggestion,
         ...ragMeta,
         model: usedModel,
       });
-    } catch (err: any) {
-      return c.json({ error: err.message }, 500);
+    } catch (err: unknown) {
+      const message = (err as Error)?.message || 'Chat processing failed';
+      return c.json({ error: message }, 500);
     }
   }
 
@@ -333,8 +406,8 @@ chatRouter.post('/', requireAuth, async (c) => {
   return streamSSE(c, async (streamEvent) => {
     try {
       const modelsToTry = getModelSequence(c.env, requestedModel);
-      let completionStream: any = null;
-      let lastError: any = null;
+      let completionStream: AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk> | null = null;
+      let lastError: unknown = null;
       let usedModel = model;
 
       for (const currentModel of modelsToTry) {
@@ -463,6 +536,9 @@ chatRouter.post('/', requireAuth, async (c) => {
       let uiControl = undefined;
       let retrievedEvidence = undefined;
       let reasoningDeduction = undefined;
+      let sandplay_invite = undefined;
+      let sandplay_close = undefined;
+      let sandplay_suggestion = undefined;
       let finalReply = extractedReply;
       
       let cleanResponse = fullResponse.trim();
@@ -484,6 +560,10 @@ chatRouter.post('/', requireAuth, async (c) => {
         } else if (parsed.message) {
           finalReply = parsed.message;
         }
+        
+        if (parsed.sandplay_invite) sandplay_invite = parsed.sandplay_invite;
+        if (parsed.sandplay_close) sandplay_close = parsed.sandplay_close;
+        if (parsed.sandplay_suggestion) sandplay_suggestion = parsed.sandplay_suggestion;
 
         // 解析破冰画像增量更新
         if (parsed.icebreaker_update && fsmCtx.currentState === 'Onboarding') {
@@ -514,7 +594,7 @@ chatRouter.post('/', requireAuth, async (c) => {
         retrievedEvidence,
         reasoningDeduction,
       };
-      const updatedMessages: ChatMessage[] = [...messages, { role: 'assistant', content: finalReply, techChain: finalTechChain as any }];
+      const updatedMessages: ChatMessage[] = [...messages, { role: 'assistant', content: finalReply, techChain: finalTechChain as unknown as MessageTechChain }];
       await saveToD1(c.env.DB, sessionId, updatedMessages, stageToIndex(finalStage) + 1, fsmCtx, user.uid);
 
       // 发送结束标志（含 FSM 状态转移信息 + UI 控制参数 + 破冰层级）
@@ -531,15 +611,19 @@ chatRouter.post('/', requireAuth, async (c) => {
           reasoning_deduction: reasoningDeduction,
           retrieved_evidence: retrievedEvidence,
           icebreakerLayer: fsmCtx.icebreaker.layer,
+          sandplay_invite,
+          sandplay_close,
+          sandplay_suggestion,
           ...ragMeta,
           model: usedModel,
         })
       });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = (error as Error)?.message || 'LLM API Request Failed';
       console.error('SSE Error:', error);
       await streamEvent.writeSSE({
-        data: JSON.stringify({ error: error.message || 'LLM API Request Failed' })
+        data: JSON.stringify({ error: message })
       });
     }
   });
@@ -548,25 +632,64 @@ chatRouter.post('/', requireAuth, async (c) => {
 
 
 /**
- * 辅助函数：保存会话到 D1（含 FSM 状态）
+ * 辅助函数：保存会话到 D1（含 FSM 状态与 Payload 截断保护）
  */
 async function saveToD1(
-  db: D1Database,
+  db: D1Database | null | undefined,
   sessionId: string,
   messages: ChatMessage[],
   stageNum: number,
   fsmCtx: FSMContext,
   userId: string,
 ) {
+  if (!db) {
+    console.warn('D1 Database binding missing, skipping saveToD1');
+    return;
+  }
+
   try {
-    const messagesWithId = messages.map(msg => ({
-      ...msg,
-      id: msg.id || crypto.randomUUID()
-    }));
-    const messagesJson = JSON.stringify(messagesWithId);
-    const title = messages.find(m => m.role === 'user')?.content.substring(0, 20) || '新对话';
+    const MAX_JSON_BYTES = 200 * 1024; // 200KB D1 列容量保护阈值
+    let processedMessages = messages.map(msg => {
+      const copy: ChatMessage = {
+        ...msg,
+        id: msg.id || crypto.randomUUID()
+      };
+      // 限制单条消息内容最大字数（防止个别超长文本填爆 DB）
+      if (copy.content && copy.content.length > 12000) {
+        copy.content = copy.content.substring(0, 12000) + '... [truncated]';
+      }
+      return copy;
+    });
+
+    let messagesJson = JSON.stringify(processedMessages);
+    // 超出 200KB 时，修剪中部历史消息，保留首条上下文与最新轮次
+    if (new TextEncoder().encode(messagesJson).byteLength > MAX_JSON_BYTES && processedMessages.length > 8) {
+      const firstMsg = processedMessages[0];
+      const recent = processedMessages.slice(-16);
+      processedMessages = [firstMsg, ...recent];
+      messagesJson = JSON.stringify(processedMessages);
+
+      // 若仍超限，安全清理旧消息中的 techChain 大字段
+      if (new TextEncoder().encode(messagesJson).byteLength > MAX_JSON_BYTES) {
+        processedMessages = processedMessages.map((m, idx) => {
+          if (idx < processedMessages.length - 2 && m.techChain) {
+            const { techChain, ...rest } = m;
+            return rest;
+          }
+          return m;
+        });
+        messagesJson = JSON.stringify(processedMessages);
+      }
+    }
+
+    const rawTitle = messages.find(m => m.role === 'user')?.content || '新对话';
+    const title = rawTitle.substring(0, 40);
     const fsmState = fsmCtx.currentState;
-    const fsmContextJson = JSON.stringify(fsmCtx);
+
+    let fsmContextJson = JSON.stringify(fsmCtx);
+    if (new TextEncoder().encode(fsmContextJson).byteLength > 40 * 1024) {
+      fsmContextJson = JSON.stringify({ currentState: fsmCtx.currentState, turnCount: fsmCtx.turnCount });
+    }
 
     await db.prepare(`
       INSERT INTO sessions (id, title, messages, current_stage, fsm_state, fsm_context, user_id, created_at, updated_at)
@@ -579,7 +702,7 @@ async function saveToD1(
         fsm_context = excluded.fsm_context,
         user_id = excluded.user_id,
         updated_at = unixepoch()
-    `).bind(sessionId, title, messagesJson, stageNum, fsmState, fsmContextJson, userId).run();
+    `).bind(sessionId, title, messagesJson, stageNum, fsmState, fsmContextJson, userId || null).run();
   } catch (e) {
     console.error('Failed to save session to D1:', e);
   }

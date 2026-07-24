@@ -10,10 +10,17 @@ interface AuthState {
   logout: () => void;
 }
 
-const getStoredToken = () => localStorage.getItem('rethink_auth_token');
-const getStoredUser = () => {
-  const u = localStorage.getItem('rethink_auth_user');
+const getStoredToken = () => {
   try {
+    return localStorage.getItem('rethink_auth_token');
+  } catch {
+    return null;
+  }
+};
+
+const getStoredUser = () => {
+  try {
+    const u = localStorage.getItem('rethink_auth_user');
     return u ? JSON.parse(u) : null;
   } catch {
     return null;
@@ -30,14 +37,22 @@ export const useAuthStore = create<AuthState>((set) => {
     isAuthenticated: !!initialToken,
 
     login: (user, token) => {
-      localStorage.setItem('rethink_auth_token', token);
-      localStorage.setItem('rethink_auth_user', JSON.stringify(user));
+      try {
+        localStorage.setItem('rethink_auth_token', token);
+        localStorage.setItem('rethink_auth_user', JSON.stringify(user));
+      } catch (err) {
+        console.warn('[authStore] Failed to persist token/user (QuotaExceededError or restricted storage):', err);
+      }
       set({ user, token, isAuthenticated: true });
     },
     
     logout: () => {
-      localStorage.removeItem('rethink_auth_token');
-      localStorage.removeItem('rethink_auth_user');
+      try {
+        localStorage.removeItem('rethink_auth_token');
+        localStorage.removeItem('rethink_auth_user');
+      } catch (err) {
+        console.warn('[authStore] Failed to remove stored token/user:', err);
+      }
       set({ user: null, token: null, isAuthenticated: false });
       // Notify other stores or systems if needed
       window.dispatchEvent(new Event('auth:logout'));

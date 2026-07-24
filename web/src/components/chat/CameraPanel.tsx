@@ -79,7 +79,11 @@ export const CameraPanel: React.FC<CameraPanelProps> = ({ onEmotionChange }) => 
         {/* 情绪信息区域 */}
         <div className="flex flex-col justify-center pe-2 md:pe-3 min-w-[100px] md:min-w-[120px]">
           {error ? (
-            <p className="text-[9px] font-light tracking-wide text-error leading-tight px-1">{error.replace('请在浏览器设置中允许访问', '请在设置中允许访问')}</p>
+            <p className="text-[10px] font-normal tracking-wide text-on-surface-variant/70 leading-tight px-1" title={error}>
+              {error.includes('wasm') || error.includes('WASM')
+                ? '情绪感知未就绪'
+                : (error.replace('请在浏览器设置中允许访问', '请在设置中允许访问').slice(0, 24))}
+            </p>
           ) : isModelLoading ? (
             <p className="text-[10px] font-light tracking-widest text-on-surface-variant/80 animate-pulse">加载模型中...</p>
           ) : !isCameraActive ? (

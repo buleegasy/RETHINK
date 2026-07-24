@@ -107,6 +107,13 @@ const OUTPUT_FORMAT_JSON = `
     "transition_speed": "渐变速度（如 5000ms）",
     "effect": "视觉特效描述（如 slow_breathing）"
   },
+  "sandplay_invite": false,
+  "sandplay_close": false,
+  "sandplay_suggestion": {
+    "action": "add|move|remove",
+    "target_label": "名称",
+    "description": "操作说明"
+  },
   "agent_reply": "你的心理干预回复文本（纯台词，严禁旁白）"
 }
 
@@ -153,6 +160,7 @@ const OUTPUT_FORMAT_ICEBREAKER = `
     "transition_speed": "渐变速度（如 5000ms）",
     "effect": "视觉特效描述（如 slow_breathing）"
   },
+  "sandplay_invite": false,
   "agent_reply": "你的对话回复（纯文字，不要括号动作描写）"
 }
 
@@ -176,6 +184,16 @@ const CINEMATIC_UI_RULES = `
 2. **低落/无力 (LowMood)** -> 晨光高动态暖色 (Sunrise Gold)
 3. **愤怒/暴躁 (Anger)** -> 莫兰迪自然色 (Sage Green)
 4. **中性/其他 (Neutral)** -> 浅灰光 (F8F9FA)`;
+
+/**
+ * 心理沙盘指令
+ */
+const SANDPLAY_INSTRUCTION = `
+【🎨 心理沙盘支持】：
+如果你发现用户当前“难以用语言表达自己”、“处于情绪混沌状态”、“不知道从何说起”，或者你认为具象化的投射有助于梳理他们的内心，你可以在 JSON 中设置 "sandplay_invite": true，从而在界面上优雅地邀请用户打开心灵沙盘。这应该用文字自然地提出邀请（例如：“听起来你现在思绪有些乱，不如我们一起在沙盘里摆点东西，把心里的感觉放出来看看？”）。
+如果用户已经打开了沙盘，你会收到【沙盘空间解析】数据，请将这些空间拓扑信息作为你分析用户心理的线索，并可以结合沙盘进行探讨。
+当你认为沙盘探讨结束时，可设置 "sandplay_close": true。
+如果需要，你甚至可以利用 "sandplay_suggestion" 提出针对性的沙盘摆放建议。`;
 
 /**
  * 交互风格要求
@@ -207,6 +225,7 @@ export function buildSystemPromptFSM(
   profile?: UserProfile,
   facialEmotion?: { label: string; labelZh: string; confidence: number },
   icebreaker?: IcebreakerProfile,
+  sandplayDesc?: string,
 ): string {
   const parts: string[] = [];
 
@@ -269,6 +288,10 @@ export function buildSystemPromptFSM(
     parts.push(`【📷 摄像头情绪感知】：检测到用户面部情绪为「${facialEmotion.labelZh}」`);
   }
 
+  if (sandplayDesc) {
+    parts.push(`\n【沙盘空间解析】\n${sandplayDesc}\n你可以将其视为用户潜意识的投射。`);
+  }
+
   if (intent !== 'crisis') {
     parts.push(EMOTIONAL_SAFETY_NET);
   }
@@ -282,6 +305,7 @@ export function buildSystemPromptFSM(
     }
   }
 
+  parts.push(SANDPLAY_INSTRUCTION);
   parts.push(CINEMATIC_UI_RULES);
 
   if (fsmState === 'Onboarding') {

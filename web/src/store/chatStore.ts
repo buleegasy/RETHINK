@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { ChatMessage, CBTStage, FSMState, TechChain, UIControl } from '../types';
+import type { SandplayState } from '../types/sandplay';
 
 interface ChatState {
   // Chat state
@@ -12,6 +13,9 @@ interface ChatState {
   isStreaming: boolean;
   selectedModel: string;
   icebreakerLayer: number;
+  isSandplayOpen: boolean;
+  sandplayState: SandplayState | null;
+  sandplayInvitePending: boolean;
   // Actions
   setSessionId: (id: string) => void;
   loadSession: (session: {
@@ -30,6 +34,11 @@ interface ChatState {
   setIsStreaming: (isStreaming: boolean) => void;
   setSelectedModel: (model: string) => void;
   setIcebreakerLayer: (layer: number) => void;
+  openSandplay: () => void;
+  closeSandplay: () => void;
+  updateSandplayState: (state: SandplayState) => void;
+  setSandplayInvitePending: (pending: boolean) => void;
+  removeLastMessage: () => void;
   clearChat: () => void;
 }
 
@@ -45,6 +54,9 @@ export const useChatStore = create<ChatState>((set) => {
     isStreaming: false,
     selectedModel: 'claude-haiku-4.5',
     icebreakerLayer: 1,
+    isSandplayOpen: false,
+    sandplayState: null,
+    sandplayInvitePending: false,
 
     // Chat Actions
     setSessionId: (id) => set({ sessionId: id }),
@@ -81,6 +93,17 @@ export const useChatStore = create<ChatState>((set) => {
       return {};
     }),
 
+    removeLastMessage: () => set((state) => {
+      const messages = state.messages;
+      if (messages.length > 0) {
+        const lastIdx = messages.length - 1;
+        if (messages[lastIdx].role === 'assistant') {
+          return { messages: messages.slice(0, -1) };
+        }
+      }
+      return {};
+    }),
+
     setLastMessageTechChain: (techChain) => set((state) => {
       const messages = state.messages;
       if (messages.length > 0) {
@@ -111,6 +134,22 @@ export const useChatStore = create<ChatState>((set) => {
 
     setIcebreakerLayer: (icebreakerLayer) => set({ icebreakerLayer }),
 
+    openSandplay: () => set({ 
+      isSandplayOpen: true, 
+      sandplayInvitePending: false,
+      sandplayState: useChatStore.getState().sandplayState || {
+        terrain: 'forest',
+        miniatures: [],
+        createdAt: new Date().toISOString()
+      }
+    }),
+
+    closeSandplay: () => set({ isSandplayOpen: false }),
+
+    updateSandplayState: (sandplayState) => set({ sandplayState }),
+
+    setSandplayInvitePending: (sandplayInvitePending) => set({ sandplayInvitePending }),
+
     clearChat: () => set({ 
       sessionId: null, 
       messages: [], 
@@ -120,6 +159,9 @@ export const useChatStore = create<ChatState>((set) => {
       hasCompletedOnboarding: false,
       isStreaming: false,
       icebreakerLayer: 1,
+      isSandplayOpen: false,
+      sandplayState: null,
+      sandplayInvitePending: false,
     }),
   };
 });

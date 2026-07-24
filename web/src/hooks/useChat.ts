@@ -26,10 +26,16 @@ export function useChat() {
 
     if (!text.trim() && !profile) return;
 
+    // 离线安全检查
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      setError('当前处于离线状态，请检查网络连接后重试');
+      return;
+    }
+
     setError(null);
     setIsStreaming(true);
 
-    const { messages, sessionId, selectedModel } = useChatStore.getState();
+    const { messages, sessionId, selectedModel, sandplayState, isSandplayOpen } = useChatStore.getState();
 
     // 添加用户消息
     const userMsg: ChatMessage = { 
@@ -42,6 +48,8 @@ export function useChat() {
     // 预先添加一条空的 assistant 消息用于流式填充
     addMessage({ role: 'assistant', content: '' });
 
+    let hasReceivedData = false;
+
     try {
       // 准备请求体
       const payloadMessages = [...messages, userMsg].map(({ id, role, content }) => ({ id, role, content }));
@@ -52,6 +60,7 @@ export function useChat() {
         profile,
         model: selectedModel,
         facialEmotion,
+        sandplayState: isSandplayOpen && sandplayState ? sandplayState : undefined,
       });
 
       const reader = streamBody.getReader();
@@ -72,6 +81,7 @@ export function useChat() {
             
             // 更新文字
             if (parsed.delta) {
+              hasReceivedData = true;
               updateLastMessage(parsed.delta);
             }
             // 更新 CBT 阶段（向后兼容）
@@ -100,6 +110,15 @@ export function useChat() {
               setSessionId(parsed.sessionId);
             }
             
+            // 处理沙盘信号
+            if (parsed.sandplay_invite) {
+              useChatStore.getState().setSandplayInvitePending(true);
+            }
+            if (parsed.sandplay_close) {
+              useChatStore.getState().closeSandplay();
+            }
+            // (将来如果需要，可以在这里处理 sandplay_suggestion)
+
             // 当收到最终块时，存储技术链元数据（含 FSM 信息）
             if (parsed.done && (parsed.intent || parsed.model)) {
               const techChain: TechChain = {
@@ -158,8 +177,20 @@ export function useChat() {
 
     } catch (err) {
       console.error('Chat error:', err);
-      setError(err instanceof Error ? err.message : '发送失败，请重试');
-      updateLastMessage('\n\n*(抱歉，网络连接或服务出现了问题，请稍后再试)*');
+      const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
+      const errorMessage = isOffline 
+        ? '当前处于离线状态，请检查网络连接后重试' 
+        : (err instanceof Error ? err.message : '发送失败，请检查网络连接');
+
+      setError(errorMessage);
+      if (!hasReceivedData) {
+        useChatStore.getState().removeLastMessage();
+      } else {
+        updateLastMessage(isOffline 
+          ? '\n\n*(网络连接已中断，当前处于离线状态)*' 
+          : '\n\n*(抱歉，网络连接中断或服务出现异常，请稍后再试)*'
+        );
+      }
     } finally {
       setIsStreaming(false);
     }

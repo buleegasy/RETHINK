@@ -20,7 +20,7 @@ const mockAuthState = {
 // Mock the store modules entirely to bypass real Zustand / localStorage imports
 vi.mock('../store/chatStore', () => ({
   useChatStore: Object.assign(
-    (selector: any) => selector(mockChatState),
+    (selector: any) => (typeof selector === 'function' ? selector(mockChatState) : mockChatState),
     {
       getState: () => mockChatState,
       setState: (newState: any) => {
@@ -32,7 +32,7 @@ vi.mock('../store/chatStore', () => ({
 
 vi.mock('../store/authStore', () => ({
   useAuthStore: Object.assign(
-    (selector: any) => selector(mockAuthState),
+    (selector: any) => (typeof selector === 'function' ? selector(mockAuthState) : mockAuthState),
     {
       getState: () => mockAuthState,
       setState: (newState: any) => {

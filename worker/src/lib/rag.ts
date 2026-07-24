@@ -86,11 +86,11 @@ export async function ingestDocument(
     id: chunk.id,
     values: embeddings[i],
     metadata: {
-      documentId: chunk.documentId,
-      documentTitle: chunk.documentTitle,
-      headingPath: chunk.headingPath,
+      documentId: truncateUtf8Bytes(chunk.documentId, 100),
+      documentTitle: truncateUtf8Bytes(chunk.documentTitle, 200),
+      headingPath: truncateUtf8Bytes(chunk.headingPath || '', 200),
       chunkIndex: chunk.chunkIndex,
-      text: chunk.content.substring(0, 1000), // Vectorize metadata 有大小限制
+      text: truncateUtf8Bytes(chunk.content, 1000), // Vectorize metadata UTF-8 字节限制保护
     },
   }));
 
@@ -239,7 +239,7 @@ async function retrieveContextFallbackSQLite(
     }
 
     const activeKeywords = keywords.slice(0, 5);
-    const whereClauses = activeKeywords.map(() => 'content LIKE ?');
+    const whereClauses = activeKeywords.map(() => "content LIKE ? ESCAPE '\\'");
     const sql = `
       SELECT id, document_id, document_title, heading_path, chunk_index, content
       FROM knowledge_chunks
@@ -247,7 +247,11 @@ async function retrieveContextFallbackSQLite(
       LIMIT 100
     `;
 
-    const binds = activeKeywords.map(k => `%${k}%`);
+    // 对 SQL LIKE 特殊通配符 (%, _, \) 进行转义保护
+    const binds = activeKeywords.map(k => {
+      const escaped = k.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
+      return `%${escaped}%`;
+    });
     const dbResult = await env.DB.prepare(sql).bind(...binds).all<{
       id: string;
       document_id: string;
@@ -272,9 +276,10 @@ async function retrieveContextFallbackSQLite(
       }
       const score = Math.min(0.99, 0.5 + (hitCount / activeKeywords.length) * 0.4);
       
-      const dummyMatch = {
+      const dummyMatch: VectorizeMatch = {
         id: m.id,
         score,
+        values: [],
         metadata: {
           documentId: m.document_id,
           documentTitle: m.document_title,
@@ -285,8 +290,8 @@ async function retrieveContextFallbackSQLite(
       };
 
       return {
-        match: dummyMatch as any,
-        adjustedScore: scoreRAGMatch(dummyMatch as any, userQuery, options),
+        match: dummyMatch,
+        adjustedScore: scoreRAGMatch(dummyMatch, userQuery, options),
         sourceKey: m.document_title || m.document_id || 'unknown',
         sourceTitle: m.document_title,
       };
@@ -524,7 +529,14 @@ ${recentContext || '无'}
       throw new Error(`RAG decision request failed: ${res.status}`);
     }
 
-    const data = await res.json() as any;
+    interface RAGDecisionCompletionResponse {
+      choices?: Array<{
+        message?: {
+          content?: string;
+        };
+      }>;
+    }
+    const data = (await res.json()) as RAGDecisionCompletionResponse;
     const content = (data.choices?.[0]?.message?.content || '{}').trim();
     const parsed = JSON.parse(content);
     return {
@@ -640,4 +652,22 @@ function generateDocumentId(title: string): string {
     hash = hash & hash; // Convert to 32bit integer
   }
   return `doc_${Math.abs(hash).toString(36)}`;
+}
+
+/**
+ * UTF-8 字节截断辅助函数：确保存入 Vectorize 的 metadata 字符串字节长度不超限
+ */
+export function truncateUtf8Bytes(str: string, maxBytes: number): string {
+  if (!str) return '';
+  const encoder = new TextEncoder();
+  const encoded = encoder.encode(str);
+  if (encoded.length <= maxBytes) {
+    return str;
+  }
+  const decoder = new TextDecoder('utf-8');
+  let decoded = decoder.decode(encoded.subarray(0, maxBytes));
+  if (decoded.endsWith('\uFFFD')) {
+    decoded = decoded.slice(0, -1);
+  }
+  return decoded;
 }

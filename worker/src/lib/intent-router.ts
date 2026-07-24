@@ -378,8 +378,15 @@ async function verifyIntentWithLLM(
     throw new Error(`LLM classification request failed: ${res.statusText}`);
   }
 
-  const data = await res.json() as any;
-  const content = (data.choices[0]?.message?.content || '{}').trim();
+  interface IntentLLMResponse {
+    choices?: Array<{
+      message?: {
+        content?: string;
+      };
+    }>;
+  }
+  const data = (await res.json()) as IntentLLMResponse;
+  const content = (data.choices?.[0]?.message?.content || '{}').trim();
   const parsed = JSON.parse(content);
 
   return {

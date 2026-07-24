@@ -171,9 +171,9 @@ describe('Challenger Empirical Verification Tests', () => {
       expect(mockEnv.AI.run).toHaveBeenCalled();
       expect(mockDBAll).toHaveBeenCalled();
       
-      // Verify query is structured with LIKE OR clauses
+      // Verify query is structured with LIKE OR clauses and ESCAPE protection
       expect(mockEnv.DB.prepare).toHaveBeenCalledWith(
-        expect.stringContaining('content LIKE ? OR content LIKE ?')
+        expect.stringContaining("content LIKE ? ESCAPE '\\' OR content LIKE ? ESCAPE '\\'")
       );
 
       expect(result.chunks.length).toBe(2);

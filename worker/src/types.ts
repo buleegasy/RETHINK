@@ -1,3 +1,22 @@
+export type MiniatureCategory = 'self' | 'emotion' | 'obstacle' | 'resource';
+export type TerrainTheme = 'desert' | 'starry_sky' | 'stormy_sea' | 'forest';
+
+export interface MiniatureItem {
+  id: string;
+  assetKey: string;
+  category: MiniatureCategory;
+  label: string;
+  position: { x: number; y: number };
+  scale: number;
+  rotation: number;
+}
+
+export interface SandplayState {
+  terrain: TerrainTheme;
+  miniatures: MiniatureItem[];
+  createdAt: string;
+}
+
 export interface AuthUser {
   uid: string;
   email: string;
@@ -117,6 +136,7 @@ export interface ChatRequest {
     confidence: number; // 0-100
   };
   model?: string;
+  sandplayState?: SandplayState;
 }
 
 // ============================================================
@@ -144,6 +164,14 @@ export interface SSEChunk {
   fsmTrigger?: string;
   /** UI 控制参数（仅在开始或发生变化时发送，或在 done=true 时完整发送） */
   uiControl?: UIControl;
+  sandplay_invite?: boolean;
+  sandplay_open?: boolean;
+  sandplay_close?: boolean;
+  sandplay_suggestion?: {
+    action: 'remove' | 'move' | 'add';
+    target_label: string;
+    description: string;
+  };
 }
 
 // D1 sessions 表行
@@ -152,6 +180,7 @@ export interface SessionRow {
   title: string;
   messages: string; // JSON string
   current_stage: number;
+  user_id?: string | null;
   created_at: number;
   updated_at: number;
   /** FSM 当前状态名 */

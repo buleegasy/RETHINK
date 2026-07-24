@@ -12,9 +12,20 @@ export const chatApi = {
     profile?: UserProfile;
     model: string;
     facialEmotion?: { label: string; labelZh: string; confidence: number };
+    sandplayState?: unknown;
   }) => {
+    // 离线检测
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      throw new ApiError(0, '当前处于离线状态，请检查网络连接后重试');
+    }
+
     const API_BASE = import.meta.env.VITE_API_URL || '';
-    const token = localStorage.getItem('rethink_auth_token');
+    let token: string | null = null;
+    try {
+      token = localStorage.getItem('rethink_auth_token');
+    } catch {
+      // Storage unavailable
+    }
     
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -25,23 +36,44 @@ export const chatApi = {
 
     const url = `${API_BASE}/api/chat`.replace(/\/api\/api\//g, '/api/');
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        ...payload,
-        stream: true,
-      }),
-    });
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          ...payload,
+          stream: true,
+        }),
+      });
+    } catch (fetchErr) {
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        throw new ApiError(0, '网络连接断开，当前处于离线状态');
+      }
+      throw new ApiError(0, fetchErr instanceof Error ? fetchErr.message : '网络请求失败，请检查网络连接');
+    }
 
     if (!response.ok) {
       if (response.status === 401) {
-        localStorage.removeItem('rethink_auth_token');
-        localStorage.removeItem('rethink_auth_user');
+        try {
+          localStorage.removeItem('rethink_auth_token');
+          localStorage.removeItem('rethink_auth_user');
+        } catch {
+          // Storage restricted
+        }
         window.dispatchEvent(new Event('auth:unauthorized'));
         throw new ApiError(401, '登录凭证已过期，请重新登录');
       }
-      throw new ApiError(response.status, `API Error: ${response.status}`);
+      let errorDetail = `API Error: ${response.status}`;
+      try {
+        const errJson = await response.json();
+        if (errJson && typeof errJson.error === 'string' && errJson.error) {
+          errorDetail = errJson.error;
+        }
+      } catch {
+        // Fallback if response body is non-JSON (e.g. 502/503 HTML)
+      }
+      throw new ApiError(response.status, errorDetail);
     }
 
     if (!response.body) {

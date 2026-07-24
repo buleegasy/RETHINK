@@ -19,7 +19,12 @@ interface FetchOptions extends RequestInit {
 export async function apiClient<T = unknown>(endpoint: string, options: FetchOptions = {}): Promise<T> {
   const { requireAuth = true, headers, ...customOptions } = options;
   
-  const token = localStorage.getItem('rethink_auth_token');
+  let token: string | null = null;
+  try {
+    token = localStorage.getItem('rethink_auth_token');
+  } catch {
+    // Storage restricted or unavailable
+  }
   
   if (requireAuth && !token) {
     throw new ApiError(401, '未登录或登录已过期');
@@ -46,9 +51,12 @@ export async function apiClient<T = unknown>(endpoint: string, options: FetchOpt
   if (!response.ok) {
     if (response.status === 401) {
       // 统一处理未授权错误：清除 token 并抛出错误
-      // 具体的跳转或状态清理交由顶层（如 useAuthStore）的订阅者或直接调用 store 处理
-      localStorage.removeItem('rethink_auth_token');
-      localStorage.removeItem('rethink_auth_user');
+      try {
+        localStorage.removeItem('rethink_auth_token');
+        localStorage.removeItem('rethink_auth_user');
+      } catch {
+        // Storage restricted
+      }
       // 由于这是底层的 utils，最优雅的做法是触发一个全局事件或者直接调用 authStore，
       // 为了解耦，这里只负责清理 localStorage 并抛出异常。
       window.dispatchEvent(new Event('auth:unauthorized'));

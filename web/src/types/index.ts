@@ -181,6 +181,14 @@ export interface SSEChunk {
   uiControl?: UIControl;
   /** 破冰层级 */
   icebreakerLayer?: number;
+  sandplay_invite?: boolean;
+  sandplay_open?: boolean;
+  sandplay_close?: boolean;
+  sandplay_suggestion?: {
+    action: 'remove' | 'move' | 'add';
+    target_label: string;
+    description: string;
+  };
 }
 
 export interface User {

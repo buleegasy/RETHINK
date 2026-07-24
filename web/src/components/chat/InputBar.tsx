@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import type { KeyboardEvent } from 'react';
+import type { FC, KeyboardEvent, CSSProperties } from 'react';
 import { motion } from 'framer-motion';
+import { useShallow } from 'zustand/react/shallow';
 import { useChatStore } from '../../store/chatStore';
 import { useVoiceInput } from '../../hooks/useVoiceInput';
 
@@ -8,14 +9,14 @@ interface InputBarProps {
   onSend: (text: string) => void;
 }
 
-export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
+export const InputBar: FC<InputBarProps> = ({ onSend }) => {
   const [input, setInput] = useState('');
   const [isFocused, setIsFocused] = useState(false);
-  const isStreaming = useChatStore(state => state.isStreaming);
+  const isStreaming = useChatStore(useShallow((state) => state.isStreaming));
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleTranscript = useCallback((text: string) => {
-    setInput(prev => {
+    setInput((prev) => {
       const trimmedPrev = prev.trim();
       return trimmedPrev ? `${trimmedPrev} ${text}` : text;
     });
@@ -88,28 +89,24 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
 
   return (
     <div className="absolute bottom-0 start-0 w-full ps-4 pe-4 md:ps-8 md:pe-8 pb-[calc(max(env(safe-area-inset-bottom),24px))] pt-8 z-30 pointer-events-none">
-
       <div className="max-w-3xl ms-auto me-auto flex flex-col items-center pointer-events-auto">
-
-
         {/* Input Container */}
-        <div className={`w-full relative max-w-3xl mx-auto`}>
+        <div className="w-full relative max-w-3xl mx-auto">
           <motion.div 
             animate={{
               boxShadow: isFocused
-                ? '0 32px 80px rgba(0,0,0,0.15)'
-                : '0 12px 48px rgba(0,0,0,0.08)'
+                ? '0 24px 60px rgba(0,0,0,0.12)'
+                : '0 8px 32px rgba(0,0,0,0.06)'
             }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className={`inputbar-streaming-glow ${isStreaming ? 'is-glowing' : ''} relative flex items-end bg-[rgba(255,255,255,0.9)] backdrop-blur-[16px] p-2 gap-1 ${
+            className={`inputbar-streaming-glow ${isStreaming ? 'is-glowing' : ''} relative flex items-end bg-surface-container-low/90 backdrop-blur-2xl p-2 gap-1.5 ${
               (input.includes('\n') || input.length > 60) ? 'rounded-3xl' : 'rounded-full'
             } ${
               isFocused
-                ? 'border-[rgba(0,0,0,0.1)] ring-4 ring-black/5'
-                : 'border border-[rgba(0,0,0,0.05)] hover:border-black/10'
+                ? 'border border-outline-variant/60 ring-4 ring-gemini-blue/10'
+                : 'border border-outline-variant/30 hover:border-outline-variant/50'
             }`}
           >
-            
             {/* Voice Button or Spacer */}
             {isVoiceSupported ? (
               <motion.button
@@ -149,7 +146,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
               className={`flex-1 bg-transparent ps-2 pe-2 md:ps-4 md:pe-4 py-2 m-0 text-[15px] md:text-[16px] leading-[24px] font-sans font-light tracking-wide text-on-surface placeholder-on-surface/50 border-none focus:outline-none resize-none overflow-y-auto max-h-[100px] md:max-h-[160px] min-h-[40px] transition-opacity duration-200 ${
                 isListening ? 'placeholder-stage-orange/60' : ''
               } ${isStreaming ? 'cursor-not-allowed' : ''}`}
-              style={{ fieldSizing: 'content' } as React.CSSProperties}
+              style={{ fieldSizing: 'content' } as CSSProperties}
             />
 
             {/* Send Button */}
@@ -171,7 +168,6 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
                 <polyline points="5 12 12 5 19 12"/>
               </svg>
             </motion.button>
-
           </motion.div>
         </div>
 

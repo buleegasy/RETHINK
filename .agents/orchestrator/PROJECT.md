@@ -1,21 +1,20 @@
-# Project: RE-THINK Agent Refactoring, Optimization, and Automated Testing
+# Project: RE-THINK Agent 5-Round Full-Stack Code Optimization
 
 ## Architecture
-RE-THINK Agent is a psychotherapeutic safety sanctuary comprised of a React + Vite + Tailwind frontend and a Cloudflare Worker backend.
-- **Frontend State**: Controlled by Zustand stores (`authStore`, `chatStore`, `sessionStore`).
-- **Backend API**: Cloudflare Worker using Hono. Communicates with LLMs, manages chat logs, surveys, and vector search chunks in D1/Vectorize databases.
+RE-THINK Agent is a psychotherapeutic safety sanctuary comprised of a React + Vite + Tailwind frontend (`web`) and a Cloudflare Worker backend (`worker`).
+- **Frontend (`web`)**: React 18/19, Vite, Tailwind CSS, Zustand state management.
+- **Backend (`worker`)**: Cloudflare Worker using Hono, D1 database, Vectorize embeddings, SSE streaming.
 
 ## Milestones
 
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| 1 | Layout Restructuring | Conditionally render ChatPanel vs LoginWall in App.tsx | None | DONE |
-| 2 | Premium Animation | Implement DecryptText/BlurText animations | M1 | DONE |
-| 3 | Code Verification | Run compilation, verification scripts, and check for overlaps | M2 | DONE |
-| 4 | Test Suite & API Validation Setup | Establish Vitest, Playwright, and backend API validation script. Write initial E2E and API tests | None | IN_PROGRESS |
-| 5 | Architectural Refactoring & TS Strictness | Remove dead files/code, split monolithic AdminApp.tsx, enable `"strict": true` in frontend and resolve all TS errors | M4 | PLANNED |
-| 6 | UI aesthetics & Mobile Responsiveness | Optimize design system Tailwind variables, refine responsiveness down to 375px, and add micro-animations | M5 | PLANNED |
-| 7 | Full Verification & Hardening | Run the complete automated test suite (Vitest + Playwright + API), resolve all issues, and run Forensic Audit | M4, M5, M6 | IN_PROGRESS |
+| 1 | Round 1 Optimization | Code Exploration & Full-Stack Baseline Analysis & Initial Fixes | None | DONE |
+| 2 | Round 2 Optimization | Web Workspace Refactoring (Component structure, UI performance, Zustand store optimization) | M1 | DONE |
+| 3 | Round 3 Optimization | Worker Workspace Refactoring (API middleware, error boundaries, Hono route handlers, payload safety) | M2 | DONE |
+| 4 | Round 4 Optimization | Full-Stack Type Safety, Linting, & Dead Code Elimination | M3 | DONE |
+| 5 | Round 5 Optimization | Bundle Size Optimization, UX Polish, & Final Edge-Case Resilience | M4 | DONE |
+| 6 | Deliverable & Build Verification | Verify `optimization_log.md`, full build checks (`web` & `worker`), & Forensic Audit | M5 | DONE |
 
 ## Interface Contracts
 ### Auth Endpoints
@@ -29,10 +28,6 @@ RE-THINK Agent is a psychotherapeutic safety sanctuary comprised of a React + Vi
 - `/api/survey/submit` (`POST`): Submits survey answers. Takes `{ respondentId, openFeedback, answers... }`. Returns `{ success: true, id: string }`.
 
 ## Code Layout
-- `web/src/App.tsx`: Coordination of login / chat screens.
-- `web/src/AdminApp.tsx`: Monolithic admin dashboard. To be split.
-- `web/src/components/chat/MessageBubble.tsx`: Message styling, contains dead code.
-- `web/tsconfig.app.json`: Frontend tsconfig. Needs strict setting.
-- `web/package.json`, `worker/package.json`: Need test frameworks added.
-- `web/e2e/`: Directory for Playwright E2E tests.
-- `scripts/api-verify.mjs`: Script to validate backend API endpoints.
+- `web/src/`: React UI, components, hooks, stores.
+- `worker/src/`: Cloudflare Worker API handlers, routes, services, DB bindings.
+- `optimization_log.md`: Log of all 5 optimization rounds at project root.

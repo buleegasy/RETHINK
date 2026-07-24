@@ -1,13 +1,52 @@
 import { Hono } from 'hono';
+import { z } from 'zod';
 import { requireAuth } from '../lib/auth-utils';
-import type { Env, AuthUser, HonoSchema } from '../types';
+import type { Env, AuthUser, HonoSchema, SessionRow } from '../types';
+import type { ContentfulStatusCode } from 'hono/utils/http-status';
 
 export const authRouter = new Hono<HonoSchema>();
+
+interface InvitationCodeRow {
+  code: string;
+  max_uses: number;
+  used_count: number;
+  created_at: number;
+}
+
+interface FirebaseAuthResponse {
+  idToken?: string;
+  localId?: string;
+  error?: {
+    message?: string;
+  };
+}
+
+const registerSchema = z.object({
+  username: z.string({ required_error: 'Username, password and invitation code are required' })
+    .min(3, 'Username must be at least 3 characters long'),
+  password: z.string({ required_error: 'Username, password and invitation code are required' })
+    .min(6, 'Password must be at least 6 characters long'),
+  invitationCode: z.string({ required_error: 'Username, password and invitation code are required' })
+    .min(1, 'Username, password and invitation code are required'),
+  turnstileToken: z.string().optional().default(''),
+});
+
+const loginSchema = z.object({
+  username: z.string({ required_error: 'Username and password are required' })
+    .min(1, 'Username and password are required'),
+  password: z.string({ required_error: 'Username and password are required' })
+    .min(1, 'Username and password are required'),
+  turnstileToken: z.string().optional().default(''),
+});
+
+const bindSessionSchema = z.object({
+  sessionId: z.string({ required_error: 'sessionId is required' }).min(1, 'sessionId is required'),
+});
 
 /**
  * Helper to verify Cloudflare Turnstile CAPTCHA response
  */
-async function verifyTurnstile(token: string, secretKey: string, ip?: string): Promise<boolean> {
+async function verifyTurnstile(_token: string, _secretKey: string, _ip?: string): Promise<boolean> {
   // 针对中国大陆用户，跳过 Turnstile 验证避免由于网络受限导致的无法注册/登录
   return true;
 }
@@ -18,21 +57,13 @@ async function verifyTurnstile(token: string, secretKey: string, ip?: string): P
  */
 authRouter.post('/register', async (c) => {
   try {
-    let body: any = {};
-    try { body = await c.req.json<any>(); } catch (e) {}
-    const { username, password, invitationCode, turnstileToken } = body;
-
-    if (!username || !password || !invitationCode) {
-      return c.json({ error: 'Username, password and invitation code are required' }, 400);
+    const rawBody = await c.req.json().catch(() => null);
+    const parsed = registerSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'Username, password and invitation code are required';
+      return c.json({ error: errorMsg }, 400);
     }
-
-    if (username.length < 3) {
-      return c.json({ error: 'Username must be at least 3 characters long' }, 400);
-    }
-
-    if (password.length < 6) {
-      return c.json({ error: 'Password must be at least 6 characters long' }, 400);
-    }
+    const { username, password, invitationCode, turnstileToken } = parsed.data;
 
     // 1. Verify Turnstile Captcha
     const clientIp = c.req.header('cf-connecting-ip');
@@ -42,6 +73,10 @@ authRouter.post('/register', async (c) => {
     }
 
     // 2. Validate and Update Invitation Code in D1 atomically
+    if (!c.env?.DB) {
+      return c.json({ error: 'Database service unavailable' }, 500);
+    }
+
     const updateResult = await c.env.DB.prepare(
       'UPDATE invitation_codes SET used_count = used_count + 1 WHERE code = ? AND used_count < max_uses'
     )
@@ -51,7 +86,7 @@ authRouter.post('/register', async (c) => {
     if (updateResult.meta.changes === 0) {
       const checkInvite = await c.env.DB.prepare('SELECT * FROM invitation_codes WHERE code = ?')
         .bind(invitationCode)
-        .first<any>();
+        .first<InvitationCodeRow>();
       if (!checkInvite) {
         return c.json({ error: 'Invalid invitation code' }, 400);
       } else {
@@ -75,36 +110,55 @@ authRouter.post('/register', async (c) => {
             email,
             password,
             returnSecureToken: true
-          })
+          }),
+          signal: AbortSignal.timeout(8000),
         });
 
-        const fbData = await response.json() as any;
+        let fbData: FirebaseAuthResponse = {};
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          try {
+            fbData = await response.json() as FirebaseAuthResponse;
+          } catch {
+            fbData = {};
+          }
+        } else {
+          const rawText = await response.text();
+          fbData = { error: { message: `Firebase Auth 服务异常 (${response.status}): ${rawText.substring(0, 100)}` } };
+        }
+
         if (!response.ok || fbData.error) {
           const errMsg = fbData.error?.message || 'Firebase Registration Failed';
           console.error('Firebase error:', fbData.error);
 
-          // Rollback by decrementing used_count
-          await c.env.DB.prepare('UPDATE invitation_codes SET used_count = used_count - 1 WHERE code = ?')
-            .bind(invitationCode)
-            .run();
+          // Rollback by decrementing used_count safely
+          if (c.env?.DB) {
+            await c.env.DB.prepare('UPDATE invitation_codes SET used_count = MAX(0, used_count - 1) WHERE code = ?')
+              .bind(invitationCode)
+              .run();
+          }
 
-          return c.json({ error: errMsg }, (response.status || 400) as any);
+          const safeStatus: ContentfulStatusCode = Number.isInteger(response.status) && response.status >= 100 && response.status <= 599 ? (response.status as ContentfulStatusCode) : 400;
+          return c.json({ error: errMsg }, safeStatus);
         }
 
-        idToken = fbData.idToken;
-        localId = fbData.localId;
+        idToken = fbData.idToken || idToken;
+        localId = fbData.localId || localId;
       } else {
         console.log(`[Mock Auth] Successfully registered mock user: ${username}`);
       }
-    } catch (fbErr: any) {
+    } catch (fbErr: unknown) {
+      const fbErrorMessage = (fbErr as Error)?.message || 'Firebase Registration Failed';
       console.error('Firebase signup error:', fbErr);
 
-      // Rollback by decrementing used_count
-      await c.env.DB.prepare('UPDATE invitation_codes SET used_count = used_count - 1 WHERE code = ?')
-        .bind(invitationCode)
-        .run();
+      // Rollback by decrementing used_count safely
+      if (c.env?.DB) {
+        await c.env.DB.prepare('UPDATE invitation_codes SET used_count = MAX(0, used_count - 1) WHERE code = ?')
+          .bind(invitationCode)
+          .run();
+      }
 
-      return c.json({ error: fbErr.message || 'Firebase Registration Failed' }, 500);
+      return c.json({ error: fbErrorMessage }, 500);
     }
 
     return c.json({
@@ -116,9 +170,10 @@ authRouter.post('/register', async (c) => {
       },
       token: idToken
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = (err as Error)?.message || 'Registration failed';
     console.error('Registration error:', err);
-    return c.json({ error: err.message || 'Registration failed' }, 500);
+    return c.json({ error: message }, 500);
   }
 });
 
@@ -128,13 +183,13 @@ authRouter.post('/register', async (c) => {
  */
 authRouter.post('/login', async (c) => {
   try {
-    let body: any = {};
-    try { body = await c.req.json<any>(); } catch (e) {}
-    const { username, password, turnstileToken } = body;
-
-    if (!username || !password) {
-      return c.json({ error: 'Username and password are required' }, 400);
+    const rawBody = await c.req.json().catch(() => null);
+    const parsed = loginSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'Username and password are required';
+      return c.json({ error: errorMsg }, 400);
     }
+    const { username, password, turnstileToken } = parsed.data;
 
     // 1. Verify Turnstile Captcha
     const clientIp = c.req.header('cf-connecting-ip');
@@ -158,18 +213,32 @@ authRouter.post('/login', async (c) => {
           email,
           password,
           returnSecureToken: true
-        })
+        }),
+        signal: AbortSignal.timeout(8000),
       });
 
-      const fbData = await response.json() as any;
+      let fbData: FirebaseAuthResponse = {};
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        try {
+          fbData = await response.json() as FirebaseAuthResponse;
+        } catch {
+          fbData = {};
+        }
+      } else {
+        const rawText = await response.text();
+        fbData = { error: { message: `Firebase Auth 服务异常 (${response.status}): ${rawText.substring(0, 100)}` } };
+      }
+
       if (!response.ok || fbData.error) {
         const errMsg = fbData.error?.message || 'Invalid username or password';
         console.error('Firebase Login error:', fbData.error);
-        return c.json({ error: errMsg }, response.status as any);
+        const safeStatus: ContentfulStatusCode = Number.isInteger(response.status) && response.status >= 100 && response.status <= 599 ? (response.status as ContentfulStatusCode) : 400;
+        return c.json({ error: errMsg }, safeStatus);
       }
 
-      idToken = fbData.idToken;
-      localId = fbData.localId;
+      idToken = fbData.idToken || idToken;
+      localId = fbData.localId || localId;
     } else {
       // Mock validation
       if (password.length < 6) {
@@ -187,9 +256,10 @@ authRouter.post('/login', async (c) => {
       },
       token: idToken
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = (err as Error)?.message || 'Login failed';
     console.error('Login error:', err);
-    return c.json({ error: err.message || 'Login failed' }, 500);
+    return c.json({ error: message }, 500);
   }
 });
 
@@ -213,9 +283,10 @@ authRouter.post('/test-login', async (c) => {
       },
       token: idToken
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = (err as Error)?.message || 'Test Login failed';
     console.error('Test Login error:', err);
-    return c.json({ error: err.message || 'Test Login failed' }, 500);
+    return c.json({ error: message }, 500);
   }
 });
 
@@ -225,19 +296,23 @@ authRouter.post('/test-login', async (c) => {
  */
 authRouter.post('/bind-session', requireAuth, async (c) => {
   try {
-    const user = c.get('user') as AuthUser;
-    let body: any = {};
-    try { body = await c.req.json<any>(); } catch (e) {}
-    const { sessionId } = body;
+    const user = c.get('user');
+    const rawBody = await c.req.json().catch(() => null);
+    const parsed = bindSessionSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'sessionId is required';
+      return c.json({ error: errorMsg }, 400);
+    }
+    const { sessionId } = parsed.data;
 
-    if (!sessionId) {
-      return c.json({ error: 'sessionId is required' }, 400);
+    if (!c.env?.DB) {
+      return c.json({ error: 'Database service unavailable' }, 500);
     }
 
     // Check if session exists
     const session = await c.env.DB.prepare('SELECT id, user_id FROM sessions WHERE id = ?')
       .bind(sessionId)
-      .first<any>();
+      .first<Pick<SessionRow, 'id' | 'user_id'>>();
 
     if (!session) {
       // Create empty session shell for this user
@@ -263,9 +338,10 @@ authRouter.post('/bind-session', requireAuth, async (c) => {
     }
 
     return c.json({ success: true, message: 'Session was already bound' });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = (err as Error)?.message || 'Bind session failed';
     console.error('Bind session error:', err);
-    return c.json({ error: err.message }, 500);
+    return c.json({ error: message }, 500);
   }
 });
 
@@ -275,21 +351,29 @@ authRouter.post('/bind-session', requireAuth, async (c) => {
  */
 authRouter.get('/sessions', requireAuth, async (c) => {
   try {
-    const user = c.get('user') as AuthUser;
+    const user = c.get('user');
+
+    if (!c.env?.DB) {
+      return c.json({
+        success: true,
+        sessions: []
+      });
+    }
 
     const { results } = await c.env.DB.prepare(
       'SELECT id, title, current_stage, fsm_state, created_at, updated_at FROM sessions WHERE user_id = ? ORDER BY updated_at DESC'
     )
     .bind(user.uid)
-    .all<any>();
+    .all<Pick<SessionRow, 'id' | 'title' | 'current_stage' | 'fsm_state' | 'created_at' | 'updated_at'>>();
 
     return c.json({
       success: true,
       sessions: results
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = (err as Error)?.message || 'Fetch user sessions failed';
     console.error('Fetch user sessions error:', err);
-    return c.json({ error: err.message }, 500);
+    return c.json({ error: message }, 500);
   }
 });
 
@@ -299,14 +383,18 @@ authRouter.get('/sessions', requireAuth, async (c) => {
  */
 authRouter.get('/sessions/:id', requireAuth, async (c) => {
   try {
-    const user = c.get('user') as AuthUser;
+    const user = c.get('user');
     const sessionId = c.req.param('id');
+
+    if (!c.env?.DB) {
+      return c.json({ error: 'Session not found' }, 404);
+    }
 
     const session = await c.env.DB.prepare(
       'SELECT id, title, messages, current_stage, fsm_state, fsm_context, created_at, updated_at FROM sessions WHERE id = ? AND user_id = ?'
     )
       .bind(sessionId, user.uid)
-      .first<any>();
+      .first<SessionRow>();
 
     if (!session) {
       return c.json({ error: 'Session not found' }, 404);
@@ -334,9 +422,10 @@ authRouter.get('/sessions/:id', requireAuth, async (c) => {
         fsm_context: fsmContext,
       },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = (err as Error)?.message || 'Fetch session detail failed';
     console.error('Fetch session detail error:', err);
-    return c.json({ error: err.message }, 500);
+    return c.json({ error: message }, 500);
   }
 });
 
@@ -346,11 +435,15 @@ authRouter.get('/sessions/:id', requireAuth, async (c) => {
  */
 authRouter.delete('/sessions/:id', requireAuth, async (c) => {
   try {
-    const user = c.get('user') as AuthUser;
+    const user = c.get('user');
     const sessionId = c.req.param('id');
 
     if (!sessionId) {
       return c.json({ error: 'sessionId is required' }, 400);
+    }
+
+    if (!c.env?.DB) {
+      return c.json({ success: true, message: 'Session not found or already deleted' }, 200);
     }
 
     // Fetch the session to check existence and user ownership
@@ -358,7 +451,7 @@ authRouter.delete('/sessions/:id', requireAuth, async (c) => {
       'SELECT id, user_id FROM sessions WHERE id = ?'
     )
       .bind(sessionId)
-      .first<any>();
+      .first<Pick<SessionRow, 'id' | 'user_id'>>();
 
     if (!session) {
       return c.json({ success: true, message: 'Session not found or already deleted' }, 200);
@@ -377,9 +470,9 @@ authRouter.delete('/sessions/:id', requireAuth, async (c) => {
       success: true,
       message: 'Session deleted successfully'
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = (err as Error)?.message || 'Delete session failed';
     console.error('Delete session error:', err);
-    return c.json({ error: err.message || 'Delete session failed' }, 500);
+    return c.json({ error: message }, 500);
   }
 });
-

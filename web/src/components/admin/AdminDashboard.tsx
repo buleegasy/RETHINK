@@ -43,8 +43,13 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
         onLogout();
         return;
       }
-      if (!res.ok) throw new Error('Failed to fetch codes');
-      const data = await res.json();
+      let data: any = {};
+      try {
+        data = await res.json();
+      } catch {
+        data = {};
+      }
+      if (!res.ok) throw new Error(data.error || `Failed to fetch codes (HTTP ${res.status})`);
       setCodes(data.codes || []);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : String(err));
@@ -75,8 +80,13 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
         })
       });
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to create');
+        let data: any = {};
+        try {
+          data = await res.json();
+        } catch {
+          data = {};
+        }
+        throw new Error(data.error || `Failed to create (HTTP ${res.status})`);
       }
       setIsCreating(false);
       setNewCode('');
@@ -94,7 +104,15 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
         method: 'DELETE',
         headers: { 'x-admin-token': token }
       });
-      if (!res.ok) throw new Error('Failed to delete');
+      if (!res.ok) {
+        let data: any = {};
+        try {
+          data = await res.json();
+        } catch {
+          data = {};
+        }
+        throw new Error(data.error || `Failed to delete (HTTP ${res.status})`);
+      }
       fetchCodes();
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : String(err));
@@ -111,7 +129,15 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
         },
         body: JSON.stringify({ maxUses: editMaxUses })
       });
-      if (!res.ok) throw new Error('Failed to update');
+      if (!res.ok) {
+        let data: any = {};
+        try {
+          data = await res.json();
+        } catch {
+          data = {};
+        }
+        throw new Error(data.error || `Failed to update (HTTP ${res.status})`);
+      }
       setEditingCode(null);
       fetchCodes();
     } catch (err: unknown) {

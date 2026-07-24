@@ -494,3 +494,73 @@ You must start and manage the local Vite development server (`npm run dev`) to a
 ### Build Quality
 - [ ] The project builds successfully (`npm run build`) without errors after the UI modifications.
 
+## Follow-up — 2026-07-16T07:10:06Z
+
+Conduct a comprehensive code review of the "心理大赛" project. The goal is to audit the entire repository for code quality, security vulnerabilities, performance bottlenecks, and adherence to modern web standards, and to propose concrete refactoring diffs.
+
+Working directory: `/Users/chenhaoran/工程文件/心理大赛`
+Integrity mode: development
+
+## Requirements
+
+### R1. Comprehensive Source Code Audit
+Analyze the codebase across all directories:
+- `worker/` (Backend cloudflare worker, LLM integration, FSM state management)
+- `web/` (Frontend UI and dashboard components)
+- `rag-psy-cbt/` (RAG and vector retrieval module)
+- `api-proxy/`, `scripts/`, `functions/` (supporting utilities and API configurations)
+
+Identify issues related to:
+1. **Security**: Hardcoded credentials, insecure API endpoints, lack of input validation, and session management issues.
+2. **Performance**: Redundant API calls, inefficient retrieval loops, and unoptimized frontend asset rendering.
+3. **Code Quality & Architecture**: Tight coupling, lack of error handling, and deviation from modular design.
+
+### R2. Modern Web Guidance Evaluation
+Specifically audit the `web/` directory against modern web standards:
+- Adherence to modern CSS/HTML/JS best practices (e.g., container queries, `:has()`, view transitions, layout efficiency).
+- Adherence to optimal loading priorities (e.g., LCP candidate optimization) and Core Web Vitals (CWV) guidelines.
+- Identify and recommend removal of obsolete web patterns or unnecessary heavy libraries.
+
+### R3. Actionable Report and Refactoring Proposals
+Generate a structured report summarizing the findings. For at least 3 major or critical issues identified, write ready-to-merge refactoring diffs or patch files to show how to fix them.
+
+## Acceptance Criteria
+
+### Verification & Deliverables
+- [ ] A file named `comprehensive_code_review.md` must be created in `/Users/chenhaoran/工程文件/心理大赛/` containing the audit report.
+- [ ] The report must have separate sections auditing `worker`, `web`, `rag-psy-cbt`, and `api-proxy/scripts/functions`.
+- [ ] The report must categorize issues by severity: Critical, Major, and Minor.
+- [ ] The report must contain a dedicated "Security & Data Safety" section.
+- [ ] The report must contain a dedicated "Modern Web Standards Adherence" section for the frontend.
+- [ ] The report (or associated patch files) must contain at least 3 concrete refactoring diffs (in standard unified diff format or markdown code blocks showing before/after) targeting major/critical issues found in the codebase.
+- [ ] All code files referenced in the report must include absolute or repository-relative paths and specific line numbers.
+
+## Follow-up — 2026-07-23T01:53:08Z
+
+# Teamwork Project Prompt — Draft
+
+> Status: Launched
+> Goal: Execute the delegated multi-agent optimization loop
+
+对整个“心理大赛”项目（包含前端 Web 与后端 Worker）进行彻底的代码优化与重构，通过时间盒模式执行 5 轮深度的自我迭代代码优化循环。
+
+Working directory: /Users/chenhaoran/工程文件/心理大赛
+Integrity mode: development
+
+## Requirements
+
+### R1. 全栈综合自驱优化 (Comprehensive Full-Stack Optimization)
+针对前端 Web 和后端 Worker 代码进行全面的审查和优化。由智能体团队自行判断并决定优化方向（包括但不限于性能优化、代码可维护性、重构、类型安全、UI/UX 细节打磨等）。
+
+### R2. 时间盒循环迭代 (Time-Boxed Iterative Loop)
+严格执行 5 轮深度的优化循环。在每一轮中，团队需要：(1) 识别具体的优化点；(2) 实施代码修改；(3) 验证修改未破坏现有逻辑。
+
+## Acceptance Criteria
+
+### 优化执行追踪 (Optimization Evidence)
+- [ ] 在 `optimization_log.md` 工件中，清晰记录了全部 5 轮优化的具体目标、所发现的问题以及实施的代码变更摘要。
+- [ ] 确实完成了 5 轮相互独立或层层递进的实质性优化。
+
+### 核心构建完整性 (Build Integrity)
+- [ ] 优化完成后，前端项目能够成功通过编译与构建（执行 `npm run build --workspace=web` 无错误）。
+- [ ] 优化完成后，后端项目能够成功通过编译与构建（执行 `npm run build --workspace=worker` 无错误）。

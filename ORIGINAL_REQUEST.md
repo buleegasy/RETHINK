@@ -494,3 +494,32 @@ You must start and manage the local Vite development server (`npm run dev`) to a
 ### Build Quality
 - [ ] The project builds successfully (`npm run build`) without errors after the UI modifications.
 
+## Follow-up — 2026-07-09T11:13:33+08:00
+
+对本项目进行一次全面的代码审查（Code Review），目标是发现潜在的 bug、提升代码的鲁棒性（Robustness）与工程质量。
+
+Working directory: /Users/chenhaoran/工程文件/心理大赛/
+
+Integrity mode: development
+
+## Requirements
+
+### R1. 全栈稳定性审查与修复 (Full-Stack Stability)
+排查前端（React Hooks 依赖、渲染异常、状态竞争）与后端（Cloudflare Worker 接口边界条件、D1 数据库事务处理）的潜在异常与并发问题。直接对发现的漏洞进行代码修复。
+
+### R2. 提升 TypeScript 类型安全 (TypeScript Strictness)
+消除代码中潜在的 `any` 滥用、隐式类型推断错误以及可能导致运行时解构失败的 unsafe 访问，确保类型闭环。
+
+### R3. 补充关键路径测试 (Test Coverage)
+在修复核心逻辑漏洞或高危 Bug 时，必须为其编写对应的自动化测试用例（单元测试或集成测试），以防止未来发生退化。
+
+## Acceptance Criteria
+
+### 静态验证 (Static Verification)
+- [ ] 整个项目必须能够通过 TypeScript 的严格编译检查（例如执行 `tsc --noEmit` 或相应的 build 脚本无报错）。
+
+### 动态验证 (Dynamic Verification)
+- [ ] 针对本次修复编写的新的自动化测试用例，必须能在本地测试环境中成功跑通。
+- [ ] 前端应用在运行 `npm run dev` 时不应在控制台抛出任何因本次修改引入的新警告或报错。
+
+

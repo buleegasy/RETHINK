@@ -1,5 +1,22 @@
 import { Hono } from 'hono';
-import { HonoSchema } from '../types';
+import { z } from 'zod';
+import type { HonoSchema } from '../types';
+
+interface InvitationCodeRow {
+  code: string;
+  max_uses: number;
+  used_count: number;
+  created_at?: number;
+}
+
+const createInvitationSchema = z.object({
+  code: z.string().optional(),
+  maxUses: z.number().int().positive().optional().default(1),
+});
+
+const updateInvitationSchema = z.object({
+  maxUses: z.number({ required_error: 'maxUses must be a number' }),
+});
 
 const adminRouter = new Hono<HonoSchema>();
 
@@ -23,9 +40,9 @@ adminRouter.get('/invitations', async (c) => {
   try {
     const { results } = await c.env.DB.prepare(
       'SELECT * FROM invitation_codes ORDER BY created_at DESC'
-    ).all();
+    ).all<InvitationCodeRow>();
     return c.json({ codes: results });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching invitations:', error);
     return c.json({ error: 'Failed to fetch invitation codes' }, 500);
   }
@@ -34,19 +51,25 @@ adminRouter.get('/invitations', async (c) => {
 // POST /api/admin/invitations - Create a new invitation code
 adminRouter.post('/invitations', async (c) => {
   try {
-    let body: any = {};
-    try { body = await c.req.json(); } catch (e) {}
-    const code = body.code || crypto.randomUUID().split('-')[0].toUpperCase(); // Default to random 8-char code
-    const maxUses = body.maxUses || 1;
+    const rawBody = await c.req.json().catch(() => ({}));
+    const parsed = createInvitationSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'Invalid input';
+      return c.json({ error: errorMsg }, 400);
+    }
+
+    const code = parsed.data.code || crypto.randomUUID().split('-')[0].toUpperCase(); // Default to random 8-char code
+    const maxUses = parsed.data.maxUses;
 
     await c.env.DB.prepare(
       'INSERT INTO invitation_codes (code, max_uses, used_count) VALUES (?, ?, 0)'
     ).bind(code, maxUses).run();
 
     return c.json({ success: true, code, max_uses: maxUses, uses: 0 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating invitation:', error);
-    if (error.message && error.message.includes('UNIQUE constraint failed')) {
+    const msg = (error as Error)?.message || '';
+    if (msg.includes('UNIQUE constraint failed')) {
       return c.json({ error: 'Code already exists' }, 400);
     }
     return c.json({ error: 'Failed to create invitation code' }, 500);
@@ -57,13 +80,13 @@ adminRouter.post('/invitations', async (c) => {
 adminRouter.put('/invitations/:code', async (c) => {
   try {
     const code = c.req.param('code');
-    let body: any = {};
-    try { body = await c.req.json(); } catch (e) {}
-    const maxUses = body.maxUses;
-
-    if (typeof maxUses !== 'number') {
-      return c.json({ error: 'maxUses must be a number' }, 400);
+    const rawBody = await c.req.json().catch(() => null);
+    const parsed = updateInvitationSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || 'maxUses must be a number';
+      return c.json({ error: errorMsg }, 400);
     }
+    const { maxUses } = parsed.data;
 
     const { success } = await c.env.DB.prepare(
       'UPDATE invitation_codes SET max_uses = ? WHERE code = ?'
@@ -74,7 +97,7 @@ adminRouter.put('/invitations/:code', async (c) => {
     }
 
     return c.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating invitation:', error);
     return c.json({ error: 'Failed to update invitation code' }, 500);
   }
@@ -94,7 +117,7 @@ adminRouter.delete('/invitations/:code', async (c) => {
     }
 
     return c.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting invitation:', error);
     return c.json({ error: 'Failed to delete invitation code' }, 500);
   }

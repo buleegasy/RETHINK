@@ -29,7 +29,12 @@ export function LoginWall() {
         body: JSON.stringify({}),
       });
 
-      const data: AuthResponse = await res.json();
+      let data: AuthResponse = {} as AuthResponse;
+      try {
+        data = await res.json();
+      } catch {
+        data = { success: false, error: `服务器网络异常 (HTTP ${res.status})` } as AuthResponse;
+      }
 
       if (!res.ok || !data.success) {
         setError(data.error || '测试账号登录失败');

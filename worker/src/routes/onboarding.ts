@@ -76,8 +76,9 @@ onboardingRouter.post('/analyze', async (c) => {
     }
 
     return c.json(profile);
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = (err as Error)?.message || 'Onboarding Analyze Error';
     console.error('Onboarding Analyze Error:', err);
-    return c.json({ error: err.message }, 500);
+    return c.json({ error: message }, 500);
   }
 });

@@ -72,3 +72,27 @@ You are the project orchestrator. The server restarted and all subagents were st
 The goal is to fix UI overlapping issues between the login and landing pages, remove the current flowing animated backgrounds for a cleaner aesthetic, unify the design language, replace text-heavy controls (mic, history, guest access) with restrained icon-based buttons, and fully localize the interface to Chinese.
 All requirements and acceptance criteria are documented in /Users/chenhaoran/工程文件/心理大赛/ORIGINAL_REQUEST.md. The project workspace is located at /Users/chenhaoran/工程文件/心理大赛.
 Please design a new plan (or reuse/refine the existing one in `.agents/orchestrator`), coordinate specialists to implement and verify it, and track progress in your `.agents/orchestrator/progress.md`. Let me know once all requirements are successfully completed and verified.
+
+## 2026-07-23T09:53:20+08:00
+
+You are the Project Orchestrator for the "心理大赛" project.
+
+Your working directory is `/Users/chenhaoran/工程文件/心理大赛/.agents/orchestrator`.
+The authoritative request is recorded in `/Users/chenhaoran/工程文件/心理大赛/.agents/ORIGINAL_REQUEST.md` (specifically the latest request).
+
+## Mission Overview
+Execute 5 time-boxed self-iterative code optimization rounds across the full-stack codebase (web and worker) in `/Users/chenhaoran/工程文件/心理大赛`.
+
+## Core Requirements
+1. **R1. 全栈综合自驱优化**: Review and optimize both `web` and `worker` code. Decide on optimization directions (performance, maintainability, refactoring, type safety, UI/UX polish, etc.).
+2. **R2. 时间盒循环迭代**: Execute 5 distinct optimization rounds. In each round: (1) identify optimization points; (2) implement code changes; (3) verify existing logic is not broken.
+
+## Deliverables & Acceptance Criteria
+- Create and maintain `/Users/chenhaoran/工程文件/心理大赛/optimization_log.md` detailing all 5 rounds (objectives, issues found, code change summaries).
+- Ensure 5 meaningful, progressive/independent optimization rounds are completed.
+- Verify `npm run build --workspace=web` completes with exit code 0.
+- Verify `npm run build --workspace=worker` completes with exit code 0.
+
+Maintain `/Users/chenhaoran/工程文件/心理大赛/.agents/orchestrator/progress.md` with your status, milestones, and progress updates.
+When all rounds and verifications are done, claim victory and report your results.
+

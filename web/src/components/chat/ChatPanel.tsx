@@ -1,21 +1,29 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
+import type { FC } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useShallow } from 'zustand/react/shallow';
 import { useChatStore } from '../../store/chatStore';
 import { MessageBubble } from './MessageBubble';
-import { GeminiWelcome } from './GeminiWelcome';
-import { EmojiSelector } from './EmojiSelector';
-import { useChat } from '../../hooks/useChat';
+import { OnboardingGuide } from './OnboardingGuide';
+import { SandplayInviteCard } from './SandplayInviteCard';
+import { WelcomeBanner } from './WelcomeBanner';
 
-export const ChatPanel: React.FC = () => {
-  const messages = useChatStore(state => state.messages);
-  const isStreaming = useChatStore(state => state.isStreaming);
-  const hasCompletedOnboarding = useChatStore(state => state.hasCompletedOnboarding);
-  
-  const setOnboardingComplete = useChatStore(state => state.setOnboardingComplete);
-  const { sendMessage } = useChat();
+export const ChatPanel: FC = () => {
+  const {
+    messages,
+    isStreaming,
+    hasCompletedOnboarding,
+    sandplayInvitePending,
+  } = useChatStore(
+    useShallow((state) => ({
+      messages: state.messages,
+      isStreaming: state.isStreaming,
+      hasCompletedOnboarding: state.hasCompletedOnboarding,
+      sandplayInvitePending: state.sandplayInvitePending,
+    }))
+  );
+
   const scrollRef = useRef<HTMLDivElement>(null);
-  
-  const [showEmojiSelector, setShowEmojiSelector] = useState(false);
   const isAtBottomRef = useRef(true);
 
   const handleScroll = () => {
@@ -33,22 +41,6 @@ export const ChatPanel: React.FC = () => {
     }
   }, [messages, isStreaming]);
 
-  const handleStart = () => {
-    // 切换到表情包选择大屏
-    setShowEmojiSelector(true);
-  };
-
-  const handleSelectEmoji = (emojiText: string) => {
-    // 标记破冰开始，将表情包作为首条输入发送给 AI 并激活聊天界面
-    setOnboardingComplete(true);
-    sendMessage(emojiText);
-  };
-
-  const handleSkipEmoji = () => {
-    // 直接解锁输入框，不发送预设表情包，由用户自由输入第一句
-    setOnboardingComplete(true);
-  };
-
   return (
     <div 
       ref={scrollRef} 
@@ -58,28 +50,7 @@ export const ChatPanel: React.FC = () => {
       <div className="max-w-3xl mx-auto w-full flex-1 flex flex-col gap-1">
         <AnimatePresence mode="wait">
           {!hasCompletedOnboarding ? (
-            !showEmojiSelector ? (
-              <motion.div
-                key="welcome"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.3 }}
-                className="flex-1 flex flex-col justify-center w-full h-full"
-              >
-                <GeminiWelcome onStart={handleStart} />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="emoji"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.3 }}
-              >
-                <EmojiSelector onSelect={handleSelectEmoji} onSkip={handleSkipEmoji} />
-              </motion.div>
-            )
+            <OnboardingGuide />
           ) : (
             <motion.div
               key="chat"
@@ -88,16 +59,19 @@ export const ChatPanel: React.FC = () => {
               transition={{ duration: 0.4 }}
               className="flex flex-col gap-1 w-full mt-auto"
             >
+              <WelcomeBanner />
+
               {messages.map((msg, idx) => {
                 const prev = messages[idx - 1];
                 const next = messages[idx + 1];
                 const isFirstInGroup = !prev || prev.isHidden || prev.role !== msg.role;
                 const isLastInGroup = !next || next.isHidden || next.role !== msg.role;
-                // Add extra top margin when a new "speaker" starts
                 const needsGroupSep = isFirstInGroup && idx > 0;
+                const isCurrentStreamingMessage = isStreaming && idx === messages.length - 1;
+
                 return (
                   <motion.div 
-                    layout="position"
+                    layout={isCurrentStreamingMessage ? false : "position"}
                     key={msg.id || idx} 
                     className={needsGroupSep ? 'mt-8' : ''}
                     transition={{
@@ -106,13 +80,18 @@ export const ChatPanel: React.FC = () => {
                   >
                     <MessageBubble
                       message={msg}
-                      isStreaming={isStreaming && idx === messages.length - 1 && msg.role === 'assistant'}
+                      isStreaming={isCurrentStreamingMessage && msg.role === 'assistant'}
                       isFirstInGroup={isFirstInGroup}
                       isLastInGroup={isLastInGroup}
                     />
                   </motion.div>
                 );
               })}
+              
+              {sandplayInvitePending && !isStreaming && (
+                <SandplayInviteCard />
+              )}
+
               <div className="h-[140px] md:h-[180px] shrink-0" />
             </motion.div>
           )}

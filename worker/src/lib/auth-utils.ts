@@ -1,8 +1,31 @@
 import { Context, Next } from 'hono';
 import type { Env, AuthUser, HonoSchema } from '../types';
 
+interface JWKKey {
+  kid: string;
+  kty: string;
+  alg: string;
+  use?: string;
+  n: string;
+  e: string;
+}
+
+interface JWTHeader {
+  alg?: string;
+  kid?: string;
+  typ?: string;
+}
+
+interface JWTPayload {
+  exp?: number;
+  iss?: string;
+  aud?: string;
+  sub?: string;
+  email?: string;
+}
+
 // Global cached JWKs
-let cachedKeys: any[] | null = null;
+let cachedKeys: JWKKey[] | null = null;
 let cachedKeysTime = 0;
 
 /**
@@ -25,8 +48,8 @@ export async function verifyFirebaseToken(token: string, projectId: string, apiK
 
   const [headerB64, payloadB64, signatureB64] = parts;
 
-  let header: any;
-  let payload: any;
+  let header: JWTHeader;
+  let payload: JWTPayload;
   try {
     // Decode base64url standard JSON parts
     header = JSON.parse(atob(headerB64.replace(/-/g, '+').replace(/_/g, '/')));
@@ -44,8 +67,17 @@ export async function verifyFirebaseToken(token: string, projectId: string, apiK
   const now = Date.now();
   if (!keys || now - cachedKeysTime > 3600000) { // Cache for 1 hour
     try {
-      const res = await fetch('https://www.googleapis.com/service_accounts/v1/jwk/securetoken-system@system.gserviceaccount.com');
-      const data = await res.json() as any;
+      const res = await fetch('https://www.googleapis.com/service_accounts/v1/jwk/securetoken-system@system.gserviceaccount.com', {
+        signal: AbortSignal.timeout(8000),
+      });
+      let data: { keys?: JWKKey[] } = {};
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const rawText = await res.text();
+        throw new Error(`Google JWK endpoint returned non-JSON (${res.status}): ${rawText.substring(0, 100)}`);
+      }
       keys = data.keys || [];
       cachedKeys = keys;
       cachedKeysTime = now;
@@ -54,7 +86,7 @@ export async function verifyFirebaseToken(token: string, projectId: string, apiK
     }
   }
 
-  const jwk = keys?.find((k: any) => k.kid === header.kid);
+  const jwk = keys?.find((k: JWKKey) => k.kid === header.kid);
   if (!jwk) {
     throw new Error('JWK not found for kid: ' + header.kid);
   }
@@ -96,7 +128,7 @@ export async function verifyFirebaseToken(token: string, projectId: string, apiK
 
   // 4. Validate Claims
   const currentSecs = Math.floor(Date.now() / 1000);
-  if (payload.exp < currentSecs) {
+  if (typeof payload.exp === 'number' && payload.exp < currentSecs) {
     throw new Error('Token has expired');
   }
 
@@ -134,8 +166,9 @@ export async function requireAuth(c: Context<HonoSchema>, next: Next) {
     const user = await verifyFirebaseToken(token, c.env.FIREBASE_PROJECT_ID, c.env.FIREBASE_API_KEY);
     c.set('user', user);
     await next();
-  } catch (e: any) {
-    console.error('Auth verification failed:', e.message);
-    return c.json({ error: 'Unauthorized: ' + e.message }, 401);
+  } catch (e: unknown) {
+    const message = (e as Error)?.message || 'Authentication error';
+    console.error('Auth verification failed:', message);
+    return c.json({ error: 'Unauthorized: ' + message }, 401);
   }
 }
