@@ -97,6 +97,7 @@ export function LoginWall() {
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
+                role="alert"
                 className="mb-8 bg-error-container/80 border border-error/20 text-error text-xs tracking-wider px-4 py-2.5 rounded-2xl shadow-sm z-20 pointer-events-auto"
               >
                 {error}

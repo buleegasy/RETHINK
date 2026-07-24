@@ -141,7 +141,7 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
         </header>
 
         {error && (
-          <div className="bg-red-500/10 text-red-400 p-4 rounded-xl mb-6 text-sm border border-red-500/20">
+          <div role="alert" className="bg-red-500/10 text-red-400 p-4 rounded-xl mb-6 text-sm border border-red-500/20">
             {error}
           </div>
         )}
@@ -167,8 +167,9 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
             >
               <form onSubmit={handleCreate} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-wrap gap-4 items-end">
                 <div className="flex-1 min-w-[200px]">
-                  <label className="block text-xs text-white/50 mb-2 uppercase tracking-wider">Custom Code (Optional)</label>
+                  <label htmlFor="new-code" className="block text-xs text-white/50 mb-2 uppercase tracking-wider">Custom Code (Optional)</label>
                   <input
+                    id="new-code"
                     type="text"
                     value={newCode}
                     onChange={(e) => setNewCode(e.target.value.toUpperCase())}
@@ -177,8 +178,9 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
                   />
                 </div>
                 <div className="w-32">
-                  <label className="block text-xs text-white/50 mb-2 uppercase tracking-wider">Max Uses</label>
+                  <label htmlFor="max-uses" className="block text-xs text-white/50 mb-2 uppercase tracking-wider">Max Uses</label>
                   <input
+                    id="max-uses"
                     type="number"
                     min="1"
                     value={newMaxUses}
@@ -235,12 +237,12 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
                             <div className="flex items-center gap-2">
                               <span>{code.uses} /</span>
                               <input
+                                aria-label="Edit max uses"
                                 type="number"
                                 min={code.uses}
                                 value={editMaxUses}
                                 onChange={(e) => setEditMaxUses(parseInt(e.target.value) || code.uses)}
                                 className="w-16 bg-black/40 border border-white/20 rounded px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
-                                aria-label="Edit max uses"
                               />
                             </div>
                           ) : (

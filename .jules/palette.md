@@ -7,3 +7,6 @@
 ## 2026-07-23 - Form Inputs and Dynamic Error Accessibility
 **Learning:** Found a pattern across the app where form inputs (especially those using placeholders instead of visible labels) lack `aria-label`s, and dynamic error message containers lack `role="alert"`, making them invisible to screen readers when errors occur.
 **Action:** Always ensure form inputs without explicit `<label>` elements have `aria-label`s, and any container that conditionally renders error messages includes `role="alert"` for proper screen reader announcement.
+## 2026-07-24 - Form Inputs and Dynamic Error Accessibility
+**Learning:** Found a pattern across the app where form inputs (especially those using placeholders instead of visible labels) lack `aria-label`s, and dynamic error message containers lack `role="alert"`, making them invisible to screen readers when errors occur.
+**Action:** Always ensure form inputs without explicit `<label>` elements have `aria-label`s, and any container that conditionally renders error messages includes `role="alert"` for proper screen reader announcement.
