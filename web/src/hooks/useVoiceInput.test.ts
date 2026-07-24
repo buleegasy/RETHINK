@@ -1,6 +1,6 @@
 import { renderHook, act, cleanup } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
-import { useVoiceInput, UseVoiceInputReturn } from './useVoiceInput';
+import { describe, it, expect, vi, beforeEach, afterEach,  } from 'vitest';
+import { useVoiceInput } from './useVoiceInput';
 
 // Define the mock class structure based on ISpeechRecognition
 class MockSpeechRecognition {
@@ -15,8 +15,8 @@ class MockSpeechRecognition {
 
   onstart: (() => void) | null = null;
   onend: (() => void) | null = null;
-  onresult: ((event: any) => void) | null = null;
-  onerror: ((event: any) => void) | null = null;
+  onresult: ((event: unknown) => void) | null = null;
+  onerror: ((event: unknown) => void) | null = null;
 
   // Add event target methods if needed by tests, though not strictly required by hook implementation
   addEventListener = vi.fn();
@@ -25,20 +25,20 @@ class MockSpeechRecognition {
 }
 
 describe('useVoiceInput', () => {
-  let originalSpeechRecognition: any;
+  let originalSpeechRecognition: unknown;
   let mockRecognitionInstance: MockSpeechRecognition;
 
   beforeEach(() => {
     vi.useFakeTimers();
 
     // Setup Mock SpeechRecognition
-    originalSpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    originalSpeechRecognition = (window as unknown).SpeechRecognition || (window as unknown).webkitSpeechRecognition;
 
     mockRecognitionInstance = new MockSpeechRecognition();
     const MockConstructor = vi.fn(() => mockRecognitionInstance);
 
-    (window as any).SpeechRecognition = MockConstructor;
-    (window as any).webkitSpeechRecognition = MockConstructor;
+    (window as unknown).SpeechRecognition = MockConstructor;
+    (window as unknown).webkitSpeechRecognition = MockConstructor;
   });
 
   afterEach(() => {
@@ -47,11 +47,11 @@ describe('useVoiceInput', () => {
 
     // Restore globals
     if (originalSpeechRecognition) {
-      (window as any).SpeechRecognition = originalSpeechRecognition;
-      (window as any).webkitSpeechRecognition = originalSpeechRecognition;
+      (window as unknown).SpeechRecognition = originalSpeechRecognition;
+      (window as unknown).webkitSpeechRecognition = originalSpeechRecognition;
     } else {
-      delete (window as any).SpeechRecognition;
-      delete (window as any).webkitSpeechRecognition;
+      delete (window as unknown).SpeechRecognition;
+      delete (window as unknown).webkitSpeechRecognition;
     }
 
     cleanup();
@@ -68,16 +68,16 @@ describe('useVoiceInput', () => {
   });
 
   it('should set isSupported to false if window.SpeechRecognition is missing', () => {
-    delete (window as any).SpeechRecognition;
-    delete (window as any).webkitSpeechRecognition;
+    delete (window as unknown).SpeechRecognition;
+    delete (window as unknown).webkitSpeechRecognition;
 
     const { result } = renderHook(() => useVoiceInput());
     expect(result.current.isSupported).toBe(false);
   });
 
   it('should return error if startListening is called but not supported', () => {
-    delete (window as any).SpeechRecognition;
-    delete (window as any).webkitSpeechRecognition;
+    delete (window as unknown).SpeechRecognition;
+    delete (window as unknown).webkitSpeechRecognition;
 
     const { result } = renderHook(() => useVoiceInput());
 
@@ -137,7 +137,7 @@ describe('useVoiceInput', () => {
       resultIndex: 0,
       results: [
         [{ transcript: 'hello ' }],
-      ] as any,
+      ] as unknown,
     };
     interimEvent.results[0].isFinal = false;
     interimEvent.results.length = 1;
@@ -156,7 +156,7 @@ describe('useVoiceInput', () => {
       resultIndex: 0,
       results: [
         [{ transcript: 'hello world' }],
-      ] as any,
+      ] as unknown,
     };
     finalEvent.results[0].isFinal = true;
     finalEvent.results.length = 1;
@@ -262,7 +262,7 @@ describe('useVoiceInput', () => {
       resultIndex: 0,
       results: [
         [{ transcript: 'test string' }],
-      ] as any,
+      ] as unknown,
     };
     finalEvent.results[0].isFinal = true;
     finalEvent.results.length = 1;

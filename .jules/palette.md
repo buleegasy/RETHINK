@@ -4,3 +4,6 @@
 ## 2025-02-18 - Chat Interactive Elements Accessibility Polish
 **Learning:** Animated, highly-styled UI components (like the `motion.div` emoji selector or rounded icon buttons in the input bar) often lack basic accessibility primitives out-of-the-box, specifically screen-reader context and keyboard focus states.
 **Action:** When working with Framer Motion or heavily customized styled components, proactively add `aria-label` to abstract UI elements (like emojis) and enforce explicit `focus-visible:ring-2 focus-visible:ring-gemini-blue` classes on all interactive nodes to ensure standard keyboard navigation works.
+## 2026-07-23 - Form Inputs and Dynamic Error Accessibility
+**Learning:** Found a pattern across the app where form inputs (especially those using placeholders instead of visible labels) lack `aria-label`s, and dynamic error message containers lack `role="alert"`, making them invisible to screen readers when errors occur.
+**Action:** Always ensure form inputs without explicit `<label>` elements have `aria-label`s, and any container that conditionally renders error messages includes `role="alert"` for proper screen reader announcement.
