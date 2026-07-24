@@ -274,7 +274,12 @@ export const SessionSidebar: FC<SessionSidebarProps> = ({ isOpen, onClose, onEmo
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto space-y-2 pe-1">
+        <div className="flex-1 overflow-y-auto space-y-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <style>{`
+            .flex-1.overflow-y-auto::-webkit-scrollbar {
+              display: none;
+            }
+          `}</style>
           {sessions.length === 0 && !isLoadingSessions ? (
             <div className="text-xs text-on-surface-dim py-8 text-center font-light tracking-wide">
               还没有保存的对话
