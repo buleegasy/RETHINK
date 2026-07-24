@@ -6,7 +6,6 @@ import { useChatStore } from '../../store/chatStore';
 import { MessageBubble } from './MessageBubble';
 import { OnboardingGuide } from './OnboardingGuide';
 import { SandplayInviteCard } from './SandplayInviteCard';
-import { WelcomeBanner } from './WelcomeBanner';
 
 export const ChatPanel: FC = () => {
   const {
@@ -59,8 +58,6 @@ export const ChatPanel: FC = () => {
               transition={{ duration: 0.4 }}
               className="flex flex-col gap-1 w-full mt-auto"
             >
-              <WelcomeBanner />
-
               {messages.map((msg, idx) => {
                 const prev = messages[idx - 1];
                 const next = messages[idx + 1];
