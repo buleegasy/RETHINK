@@ -17,3 +17,11 @@
 **Vulnerability:** The survey submission endpoint `/api/survey/submit` (`worker/src/routes/survey.ts`) did not validate the length of user-provided fields (like `openFeedback`) or the overall JSON payload before writing to the D1 database.
 **Learning:** Failing to enforce payload length boundaries in unauthenticated or lightly authenticated routes makes the system highly susceptible to Denial of Service (DoS) and database exhaustion attacks.
 **Prevention:** Always enforce strict size limits on external inputs, particularly for endpoints that accept free-form text or JSON objects, using both field-level checks (e.g., `val.length > 5000`) and overall payload checks.
+## 2026-06-06 - [Sentinel: Input Type and Length Validation]
+**Vulnerability:** Authentication endpoints lacked strict type checking and length limits on input parameters (username, password, invitationCode, sessionId).
+**Learning:** Omitted type checks () can lead to type juggling vulnerabilities, and missing length limits expose the application to DoS attacks through excessively large payloads, particularly on computationally expensive operations like password hashing or database inserts.
+**Prevention:** Always enforce strict input validation, including explicit type checking and sensible maximum length constraints, on all user-provided data at the API boundary.
+## 2026-06-06 - [Sentinel: Input Type and Length Validation]
+**Vulnerability:** Authentication endpoints lacked strict type checking and length limits on input parameters (username, password, invitationCode, sessionId).
+**Learning:** Omitted type checks (`typeof === 'string'`) can lead to type juggling vulnerabilities, and missing length limits expose the application to DoS attacks through excessively large payloads, particularly on computationally expensive operations like password hashing or database inserts.
+**Prevention:** Always enforce strict input validation, including explicit type checking and sensible maximum length constraints, on all user-provided data at the API boundary.
