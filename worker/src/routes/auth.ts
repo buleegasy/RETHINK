@@ -22,16 +22,25 @@ authRouter.post('/register', async (c) => {
     try { body = await c.req.json<any>(); } catch (e) {}
     const { username, password, invitationCode, turnstileToken } = body;
 
+    // 🛡️ Security Enhancement: Input validation and length limits to prevent type juggling and DoS
+    if (typeof username !== 'string' || typeof password !== 'string' || typeof invitationCode !== 'string') {
+      return c.json({ error: 'Invalid input format' }, 400);
+    }
+
     if (!username || !password || !invitationCode) {
       return c.json({ error: 'Username, password and invitation code are required' }, 400);
     }
 
-    if (username.length < 3) {
-      return c.json({ error: 'Username must be at least 3 characters long' }, 400);
+    if (username.length < 3 || username.length > 50) {
+      return c.json({ error: 'Username must be between 3 and 50 characters long' }, 400);
     }
 
-    if (password.length < 6) {
-      return c.json({ error: 'Password must be at least 6 characters long' }, 400);
+    if (password.length < 6 || password.length > 100) {
+      return c.json({ error: 'Password must be between 6 and 100 characters long' }, 400);
+    }
+
+    if (invitationCode.length > 50) {
+      return c.json({ error: 'Invitation code too long' }, 400);
     }
 
     // 1. Verify Turnstile Captcha
@@ -132,8 +141,17 @@ authRouter.post('/login', async (c) => {
     try { body = await c.req.json<any>(); } catch (e) {}
     const { username, password, turnstileToken } = body;
 
+    // 🛡️ Security Enhancement: Input validation and length limits
+    if (typeof username !== 'string' || typeof password !== 'string') {
+      return c.json({ error: 'Invalid input format' }, 400);
+    }
+
     if (!username || !password) {
       return c.json({ error: 'Username and password are required' }, 400);
+    }
+
+    if (username.length > 50 || password.length > 100) {
+      return c.json({ error: 'Input too long' }, 400);
     }
 
     // 1. Verify Turnstile Captcha
@@ -230,8 +248,17 @@ authRouter.post('/bind-session', requireAuth, async (c) => {
     try { body = await c.req.json<any>(); } catch (e) {}
     const { sessionId } = body;
 
+    // 🛡️ Security Enhancement: Input validation and length limits
+    if (typeof sessionId !== 'string') {
+      return c.json({ error: 'Invalid sessionId format' }, 400);
+    }
+
     if (!sessionId) {
       return c.json({ error: 'sessionId is required' }, 400);
+    }
+
+    if (sessionId.length > 100) {
+      return c.json({ error: 'sessionId too long' }, 400);
     }
 
     // Check if session exists
