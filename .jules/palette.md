@@ -7,3 +7,6 @@
 ## 2026-07-23 - Form Inputs and Dynamic Error Accessibility
 **Learning:** Found a pattern across the app where form inputs (especially those using placeholders instead of visible labels) lack `aria-label`s, and dynamic error message containers lack `role="alert"`, making them invisible to screen readers when errors occur.
 **Action:** Always ensure form inputs without explicit `<label>` elements have `aria-label`s, and any container that conditionally renders error messages includes `role="alert"` for proper screen reader announcement.
+## 2026-07-26 - Consistent Localization in ARIA Labels
+**Learning:** When adding ARIA labels to components that are mostly in one language (e.g., Chinese, like LoginModal.tsx), it's acceptable and often preferable to keep the ARIA labels in the same language for consistency unless otherwise specified by user requirements or accessibility guidelines specific to the primary user base.
+**Action:** When adding ARIA labels, check the surrounding text context of the component to determine the appropriate language for the label.

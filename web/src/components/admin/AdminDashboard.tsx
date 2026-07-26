@@ -141,7 +141,7 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
         </header>
 
         {error && (
-          <div className="bg-red-500/10 text-red-400 p-4 rounded-xl mb-6 text-sm border border-red-500/20">
+          <div role="alert" className="bg-red-500/10 text-red-400 p-4 rounded-xl mb-6 text-sm border border-red-500/20">
             {error}
           </div>
         )}
@@ -167,8 +167,9 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
             >
               <form onSubmit={handleCreate} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-wrap gap-4 items-end">
                 <div className="flex-1 min-w-[200px]">
-                  <label className="block text-xs text-white/50 mb-2 uppercase tracking-wider">Custom Code (Optional)</label>
+                  <label htmlFor="customCodeInput" className="block text-xs text-white/50 mb-2 uppercase tracking-wider">Custom Code (Optional)</label>
                   <input
+                    id="customCodeInput"
                     type="text"
                     value={newCode}
                     onChange={(e) => setNewCode(e.target.value.toUpperCase())}
@@ -177,8 +178,9 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
                   />
                 </div>
                 <div className="w-32">
-                  <label className="block text-xs text-white/50 mb-2 uppercase tracking-wider">Max Uses</label>
+                  <label htmlFor="maxUsesInput" className="block text-xs text-white/50 mb-2 uppercase tracking-wider">Max Uses</label>
                   <input
+                    id="maxUsesInput"
                     type="number"
                     min="1"
                     value={newMaxUses}

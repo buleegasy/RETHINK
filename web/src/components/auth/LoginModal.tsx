@@ -183,10 +183,11 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <div className="w-full md:w-1/2 p-4 sm:p-8 md:p-10 lg:p-12 relative flex flex-col justify-center">
               <motion.button
                 onClick={onClose}
+                aria-label="关闭窗口"
                 whileHover={{ rotate: 90, scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                className="absolute top-4 right-4 md:top-6 md:right-6 p-2 text-on-surface-variant/60 hover:text-on-surface hover:bg-surface-container rounded-full transition-colors z-20 min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer"
+                className="absolute top-4 right-4 md:top-6 md:right-6 p-2 text-on-surface-variant/60 hover:text-on-surface hover:bg-surface-container rounded-full transition-colors z-20 min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer focus-visible:ring-2 focus-visible:ring-gemini-blue focus-visible:outline-none"
               >
                 <X className="w-5 h-5" />
               </motion.button>
