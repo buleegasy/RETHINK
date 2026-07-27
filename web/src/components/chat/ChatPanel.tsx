@@ -10,15 +10,12 @@ import type { ChatMessage } from '../../types';
 interface MessageRowProps {
   msg: ChatMessage;
   idx: number;
-  prev: ChatMessage | undefined;
-  next: ChatMessage | undefined;
-  isStreaming: boolean;
-  messagesLength: number;
+  isFirstInGroup: boolean;
+  isLastInGroup: boolean;
+  isCurrentlyStreaming: boolean;
 }
 
-const MessageRow = React.memo(({ msg, idx, prev, next, isStreaming, messagesLength }: MessageRowProps) => {
-  const isFirstInGroup = !prev || prev.isHidden || prev.role !== msg.role;
-  const isLastInGroup = !next || next.isHidden || next.role !== msg.role;
+const MessageRow = React.memo(({ msg, idx, isFirstInGroup, isLastInGroup, isCurrentlyStreaming }: MessageRowProps) => {
   // Add extra top margin when a new "speaker" starts
   const needsGroupSep = isFirstInGroup && idx > 0;
 
@@ -32,7 +29,7 @@ const MessageRow = React.memo(({ msg, idx, prev, next, isStreaming, messagesLeng
     >
       <MessageBubble
         message={msg}
-        isStreaming={isStreaming && idx === messagesLength - 1 && msg.role === 'assistant'}
+        isStreaming={isCurrentlyStreaming}
         isFirstInGroup={isFirstInGroup}
         isLastInGroup={isLastInGroup}
       />
@@ -124,17 +121,24 @@ export const ChatPanel: React.FC = () => {
               transition={{ duration: 0.4 }}
               className="flex flex-col gap-1 w-full mt-auto"
             >
-              {messages.map((msg, idx) => (
-                <MessageRow
-                  key={msg.id || idx}
-                  msg={msg}
-                  idx={idx}
-                  prev={messages[idx - 1]}
-                  next={messages[idx + 1]}
-                  isStreaming={isStreaming}
-                  messagesLength={messages.length}
-                />
-              ))}
+              {messages.map((msg, idx) => {
+                const prev = messages[idx - 1];
+                const next = messages[idx + 1];
+                const isFirstInGroup = !prev || prev.isHidden || prev.role !== msg.role;
+                const isLastInGroup = !next || next.isHidden || next.role !== msg.role;
+                const isCurrentlyStreaming = isStreaming && idx === messages.length - 1 && msg.role === 'assistant';
+
+                return (
+                  <MessageRow
+                    key={msg.id || idx}
+                    msg={msg}
+                    idx={idx}
+                    isFirstInGroup={isFirstInGroup}
+                    isLastInGroup={isLastInGroup}
+                    isCurrentlyStreaming={isCurrentlyStreaming}
+                  />
+                );
+              })}
               <div className="h-[140px] md:h-[180px] shrink-0" />
             </motion.div>
           )}
