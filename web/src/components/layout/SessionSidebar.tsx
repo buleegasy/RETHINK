@@ -313,7 +313,7 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
                                 e.stopPropagation();
                                 void handleDeleteSession(session.id);
                               }}
-                              className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-1 rounded-full text-on-surface-variant/60 hover:text-error hover:bg-error/10 transition-all cursor-pointer"
+                              className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-1 rounded-full text-on-surface-variant/60 hover:text-error hover:bg-error/10 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-error focus-visible:outline-none"
                               aria-label="删除此对话"
                             >
                               <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
