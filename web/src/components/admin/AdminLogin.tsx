@@ -46,6 +46,7 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
               <input
                 type="password"
                 placeholder="Admin Token"
+                aria-label="Admin Token"
                 value={inputToken}
                 onChange={(e) => {
                   setInputToken(e.target.value);
@@ -58,6 +59,7 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
             <AnimatePresence>
               {error && (
                 <motion.div
+                  role="alert"
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
