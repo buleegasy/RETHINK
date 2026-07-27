@@ -23,8 +23,8 @@ chatRouter.post('/', requireAuth, async (c) => {
   try { body = await c.req.json<ChatRequest>(); } catch (e) {}
   const { messages, stream = true, sessionId = crypto.randomUUID(), profile, facialEmotion, model: requestedModel } = body;
 
-  if (!messages || messages.length === 0) {
-    return c.json({ error: 'messages cannot be empty' }, 400);
+  if (!Array.isArray(messages) || messages.length === 0 || messages.length > 100 || JSON.stringify(messages).length > 50000) {
+    return c.json({ error: 'Invalid messages array or payload too large' }, 400);
   }
 
   // ── 1. 从 D1 获取历史会话 + FSM 状态 ──

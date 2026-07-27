@@ -41,8 +41,8 @@ onboardingRouter.post('/analyze', async (c) => {
     let text = '';
     try { const parsed = await c.req.json<{ text: string }>(); text = parsed.text; } catch (e) {}
 
-    if (!text || !text.trim()) {
-      return c.json({ error: 'Text is required' }, 400);
+    if (typeof text !== 'string' || text.length > 1000 || !text.trim()) {
+      return c.json({ error: 'Text is required and must be under 1000 characters' }, 400);
     }
 
     const client = getLLMClient(c.env);

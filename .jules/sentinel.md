@@ -25,3 +25,8 @@
 **Vulnerability:** Authentication endpoints lacked strict type checking and length limits on input parameters (username, password, invitationCode, sessionId).
 **Learning:** Omitted type checks (`typeof === 'string'`) can lead to type juggling vulnerabilities, and missing length limits expose the application to DoS attacks through excessively large payloads, particularly on computationally expensive operations like password hashing or database inserts.
 **Prevention:** Always enforce strict input validation, including explicit type checking and sensible maximum length constraints, on all user-provided data at the API boundary.
+
+## 2026-07-27 - [Sentinel: DoS Prevention via Strict Payload Bounds]
+**Vulnerability:** The LLM inference endpoints in `worker/src/routes/chat.ts` and `worker/src/routes/onboarding.ts` parsed incoming JSON arrays/strings and immediately dispatched them to expensive inference functions (like `Llama-3`) without upper bounds checks or strict type validations, resulting in severe DoS/Resource Exhaustion vectors.
+**Learning:** In Serverless setups billing by CPU time or token count, unvalidated lengths on proxy/passthrough payloads can incur massive bills or cause OOM limits when parsing extremely large arbitrary arrays (like `messages`).
+**Prevention:** Apply defensive programming by explicitly validating type (e.g. `Array.isArray(msg)`) and strict sensible length limits (e.g., maximum string length of `1000` or total JSON size of `50KB`) directly after `c.req.json()`.
