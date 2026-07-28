@@ -25,3 +25,8 @@
 **Vulnerability:** Authentication endpoints lacked strict type checking and length limits on input parameters (username, password, invitationCode, sessionId).
 **Learning:** Omitted type checks (`typeof === 'string'`) can lead to type juggling vulnerabilities, and missing length limits expose the application to DoS attacks through excessively large payloads, particularly on computationally expensive operations like password hashing or database inserts.
 **Prevention:** Always enforce strict input validation, including explicit type checking and sensible maximum length constraints, on all user-provided data at the API boundary.
+
+## 2026-07-28 - Secure Knowledge API Endpoints
+**Vulnerability:** The `/api/knowledge` endpoints (ingest, list, delete, query) lacked authentication, allowing unauthorized users to modify or query the system's knowledgebase.
+**Learning:** Administrative endpoints must always require authorization. The existing pattern of using an `x-admin-token` header checked against `c.env.ADMIN_SECRET_TOKEN` was missing from the knowledge router.
+**Prevention:** Apply consistent authentication middleware across all admin-level route groups (e.g., using `knowledgeRouter.use('*', ...)`) and ensure any companion scripts (like `ingest_jsonl.py`) are updated to send the required token.

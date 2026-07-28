@@ -12,6 +12,20 @@ import { ingestDocument, listDocuments, deleteDocument, retrieveContext } from '
 
 export const knowledgeRouter = new Hono<{ Bindings: Env }>();
 
+knowledgeRouter.use('*', async (c, next) => {
+  const adminToken = c.env.ADMIN_SECRET_TOKEN;
+  if (!adminToken) {
+    return c.json({ error: 'Admin token not configured on server' }, 500);
+  }
+
+  const providedToken = c.req.header('x-admin-token');
+  if (providedToken !== adminToken) {
+    return c.json({ error: 'Unauthorized: Invalid admin token' }, 401);
+  }
+
+  await next();
+});
+
 /**
  * POST /api/knowledge/ingest
  * 
