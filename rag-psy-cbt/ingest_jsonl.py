@@ -42,7 +42,11 @@ def ingest_file(filepath):
         "sourceFile": os.path.basename(filepath)
     }
     
-    response = requests.post(API_URL, json=payload)
+    headers = {
+        "x-admin-token": os.environ.get("ADMIN_SECRET_TOKEN", "")
+    }
+
+    response = requests.post(API_URL, json=payload, headers=headers)
     if response.status_code == 200:
         print(f"✅ Successfully ingested {title}: {response.json()}")
     else:
