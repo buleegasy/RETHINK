@@ -107,13 +107,6 @@ const OUTPUT_FORMAT_JSON = `
     "transition_speed": "渐变速度（如 5000ms）",
     "effect": "视觉特效描述（如 slow_breathing）"
   },
-  "sandplay_invite": false,
-  "sandplay_close": false,
-  "sandplay_suggestion": {
-    "action": "add|move|remove",
-    "target_label": "名称",
-    "description": "操作说明"
-  },
   "agent_reply": "你的心理干预回复文本（纯台词，严禁旁白）"
 }
 
@@ -160,7 +153,6 @@ const OUTPUT_FORMAT_ICEBREAKER = `
     "transition_speed": "渐变速度（如 5000ms）",
     "effect": "视觉特效描述（如 slow_breathing）"
   },
-  "sandplay_invite": false,
   "agent_reply": "你的对话回复（纯文字，不要括号动作描写）"
 }
 
@@ -225,7 +217,6 @@ export function buildSystemPromptFSM(
   profile?: UserProfile,
   facialEmotion?: { label: string; labelZh: string; confidence: number },
   icebreaker?: IcebreakerProfile,
-  sandplayDesc?: string,
 ): string {
   const parts: string[] = [];
 
@@ -288,10 +279,6 @@ export function buildSystemPromptFSM(
     parts.push(`【📷 摄像头情绪感知】：检测到用户面部情绪为「${facialEmotion.labelZh}」`);
   }
 
-  if (sandplayDesc) {
-    parts.push(`\n【沙盘空间解析】\n${sandplayDesc}\n你可以将其视为用户潜意识的投射。`);
-  }
-
   if (intent !== 'crisis') {
     parts.push(EMOTIONAL_SAFETY_NET);
   }
@@ -305,7 +292,6 @@ export function buildSystemPromptFSM(
     }
   }
 
-  parts.push(SANDPLAY_INSTRUCTION);
   parts.push(CINEMATIC_UI_RULES);
 
   if (fsmState === 'Onboarding') {

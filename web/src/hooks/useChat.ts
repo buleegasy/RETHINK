@@ -35,7 +35,7 @@ export function useChat() {
     setError(null);
     setIsStreaming(true);
 
-    const { messages, sessionId, selectedModel, sandplayState, isSandplayOpen } = useChatStore.getState();
+    const { messages, sessionId, selectedModel } = useChatStore.getState();
 
     // 添加用户消息
     const userMsg: ChatMessage = { 
@@ -60,7 +60,6 @@ export function useChat() {
         profile,
         model: selectedModel,
         facialEmotion,
-        sandplayState: isSandplayOpen && sandplayState ? sandplayState : undefined,
       });
 
       const reader = streamBody.getReader();
@@ -109,15 +108,7 @@ export function useChat() {
             if (parsed.sessionId && !currentSessionId) {
               setSessionId(parsed.sessionId);
             }
-            
-            // 处理沙盘信号
-            if (parsed.sandplay_invite) {
-              useChatStore.getState().setSandplayInvitePending(true);
-            }
-            if (parsed.sandplay_close) {
-              useChatStore.getState().closeSandplay();
-            }
-            // (将来如果需要，可以在这里处理 sandplay_suggestion)
+
 
             // 当收到最终块时，存储技术链元数据（含 FSM 信息）
             if (parsed.done && (parsed.intent || parsed.model)) {

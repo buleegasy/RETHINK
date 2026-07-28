@@ -5,20 +5,17 @@ import { useShallow } from 'zustand/react/shallow';
 import { useChatStore } from '../../store/chatStore';
 import { MessageBubble } from './MessageBubble';
 import { OnboardingGuide } from './OnboardingGuide';
-import { SandplayInviteCard } from './SandplayInviteCard';
 
 export const ChatPanel: FC = () => {
   const {
     messages,
     isStreaming,
     hasCompletedOnboarding,
-    sandplayInvitePending,
   } = useChatStore(
     useShallow((state) => ({
       messages: state.messages,
       isStreaming: state.isStreaming,
       hasCompletedOnboarding: state.hasCompletedOnboarding,
-      sandplayInvitePending: state.sandplayInvitePending,
     }))
   );
 
@@ -85,10 +82,6 @@ export const ChatPanel: FC = () => {
                 );
               })}
               
-              {sandplayInvitePending && !isStreaming && (
-                <SandplayInviteCard />
-              )}
-
               <div className="h-[140px] md:h-[180px] shrink-0" />
             </motion.div>
           )}

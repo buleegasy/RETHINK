@@ -14,7 +14,6 @@ import { EMOTION_MAP } from './hooks/useFaceEmotion';
 import { CrisisOverlay } from './components/crisis/CrisisOverlay';
 import { AmbientGlow } from './components/layout/AmbientGlow';
 
-const SandplayPanel = React.lazy(() => import('./components/sandplay/SandplayPanel').then(m => ({ default: m.SandplayPanel })));
 
 const FSM_ORDER: FSMState[] = ['Active_Listening', 'CBT_Stripping', 'Socratic_Questioning', 'Crisis_Escalation'];
 
@@ -89,7 +88,7 @@ function App() {
           {/* ── Session History Sidebar ── */}
           <SessionSidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} onEmotionChange={handleEmotionChange} />
 
-          {/* 主工作区（对话 + 沙盘） */}
+          {/* 主工作区 */}
           <div className="flex flex-col md:flex-row flex-1 h-full relative z-10 min-w-0">
             {/* 主对话区 (Workspace Layout) */}
             <div className="flex flex-col flex-1 h-full min-w-0 relative">
@@ -190,10 +189,6 @@ function App() {
                 onSend={handleSendWithEmotion} 
               />
             )}
-            </div>
-            <Suspense fallback={<div role="status" aria-label="加载中..." className="sr-only">加载中...</div>}>
-              <SandplayPanel />
-            </Suspense>
           </div>
 
           {/* 危机干预覆盖层 */}

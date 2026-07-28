@@ -14,7 +14,6 @@ import {
   type FSMContext,
   type FSMState,
 } from '../lib/fsm';
-import { evaluateSandplay } from '../lib/sandplay-evaluator';
 import { requireAuth } from '../lib/auth-utils';
 import type { Env, ChatRequest, ChatMessage, SessionRow, HonoSchema, AuthUser, MessageTechChain } from '../types';
 
@@ -235,18 +234,7 @@ chatRouter.post('/', requireAuth, async (c) => {
     userMessage: userLastMessage,
   });
 
-  let sandplayDesc = undefined;
-  if (sandplayState) {
-    try {
-      sandplayDesc = evaluateSandplay(sandplayState);
-      console.log('[Sandplay] Evaluated description length:', sandplayDesc.length);
-    } catch(e) {
-      console.warn('[Sandplay] Evaluator error:', e);
-    }
-  }
-
-  // ── 5. 构建 System Prompt（基于 FSM 状态） ──
-  const systemPrompt = buildSystemPromptFSM(fsmCtx.currentState, intentResult.type, ragContext, profile, facialEmotion, fsmCtx.icebreaker, sandplayDesc);
+  const systemPrompt = buildSystemPromptFSM(fsmCtx.currentState, intentResult.type, ragContext, profile, facialEmotion, fsmCtx.icebreaker);
 
   const client = getLLMClient(c.env);
   const model = getModelName(c.env, requestedModel);
