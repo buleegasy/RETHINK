@@ -13,3 +13,7 @@
 ## 2026-07-27 - Focus-visible styles on sidebar buttons
 **Learning:** Icon-only action buttons in floating sidebars often miss keyboard focus styles. Adding `focus-visible:ring-2 focus-visible:ring-error focus-visible:outline-none` specifically targets keyboard navigation without impacting mouse users.
 **Action:** Always check interactive elements in overlay/sidebar components for explicit `focus-visible` states, especially destructive actions that benefit from semantic colors like `ring-error`.
+
+## 2024-05-30 - Sidebar Accessibility Focus States
+**Learning:** React Motion (`motion.button`) elements in the `SessionSidebar` were stripping or missing default keyboard focus rings, making it impossible for keyboard users to track tab order through critical actions like new chat, refresh, and logout.
+**Action:** Always verify that interactive elements, especially custom motion components, have explicit `focus-visible:ring-2 focus-visible:outline-none` classes added to ensure keyboard accessibility.
