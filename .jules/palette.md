@@ -10,3 +10,6 @@
 ## 2026-07-26 - Consistent Localization in ARIA Labels
 **Learning:** When adding ARIA labels to components that are mostly in one language (e.g., Chinese, like LoginModal.tsx), it's acceptable and often preferable to keep the ARIA labels in the same language for consistency unless otherwise specified by user requirements or accessibility guidelines specific to the primary user base.
 **Action:** When adding ARIA labels, check the surrounding text context of the component to determine the appropriate language for the label.
+## 2026-07-27 - Focus-visible styles on sidebar buttons
+**Learning:** Icon-only action buttons in floating sidebars often miss keyboard focus styles. Adding `focus-visible:ring-2 focus-visible:ring-error focus-visible:outline-none` specifically targets keyboard navigation without impacting mouse users.
+**Action:** Always check interactive elements in overlay/sidebar components for explicit `focus-visible` states, especially destructive actions that benefit from semantic colors like `ring-error`.
