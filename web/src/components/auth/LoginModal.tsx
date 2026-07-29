@@ -232,7 +232,9 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
               <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
                 <div>
+                  <label htmlFor="username" className="sr-only">用户名</label>
                   <input
+                    id="username"
                     type="text"
                     required
                     aria-label="用户名"
@@ -245,7 +247,9 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 </div>
 
                 <div>
+                  <label htmlFor="password" className="sr-only">密码</label>
                   <input
+                    id="password"
                     type="password"
                     required
                     aria-label="密码"
@@ -265,7 +269,9 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                     transition={{ duration: 0.25, ease: 'easeOut' }}
                     className="overflow-hidden"
                   >
+                    <label htmlFor="invitationCode" className="sr-only">邀请密钥</label>
                     <input
+                      id="invitationCode"
                       type="text"
                       required
                       aria-label="邀请密钥"
