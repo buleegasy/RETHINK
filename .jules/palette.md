@@ -17,3 +17,6 @@
 ## 2024-05-30 - Sidebar Accessibility Focus States
 **Learning:** React Motion (`motion.button`) elements in the `SessionSidebar` were stripping or missing default keyboard focus rings, making it impossible for keyboard users to track tab order through critical actions like new chat, refresh, and logout.
 **Action:** Always verify that interactive elements, especially custom motion components, have explicit `focus-visible:ring-2 focus-visible:outline-none` classes added to ensure keyboard accessibility.
+## 2026-07-29 - Login Modal Form Field Labels
+**Learning:** Placeholders and `aria-label`s on standard HTML text/password inputs often do not provide sufficient context for all screen readers across different devices and browsers. Explicit, semantically linked `<label>` tags provide the most robust accessibility.
+**Action:** Always link text and password inputs with an explicit `<label>` tag using the `id` and `htmlFor` attributes. If visual aesthetics demand no label, apply a `sr-only` class to visually hide the label while maintaining semantic availability.
