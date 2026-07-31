@@ -43,7 +43,9 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
+              <label htmlFor="adminToken" className="sr-only">Admin Token</label>
               <input
+                id="adminToken"
                 type="password"
                 placeholder="Admin Token"
                 aria-label="Admin Token"
@@ -72,7 +74,7 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
 
             <button
               type="submit"
-              className="w-full bg-white text-black font-medium rounded-xl px-4 py-3 text-sm hover:bg-white/90 active:scale-[0.98] transition-all"
+              className="w-full bg-white text-black font-medium rounded-xl px-4 py-3 text-sm hover:bg-white/90 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
             >
               Access Dashboard
             </button>

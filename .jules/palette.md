@@ -20,3 +20,6 @@
 ## 2026-07-29 - Login Modal Form Field Labels
 **Learning:** Placeholders and `aria-label`s on standard HTML text/password inputs often do not provide sufficient context for all screen readers across different devices and browsers. Explicit, semantically linked `<label>` tags provide the most robust accessibility.
 **Action:** Always link text and password inputs with an explicit `<label>` tag using the `id` and `htmlFor` attributes. If visual aesthetics demand no label, apply a `sr-only` class to visually hide the label while maintaining semantic availability.
+## 2025-02-18 - Admin Login Accessibility Improvements
+**Learning:** The AdminLogin component had an input without a semantic label, relying only on `aria-label`, and the submit button lacked keyboard focus styles, making it harder to use for keyboard-only users.
+**Action:** Always link text/password inputs with an explicit `<label>` tag using `id` and `htmlFor`, even if visually hidden with `sr-only`. Also, ensure primary action buttons have explicit `focus-visible` utility classes (like `focus-visible:ring-2 focus-visible:ring-white`) for clear keyboard navigation states.
