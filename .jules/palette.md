@@ -20,3 +20,6 @@
 ## 2026-07-29 - Login Modal Form Field Labels
 **Learning:** Placeholders and `aria-label`s on standard HTML text/password inputs often do not provide sufficient context for all screen readers across different devices and browsers. Explicit, semantically linked `<label>` tags provide the most robust accessibility.
 **Action:** Always link text and password inputs with an explicit `<label>` tag using the `id` and `htmlFor` attributes. If visual aesthetics demand no label, apply a `sr-only` class to visually hide the label while maintaining semantic availability.
+## 2026-08-01 - [Add ARIA states and focus to RAG snippet toggles]
+**Learning:** Found an accessibility issue pattern in expandable panels where `aria-expanded` and `aria-controls` were missing, and the buttons lacked keyboard focus states. The fix links the toggle button to the expandable content using dynamic IDs and adds `focus-visible` styles for clear keyboard navigation without affecting mouse users.
+**Action:** Always ensure custom disclosure widgets (collapsible panels) have `aria-expanded` on the button, `aria-controls` pointing to the content ID, and explicit `focus-visible` styles.
