@@ -41,8 +41,17 @@ onboardingRouter.post('/analyze', async (c) => {
     let text = '';
     try { const parsed = await c.req.json<{ text: string }>(); text = parsed.text; } catch (e) {}
 
+    // 🛡️ Security Enhancement: Input validation and length limits to prevent DoS via excessive token consumption
+    if (typeof text !== 'string') {
+      return c.json({ error: 'Invalid input format' }, 400);
+    }
+
     if (!text || !text.trim()) {
       return c.json({ error: 'Text is required' }, 400);
+    }
+
+    if (text.length > 500) {
+      return c.json({ error: 'Input too long' }, 400);
     }
 
     const client = getLLMClient(c.env);

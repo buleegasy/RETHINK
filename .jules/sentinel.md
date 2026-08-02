@@ -30,3 +30,8 @@
 **Vulnerability:** The `/api/knowledge` endpoints (ingest, list, delete, query) lacked authentication, allowing unauthorized users to modify or query the system's knowledgebase.
 **Learning:** Administrative endpoints must always require authorization. The existing pattern of using an `x-admin-token` header checked against `c.env.ADMIN_SECRET_TOKEN` was missing from the knowledge router.
 **Prevention:** Apply consistent authentication middleware across all admin-level route groups (e.g., using `knowledgeRouter.use('*', ...)`) and ensure any companion scripts (like `ingest_jsonl.py`) are updated to send the required token.
+
+## 2026-08-01 - Prevent Token Exhaustion DoS on LLM Endpoints
+**Vulnerability:** The unauthenticated `/api/onboarding/analyze` endpoint directly passed user-provided text to an LLM completion request without any length or type constraints.
+**Learning:** Endpoints proxying requests directly to LLMs without validation expose the application to severe financial and operational Denial of Service (DoS) attacks via excessive token consumption, even if the payload doesn't crash the database.
+**Prevention:** Always enforce strict input type checking (`typeof input === 'string'`) and a reasonable maximum length constraint (`input.length > MAX_LEN`) *before* invoking any downstream AI models on unauthenticated or lightly authenticated routes.
