@@ -20,3 +20,7 @@
 ## 2026-07-29 - Login Modal Form Field Labels
 **Learning:** Placeholders and `aria-label`s on standard HTML text/password inputs often do not provide sufficient context for all screen readers across different devices and browsers. Explicit, semantically linked `<label>` tags provide the most robust accessibility.
 **Action:** Always link text and password inputs with an explicit `<label>` tag using the `id` and `htmlFor` attributes. If visual aesthetics demand no label, apply a `sr-only` class to visually hide the label while maintaining semantic availability.
+
+## 2026-08-02 - Added ARIA and focus-visible attributes to dynamically mapped UI elements
+**Learning:** When dealing with collapsible components inside nested loops (like RAG snippet sources mapped inside chat messages), ensure `aria-controls` and target `id` attributes are dynamically generated (e.g. using message ID and loop index) to avoid duplicate IDs in the DOM and maintain proper screen reader mapping. Combine with `focus-visible:ring-X` to ensure keyboard accessibility.
+**Action:** Always generate unique, multi-part IDs when applying `aria-controls` to mapped lists in chat interfaces.

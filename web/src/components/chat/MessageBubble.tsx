@@ -331,14 +331,16 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
                                     <div key={i} className="text-[10px] space-y-0.5">
                                       <button
                                         onClick={() => setExpandedRag(isExpanded ? null : i)}
-                                        className="flex items-center gap-1.5 text-[9.5px] text-on-surface-variant hover:text-on-surface transition-colors text-left cursor-pointer font-mono"
+                                        aria-expanded={isExpanded}
+                                        aria-controls={`rag-snippet-${message.id}-${i}`}
+                                        className="flex items-center gap-1.5 text-[9.5px] text-on-surface-variant hover:text-on-surface transition-colors text-left cursor-pointer font-mono focus-visible:ring-2 focus-visible:ring-gemini-blue focus-visible:outline-none rounded-sm"
                                       >
                                         <span className={score >= 0.8 ? 'text-stage-green' : 'text-stage-orange'}>{isExpanded ? '▼' : '▶'}</span>
                                         <span className="text-on-surface font-semibold truncate max-w-[150px]">{source}</span>
                                         <span className="text-on-surface-variant/60">({score ? `${Math.round(score * 100)}%` : '0%'})</span>
                                       </button>
                                       {isExpanded && (
-                                        <div className="bg-surface/60 p-1.5 rounded border border-outline-variant/20 text-[10px] text-on-surface-variant whitespace-pre-wrap leading-normal font-sans">
+                                        <div id={`rag-snippet-${message.id}-${i}`} className="bg-surface/60 p-1.5 rounded border border-outline-variant/20 text-[10px] text-on-surface-variant whitespace-pre-wrap leading-normal font-sans">
                                           {snippet}
                                         </div>
                                       )}
