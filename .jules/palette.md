@@ -23,3 +23,7 @@
 ## 2025-02-18 - Admin Login Accessibility Improvements
 **Learning:** The AdminLogin component had an input without a semantic label, relying only on `aria-label`, and the submit button lacked keyboard focus styles, making it harder to use for keyboard-only users.
 **Action:** Always link text/password inputs with an explicit `<label>` tag using `id` and `htmlFor`, even if visually hidden with `sr-only`. Also, ensure primary action buttons have explicit `focus-visible` utility classes (like `focus-visible:ring-2 focus-visible:ring-white`) for clear keyboard navigation states.
+
+## 2026-08-03 - [Native Dialogs in Visual Verification]
+**Learning:** Native OS-level dialogs like `window.confirm` cannot be captured by standard Playwright `page.screenshot()`. Relying on visual screenshots to verify their presence will fail.
+**Action:** Use programmatic interception like `page.on('dialog')` in testing scripts to verify their invocation, rather than expecting them to appear in the generated screenshots.
