@@ -27,3 +27,6 @@
 ## 2026-08-03 - [Native Dialogs in Visual Verification]
 **Learning:** Native OS-level dialogs like `window.confirm` cannot be captured by standard Playwright `page.screenshot()`. Relying on visual screenshots to verify their presence will fail.
 **Action:** Use programmatic interception like `page.on('dialog')` in testing scripts to verify their invocation, rather than expecting them to appear in the generated screenshots.
+## 2024-05-20 - [ARIA Label Overriding Visible Text]
+**Learning:** When enhancing accessibility on buttons containing critical visible text (like dynamic names or scores), adding an `aria-label` completely overrides the child elements' visible text for screen readers. Screen readers will only read the `aria-label` and ignore the text content within the button.
+**Action:** Avoid using `aria-label` to indicate state (like expanded/collapsed) when the button contains important visible text. Rely on attributes like `aria-expanded` which screen readers will read in addition to the element's text.
