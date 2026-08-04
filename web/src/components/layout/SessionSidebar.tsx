@@ -311,7 +311,9 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                void handleDeleteSession(session.id);
+                                if (window.confirm('确定要删除此对话吗？')) {
+                                  void handleDeleteSession(session.id);
+                                }
                               }}
                               className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-1 rounded-full text-on-surface-variant/60 hover:text-error hover:bg-error/10 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-error focus-visible:outline-none"
                               aria-label="删除此对话"
