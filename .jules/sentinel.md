@@ -35,3 +35,7 @@
 **Vulnerability:** The unauthenticated `/api/onboarding/analyze` endpoint directly passed user-provided text to an LLM completion request without any length or type constraints.
 **Learning:** Endpoints proxying requests directly to LLMs without validation expose the application to severe financial and operational Denial of Service (DoS) attacks via excessive token consumption, even if the payload doesn't crash the database.
 **Prevention:** Always enforce strict input type checking (`typeof input === 'string'`) and a reasonable maximum length constraint (`input.length > MAX_LEN`) *before* invoking any downstream AI models on unauthenticated or lightly authenticated routes.
+## 2024-02-27 - [Missing Input Length Validation on LLM Routes]
+**Vulnerability:** Found unvalidated user input limits and unbounded nested array processing within `worker/src/routes/chat.ts` processing LLM tokens.
+**Learning:** Due to the worker interacting directly with costly upstream LLM routing providers and using streaming parsing logic, missing validation created an easy attack vector for DoS and excessive LLM API consumption via token injection.
+**Prevention:** Always enforce strict length and explicit type checking for all string and array arguments passed into backend routes, specifically for routes hitting expensive LLM interfaces or nested looping algorithms.
