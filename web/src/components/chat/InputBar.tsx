@@ -181,7 +181,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
         {/* Bottom Disclaimer */}
         <div className="text-center mt-3 pointer-events-auto">
           {voiceError && (
-            <p className="text-xs text-error font-sans animate-fade-in mb-1">
+            <p role="alert" className="text-xs text-error font-sans animate-fade-in mb-1">
               语音识别出错：{voiceError}
             </p>
           )}

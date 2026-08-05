@@ -30,3 +30,6 @@
 ## 2024-05-20 - [ARIA Label Overriding Visible Text]
 **Learning:** When enhancing accessibility on buttons containing critical visible text (like dynamic names or scores), adding an `aria-label` completely overrides the child elements' visible text for screen readers. Screen readers will only read the `aria-label` and ignore the text content within the button.
 **Action:** Avoid using `aria-label` to indicate state (like expanded/collapsed) when the button contains important visible text. Rely on attributes like `aria-expanded` which screen readers will read in addition to the element's text.
+## 2025-02-18 - Ensure role="alert" for dynamic error messages
+**Learning:** React components that conditionally render error messages (such as `error` in `SessionSidebar.tsx` and `voiceError` in `InputBar.tsx`) often forget the `role="alert"` attribute. Without this, screen readers will not announce the new error message dynamically to the user when it appears.
+**Action:** Always add `role="alert"` to the container of dynamically rendered error messages to guarantee immediate announcement by screen readers.

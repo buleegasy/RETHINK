@@ -253,7 +253,7 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
             </motion.button>
 
             {error && (
-              <div className="mb-3 rounded-chip bg-error-container/80 text-error text-xs px-3 py-2 border border-error/25">
+              <div role="alert" className="mb-3 rounded-chip bg-error-container/80 text-error text-xs px-3 py-2 border border-error/25">
                 {error}
               </div>
             )}
