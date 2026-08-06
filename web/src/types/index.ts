@@ -3,6 +3,7 @@
 // ============================================================
 
 export type FSMState =
+  | 'Pre_Info_Collection'
   | 'Onboarding'
   | 'Active_Listening'
   | 'CBT_Stripping'
@@ -10,12 +11,21 @@ export type FSMState =
   | 'Crisis_Escalation';
 
 export const FSM_STATES: FSMState[] = [
+  'Pre_Info_Collection',
   'Onboarding',
   'Active_Listening',
   'CBT_Stripping',
   'Socratic_Questioning',
   'Crisis_Escalation',
 ];
+
+/** 前置信息数据 */
+export interface PreInfoData {
+  userName?: string;
+  collectionCompleted: boolean;
+  collectedAt?: number;
+  fromMemory?: boolean;
+}
 
 /** FSM 状态元数据（用于前端展示） */
 export const FSM_STATE_META: Record<FSMState, {
@@ -24,6 +34,12 @@ export const FSM_STATE_META: Record<FSMState, {
   colorHex: string;
   icon: string;
 }> = {
+  'Pre_Info_Collection': {
+    label: '前置接待',
+    description: '了解你的称呼',
+    colorHex: '#4FC3F7',
+    icon: '👋',
+  },
   'Onboarding': {
     label: '登录破冰',
     description: '了解你的基本情况',
@@ -114,6 +130,8 @@ export interface TechChain {
   fsmState?: FSMState;
   /** FSM 触发条件 */
   fsmTrigger?: string;
+  /** 前置接待信息 */
+  preInfo?: PreInfoData;
 }
 
 // ============================================================
@@ -177,6 +195,8 @@ export interface SSEChunk {
   fsmState?: FSMState;
   /** FSM 进入下一状态的触发条件 */
   fsmTrigger?: string;
+  /** 前置接待信息 */
+  preInfo?: PreInfoData;
   /** UI 控制参数 */
   uiControl?: UIControl;
   /** 破冰层级 */
@@ -208,4 +228,5 @@ export interface ChatSessionSummary {
 export interface ChatSessionDetail extends ChatSessionSummary {
   messages: ChatMessage[];
   fsm_context?: Record<string, unknown>;
+  preInfo?: PreInfoData;
 }

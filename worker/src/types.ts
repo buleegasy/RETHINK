@@ -13,7 +13,7 @@ export interface HonoSchema {
 export interface Env {
   DB: D1Database;
   AI: Ai;
-  VECTORIZE: Vectorize;
+  VECTORIZE: VectorizeIndex;
   API_KEY: string;
   API_BASE_URL: string;
   MODEL_NAME: string;
@@ -28,6 +28,7 @@ export interface Env {
 // ============================================================
 
 export type FSMState =
+  | 'Pre_Info_Collection'
   | 'Onboarding'
   | 'Active_Listening'
   | 'CBT_Stripping'
@@ -35,12 +36,21 @@ export type FSMState =
   | 'Crisis_Escalation';
 
 export const FSM_STATES: FSMState[] = [
+  'Pre_Info_Collection',
   'Onboarding',
   'Active_Listening',
   'CBT_Stripping',
   'Socratic_Questioning',
   'Crisis_Escalation',
 ];
+
+/** 前置信息收集数据 */
+export interface PreInfoData {
+  userName?: string;
+  collectionCompleted: boolean;
+  collectedAt?: number;
+  fromMemory?: boolean;
+}
 
 // CBT 五阶段枚举（保留向后兼容）
 export type CBTStage =
@@ -89,6 +99,7 @@ export interface MessageTechChain {
   intentEmotion?: string;
   fsmState?: FSMState;
   fsmTrigger?: string;
+  preInfo?: PreInfoData;
 }
 
 // 聊天消息
@@ -144,6 +155,8 @@ export interface SSEChunk {
   fsmTrigger?: string;
   /** UI 控制参数（仅在开始或发生变化时发送，或在 done=true 时完整发送） */
   uiControl?: UIControl;
+  /** 前置信息收集数据 */
+  preInfo?: PreInfoData;
 }
 
 // D1 sessions 表行

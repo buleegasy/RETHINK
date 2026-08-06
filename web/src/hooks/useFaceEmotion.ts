@@ -24,6 +24,8 @@ export interface UseFaceEmotionReturn {
   isCameraActive: boolean;
   isModelLoaded: boolean;
   isModelLoading: boolean;
+  /** 模型加载进度 0-100，加载完成后保持 100 */
+  modelLoadProgress: number;
   currentEmotion: EmotionResult | null;
   videoRef: React.RefObject<HTMLVideoElement | null>;
   startCamera: () => Promise<void>;
@@ -75,28 +77,123 @@ declare global {
 }
 
 const MODEL_URL = '/cv-models/';
-let modelsLoaded = false;
 
-async function loadModels() {
-  const api = window.faceapi;
-  if (!api) {
-    throw new Error('faceapi library is not loaded on window object');
+// ── 进度订阅系统 ────────────────────────────────────────────────────────────
+// 因为模型在模块级单例 Promise 中加载，进度也必须在模块级维护并广播给所有
+// hook 实例（通常只有一个 CameraPanel），避免 React state 与模块状态脱节。
+let _progress = 0; // 0-100
+const _progressListeners = new Set<(p: number) => void>();
+
+function _setProgress(p: number) {
+  _progress = p;
+  _progressListeners.forEach(fn => fn(p));
+}
+
+/** 订阅加载进度，返回取消订阅函数 */
+export function subscribeModelProgress(fn: (progress: number) => void): () => void {
+  fn(_progress); // 立即同步当前值
+  _progressListeners.add(fn);
+  return () => _progressListeners.delete(fn);
+}
+
+// ── 单例 Promise ─────────────────────────────────────────────────────────────
+// 模型加载只会触发一次，后续调用都复用同一个 Promise。
+// 这允许我们在后台预加载，当用户真正开启摄像头时直接 await 已完成的 Promise。
+let modelsLoadingPromise: Promise<void> | null = null;
+
+function loadModels(): Promise<void> {
+  if (modelsLoadingPromise) return modelsLoadingPromise;
+
+  modelsLoadingPromise = (async () => {
+    // faceapi 脚本可能尚未加载完毕（defer），等待它就绪
+    let api = window.faceapi;
+    if (!api) {
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new Error('faceapi 脚本加载超时')), 15000);
+        const check = setInterval(() => {
+          if (window.faceapi) {
+            clearInterval(check);
+            clearTimeout(timeout);
+            resolve();
+          }
+        }, 100);
+      });
+      api = window.faceapi!;
+    }
+
+    // 三个模型各占 ~33%，使用定时器模拟平滑进度（face-api 不暴露进度事件）
+    // 每个模型用定时器从起点爬到终点的 90%，Promise resolve 时立即跳到终点
+    const MODEL_TARGETS = [33, 66, 99]; // 三模型完成后的进度节点
+    let completed = 0;
+
+    // 定时进度爬升：在模型加载期间每 300ms 向目标靠近
+    let crawlTimer: ReturnType<typeof setInterval> | null = setInterval(() => {
+      // 当前阶段目标：已完成模型的进度 + 当前模型 90% 区间
+      const stageStart = completed === 0 ? 0 : MODEL_TARGETS[completed - 1];
+      const stageTarget = MODEL_TARGETS[completed] ?? 99;
+      const softCap = stageStart + (stageTarget - stageStart) * 0.9;
+      if (_progress < softCap) {
+        _setProgress(Math.min(_progress + 2, softCap));
+      }
+    }, 300);
+
+    const stopCrawl = () => {
+      if (crawlTimer) { clearInterval(crawlTimer); crawlTimer = null; }
+    };
+
+    const loadOne = async (net: { loadFromUri: (u: string) => Promise<void> }, idx: number) => {
+      await net.loadFromUri(MODEL_URL);
+      completed = idx + 1;
+      // 立即跳到该模型对应的进度节点
+      _setProgress(MODEL_TARGETS[idx]);
+    };
+
+    try {
+      await Promise.all([
+        loadOne(api.nets.ssdMobilenetv1, 0),
+        loadOne(api.nets.faceLandmark68Net, 1),
+        loadOne(api.nets.faceExpressionNet, 2),
+      ]);
+    } finally {
+      stopCrawl();
+    }
+
+    _setProgress(100);
+  })();
+
+  // 加载失败时重置，允许重试
+  modelsLoadingPromise.catch(() => {
+    modelsLoadingPromise = null;
+    _setProgress(0);
+  });
+
+  return modelsLoadingPromise;
+}
+
+/**
+ * 在应用启动后立即调用此函数，在浏览器空闲时静默预加载人脸识别模型。
+ * 当用户真正打开摄像头时，模型已就绪，不会有等待延迟。
+ */
+export function preloadFaceModels(): void {
+  if (typeof requestIdleCallback !== 'undefined') {
+    requestIdleCallback(() => { loadModels().catch(() => {}); }, { timeout: 5000 });
+  } else {
+    setTimeout(() => { loadModels().catch(() => {}); }, 2000);
   }
-  if (modelsLoaded) return;
-  await Promise.all([
-    api.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
-    api.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-    api.nets.faceExpressionNet.loadFromUri(MODEL_URL),
-  ]);
-  modelsLoaded = true;
 }
 
 export function useFaceEmotion(): UseFaceEmotionReturn {
   const [isCameraActive, setIsCameraActive] = useState(false);
-  const [isModelLoaded, setIsModelLoaded] = useState(modelsLoaded);
+  const [isModelLoaded, setIsModelLoaded] = useState(() => modelsLoadingPromise !== null);
   const [isModelLoading, setIsModelLoading] = useState(false);
+  const [modelLoadProgress, setModelLoadProgress] = useState<number>(() => _progress);
   const [currentEmotion, setCurrentEmotion] = useState<EmotionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // 订阅模块级进度广播
+  useEffect(() => {
+    return subscribeModelProgress(setModelLoadProgress);
+  }, []);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -247,20 +344,27 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
     isActiveRef.current = true;
     setError(null);
 
-    // 加载模型（只加载一次）
-    if (!modelsLoaded) {
+    // 加载模型（单例 Promise，无论预加载是否已完成，都只等待同一个 Promise）
+    if (!modelsLoadingPromise) {
       setIsModelLoading(true);
-      try {
-        await loadModels();
-        setIsModelLoaded(true);
-      } catch (err: unknown) {
-        setError(`情绪识别模型加载失败: ${err instanceof Error ? err.message : String(err)}`);
-        setIsModelLoading(false);
-        isActiveRef.current = false;
-        return;
-      }
-      setIsModelLoading(false);
+    } else {
+      // 检查 Promise 是否已完成（已预加载完成则跳过 loading 状态）
+      let alreadyLoaded = false;
+      modelsLoadingPromise.then(() => { alreadyLoaded = true; }).catch(() => {});
+      // 给微任务队列一个 tick 来更新 alreadyLoaded
+      await Promise.resolve();
+      if (!alreadyLoaded) setIsModelLoading(true);
     }
+    try {
+      await loadModels();
+      setIsModelLoaded(true);
+    } catch (err: unknown) {
+      setError(`情绪识别模型加载失败: ${err instanceof Error ? err.message : String(err)}`);
+      setIsModelLoading(false);
+      isActiveRef.current = false;
+      return;
+    }
+    setIsModelLoading(false);
 
     // Check if stopCamera was called while loading models
     if (!isActiveRef.current) {
@@ -322,6 +426,7 @@ export function useFaceEmotion(): UseFaceEmotionReturn {
     isCameraActive,
     isModelLoaded,
     isModelLoading,
+    modelLoadProgress,
     currentEmotion,
     videoRef,
     startCamera,

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 
 interface DecryptTextProps {
   text: string; // The final text to display
@@ -22,7 +22,6 @@ export function DecryptText({
   useMonospace = false,
 }: DecryptTextProps) {
   const [displayText, setDisplayText] = useState('');
-  const isAnimatingRef = useRef(false);
 
   useEffect(() => {
     if (!animateOnMount) {
@@ -35,7 +34,6 @@ export function DecryptText({
     let intervalId: ReturnType<typeof setInterval>;
 
     const startAnimation = () => {
-      isAnimatingRef.current = true;
       const length = text.length;
       let frame = 0;
       const totalFrames = length * scrambleSteps;
@@ -66,7 +64,6 @@ export function DecryptText({
 
         if (frame > totalFrames) {
           setDisplayText(text);
-          isAnimatingRef.current = false;
           clearInterval(intervalId);
         }
       }, speed);

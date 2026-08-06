@@ -26,7 +26,9 @@ function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
   
   // 计算进度
-  const stageIndex = fsmState === 'Onboarding' ? 0 : FSM_ORDER.indexOf(fsmState as FSMState) + 1;
+  const stageIndex = (fsmState === 'Pre_Info_Collection' || fsmState === 'Onboarding')
+    ? 0
+    : FSM_ORDER.indexOf(fsmState as FSMState) + 1;
   
   // 用于记录每一次对话周期内（从上一次发送到本次发送之间）的所有情绪帧
   const emotionHistoryRef = useRef<EmotionResult[]>([]);

@@ -32,8 +32,6 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
 
   const isListening = voiceState === 'listening';
 
-  const lastHeightRef = useRef<number>(0);
-
   useEffect(() => {
     // Progressive enhancement: only use JS resize if CSS field-sizing is unsupported
     if (typeof CSS !== 'undefined' && CSS.supports && CSS.supports('field-sizing', 'content')) {
@@ -47,7 +45,6 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
       const scrollHeight = textarea.scrollHeight;
       const targetHeight = Math.min(scrollHeight, maxH);
       textarea.style.height = `${targetHeight}px`;
-      lastHeightRef.current = targetHeight;
     }
   }, [input]);
 

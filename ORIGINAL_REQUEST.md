@@ -494,3 +494,54 @@ You must start and manage the local Vite development server (`npm run dev`) to a
 ### Build Quality
 - [ ] The project builds successfully (`npm run build`) without errors after the UI modifications.
 
+## Follow-up — 2026-08-05T16:04:11+08:00
+
+# Teamwork Project Prompt — Draft
+
+> Status: Launched
+> Goal: Craft prompt → get user approval → delegate to teamwork_preview
+
+为 RE-THINK 心理咨询系统增加前置信息收集功能，在正式进入咨询前，先通过对话形式（如“接待员”AI）询问用户的名字。至于是否需要收集其他信息，由系统在设计时自行决定。收集完毕后再平滑转入正式咨询。
+
+Working directory: /Users/chenhaoran/工程文件/心理大赛
+Integrity mode: development
+
+## Requirements
+
+### R1. 对话式信息收集
+在进入正式心理咨询前，系统需要先进入“信息收集状态”。在这个状态下，由系统通过对话主动询问用户的名字（以及系统认为有必要的其他基本信息）。
+
+### R2. 状态平滑过渡
+一旦必要信息（至少包括名字）收集完毕，系统需要自动结束信息收集环节，将收集到的用户信息传递给正式的咨询 AI，并在界面上平滑切换到正式咨询流程。
+
+## Acceptance Criteria
+
+### 对话逻辑验证
+- [ ] 启动新咨询时，首条消息必须是询问用户名字等信息的引导语，而非直接开始深度心理咨询。
+- [ ] 当用户在对话中提供名字后，系统能够正确识别收集完毕，并触发状态切换。
+- [ ] 转入正式咨询后，正式的咨询 AI 能够知道并使用用户刚刚提供的名字进行称呼。
+- [ ] 开发完成后，提供明确的测试/验证方式（例如自动化的测试脚本，或具体的界面测试步骤），能客观验证上述信息传递和状态切换过程没有漏洞。
+
+## Follow-up — 2026-08-05T08:08:47Z
+
+### R3. 跨对话 Memory 级持久化与生命周期解耦 (R3 Requirements & Acceptance)
+前置收集的基本信息需要能够跨对话访问，相当于一个跨对话的 memory。并且当用户删除相关的对话数据时，该段 memory 也应随之被清除。另外，在实现这种机制时需要尽量解耦，最小化对底层 subagent/主逻辑的侵入打扰。
+
+Acceptance Criteria:
+- 跨对话访问：用户在某个会话中完成名字及基本信息收集后，发起新会话时能够直接识别并跨对话复用该 memory 信息。
+- 数据删除同步：当用户删除对应的对话数据时，关联的跨对话 memory 也随之清除。
+- 代码解耦：跨对话 memory 机制与核心干预/主逻辑保持高内聚低耦合，不侵入无关底层业务。
+
+## Follow-up — 2026-08-05T08:18:27Z
+
+### R4. 开场白语气、专业调性与多样性要求 (R4 Requirements & Acceptance)
+点击表情包（或触发新对话）之后的开场句子需要自然、生动，不能太生硬。必须具备多样性（不能每次都一样）。绝对禁止出现如“卧槽”等不符合专业调性的词汇。
+
+Acceptance Criteria:
+- 自然生动与多样性：表情包/新对话触发的开场引导语自然、生动，且具备随机/轮播多样性，避免静态死板重复。
+- 专业调性与违禁词过滤：绝对禁止出现“卧槽”等粗俗或不合心理咨询专业调性的词汇。
+- 测试集成：在自动化测试脚本中包含针对开场白多样性与违禁词过滤的断言检查。
+
+
+
+

@@ -13,7 +13,9 @@ import {
   type FSMState,
 } from '../lib/fsm';
 import { requireAuth } from '../lib/auth-utils';
-import type { Env, ChatRequest, ChatMessage, SessionRow, HonoSchema, AuthUser } from '../types';
+import type { Env, ChatRequest, ChatMessage, SessionRow, HonoSchema, AuthUser, PreInfoData } from '../types';
+import { MemoryService } from '../lib/memory';
+import { sanitizeResponse, getEmittableAndBuffer } from '../lib/sanitizer';
 
 export const chatRouter = new Hono<HonoSchema>();
 
@@ -64,6 +66,26 @@ chatRouter.post('/', requireAuth, async (c) => {
     }
   } catch (e) {
     console.warn('D1 Database read skipped/failed, proceeding without history', e);
+  }
+
+  // ── 1.2 Cross-Session Memory Inheritance (R3) ──
+  if (user?.uid && (!fsmCtx.preInfo?.userName || !fsmCtx.preInfo?.collectionCompleted)) {
+    try {
+      const rememberedName = await MemoryService.getLatestMemory(c.env.DB, user.uid, 'user_name');
+      if (rememberedName) {
+        fsmCtx.preInfo = {
+          userName: rememberedName,
+          collectionCompleted: true,
+          fromMemory: true,
+        };
+        if (fsmCtx.currentState === 'Pre_Info_Collection') {
+          fsmCtx.currentState = 'Active_Listening';
+        }
+        console.log(`[MemoryService] Loaded cross-session userName="${rememberedName}" for user=${user.uid}`);
+      }
+    } catch (err) {
+      console.warn('[MemoryService] Failed to query cross-session memory:', err);
+    }
   }
 
   // ── 1.1 处理传入的 Profile (Onboarding Cards) ──
@@ -184,7 +206,15 @@ chatRouter.post('/', requireAuth, async (c) => {
   });
 
   // ── 5. 构建 System Prompt（基于 FSM 状态） ──
-  const systemPrompt = buildSystemPromptFSM(fsmCtx.currentState, intentResult.type, ragContext, profile, facialEmotion, fsmCtx.icebreaker);
+  const systemPrompt = buildSystemPromptFSM(
+    fsmCtx.currentState,
+    intentResult.type,
+    ragContext,
+    profile,
+    facialEmotion,
+    fsmCtx.icebreaker,
+    fsmCtx.preInfo,
+  );
 
   const client = getLLMClient(c.env);
   const model = getModelName(c.env, requestedModel);
@@ -279,6 +309,19 @@ chatRouter.post('/', requireAuth, async (c) => {
         }
 
         
+        // 解析前置信息收集更新 (Pre_Info_Collection 阶段)
+        if (parsed.pre_info_update && fsmCtx.currentState === 'Pre_Info_Collection') {
+          fsmCtx.preInfo = applyPreInfoUpdate(fsmCtx.preInfo, parsed.pre_info_update);
+          console.log(`[PreInfo Non-Stream] userName=${fsmCtx.preInfo.userName || 'n/a'}, completed=${fsmCtx.preInfo.collectionCompleted}`);
+          if (fsmCtx.preInfo?.userName && !fsmCtx.preInfo?.fromMemory && user?.uid) {
+            try {
+              c.executionCtx.waitUntil(MemoryService.saveMemory(c.env.DB, user.uid, sessionId, 'user_name', fsmCtx.preInfo.userName));
+            } catch {
+              await MemoryService.saveMemory(c.env.DB, user.uid, sessionId, 'user_name', fsmCtx.preInfo.userName);
+            }
+          }
+        }
+
         // 解析破冰画像增量更新 (Onboarding 阶段)
         if (parsed.icebreaker_update && fsmCtx.currentState === 'Onboarding') {
           fsmCtx.icebreaker = applyIcebreakerUpdate(fsmCtx.icebreaker, parsed.icebreaker_update);
@@ -287,6 +330,8 @@ chatRouter.post('/', requireAuth, async (c) => {
       } catch (e) {
         console.warn('Failed to parse final JSON in non-streaming mode:', e);
       }
+
+      cleanReply = sanitizeResponse(cleanReply);
 
       const stage = detectStage(cleanReply, currentStageIndex);
 
@@ -303,6 +348,7 @@ chatRouter.post('/', requireAuth, async (c) => {
         intent: intentResult.type,
         fsmState: fsmCtx.currentState,
         fsmTrigger: postTransition.trigger,
+        preInfo: fsmCtx.preInfo,
         retrievedEvidence,
         reasoningDeduction,
         model: usedModel,
@@ -317,6 +363,7 @@ chatRouter.post('/', requireAuth, async (c) => {
         intent: intentResult.type,
         fsmState: fsmCtx.currentState,
         fsmTrigger: postTransition.trigger,
+        preInfo: fsmCtx.preInfo,
         uiControl,
         reasoning_deduction: reasoningDeduction,
         retrieved_evidence: retrievedEvidence,
@@ -365,6 +412,7 @@ chatRouter.post('/', requireAuth, async (c) => {
       let isExtracting = false;
       let hasFinishedExtraction = false;
       let isPlainTextFallback = false;
+      let streamBuffer = '';
 
       // 辅助函数：寻找第一个非转义的引号
       // ⚡ Bolt Optimization: Replaced slow manual character-by-character backwards iteration JS loop
@@ -402,17 +450,24 @@ chatRouter.post('/', requireAuth, async (c) => {
             const trueDelta = fullResponse.substring(sentUnescapedLength);
             if (trueDelta) {
               sentUnescapedLength = fullResponse.length;
-              await streamEvent.writeSSE({
-                data: JSON.stringify({
-                  delta: trueDelta,
-                  stage: detectStage(fullResponse, currentStageIndex),
-                  done: false,
-                  sessionId,
-                  intent: intentResult.type,
-                  fsmState: fsmCtx.currentState,
-                  ...ragMeta,
-                })
-              });
+              const combined = streamBuffer + trueDelta;
+              const sanitizedCombined = sanitizeResponse(combined);
+              const { emittable, buffer: newBuffer } = getEmittableAndBuffer(sanitizedCombined, false);
+              streamBuffer = newBuffer;
+
+              if (emittable.length > 0) {
+                await streamEvent.writeSSE({
+                  data: JSON.stringify({
+                    delta: emittable,
+                    stage: detectStage(fullResponse, currentStageIndex),
+                    done: false,
+                    sessionId,
+                    intent: intentResult.type,
+                    fsmState: fsmCtx.currentState,
+                    ...ragMeta,
+                  })
+                });
+              }
             }
           } else if (isExtracting) {
             const match = fullResponse.match(/"agent_reply"\s*:\s*"/);
@@ -435,23 +490,50 @@ chatRouter.post('/', requireAuth, async (c) => {
                 
                 if (trueDelta) {
                   sentUnescapedLength = unescapedFull.length;
-                  await streamEvent.writeSSE({
-                    data: JSON.stringify({
-                      delta: trueDelta,
-                      stage: detectStage(unescapedFull, currentStageIndex),
-                      done: false,
-                      sessionId,
-                      intent: intentResult.type,
-                      fsmState: fsmCtx.currentState,
-                      ...ragMeta,
-                      model: usedModel,
-                    })
-                  });
+                  const combined = streamBuffer + trueDelta;
+                  const sanitizedCombined = sanitizeResponse(combined);
+                  const { emittable, buffer: newBuffer } = getEmittableAndBuffer(sanitizedCombined, false);
+                  streamBuffer = newBuffer;
+
+                  if (emittable.length > 0) {
+                    await streamEvent.writeSSE({
+                      data: JSON.stringify({
+                        delta: emittable,
+                        stage: detectStage(unescapedFull, currentStageIndex),
+                        done: false,
+                        sessionId,
+                        intent: intentResult.type,
+                        fsmState: fsmCtx.currentState,
+                        ...ragMeta,
+                        model: usedModel,
+                      })
+                    });
+                  }
                 }
               }
             }
           }
         }
+      }
+
+      // ── Flush Hold-back Buffer on Stream End ──
+      if (streamBuffer.length > 0) {
+        const finalChunk = sanitizeResponse(streamBuffer);
+        if (finalChunk.length > 0) {
+          await streamEvent.writeSSE({
+            data: JSON.stringify({
+              delta: finalChunk,
+              stage: detectStage(fullResponse, currentStageIndex),
+              done: false,
+              sessionId,
+              intent: intentResult.type,
+              fsmState: fsmCtx.currentState,
+              ...ragMeta,
+              model: usedModel,
+            })
+          });
+        }
+        streamBuffer = '';
       }
 
       // ── 流结束：尝试解析完整 JSON ──
@@ -480,6 +562,19 @@ chatRouter.post('/', requireAuth, async (c) => {
           finalReply = parsed.message;
         }
 
+        // 解析前置信息收集更新 (Pre_Info_Collection 阶段)
+        if (parsed.pre_info_update && fsmCtx.currentState === 'Pre_Info_Collection') {
+          fsmCtx.preInfo = applyPreInfoUpdate(fsmCtx.preInfo, parsed.pre_info_update);
+          console.log(`[PreInfo Stream] userName=${fsmCtx.preInfo.userName || 'n/a'}, completed=${fsmCtx.preInfo.collectionCompleted}`);
+          if (fsmCtx.preInfo?.userName && !fsmCtx.preInfo?.fromMemory && user?.uid) {
+            try {
+              c.executionCtx.waitUntil(MemoryService.saveMemory(c.env.DB, user.uid, sessionId, 'user_name', fsmCtx.preInfo.userName));
+            } catch {
+              await MemoryService.saveMemory(c.env.DB, user.uid, sessionId, 'user_name', fsmCtx.preInfo.userName);
+            }
+          }
+        }
+
         // 解析破冰画像增量更新
         if (parsed.icebreaker_update && fsmCtx.currentState === 'Onboarding') {
           fsmCtx.icebreaker = applyIcebreakerUpdate(fsmCtx.icebreaker, parsed.icebreaker_update);
@@ -491,6 +586,8 @@ chatRouter.post('/', requireAuth, async (c) => {
           finalReply = cleanResponse;
         }
       }
+
+      finalReply = sanitizeResponse(finalReply);
 
       // ── FSM Post-response 转移 ──
       fsmCtx.turnCount += 1;
@@ -506,13 +603,14 @@ chatRouter.post('/', requireAuth, async (c) => {
         intent: intentResult.type,
         fsmState: fsmCtx.currentState,
         fsmTrigger: postTransition.trigger,
+        preInfo: fsmCtx.preInfo,
         retrievedEvidence,
         reasoningDeduction,
       };
       const updatedMessages: ChatMessage[] = [...messages, { role: 'assistant', content: finalReply, techChain: finalTechChain as any }];
       await saveToD1(c.env.DB, sessionId, updatedMessages, stageToIndex(finalStage) + 1, fsmCtx, user.uid);
 
-      // 发送结束标志（含 FSM 状态转移信息 + UI 控制参数 + 破冰层级）
+      // 发送结束标志（含 FSM 状态转移信息 + UI 控制参数 + 破冰层级 + 前置信息）
       await streamEvent.writeSSE({
         data: JSON.stringify({
           delta: '',
@@ -522,6 +620,7 @@ chatRouter.post('/', requireAuth, async (c) => {
           intent: intentResult.type,
           fsmState: fsmCtx.currentState,
           fsmTrigger: postTransition.trigger,
+          preInfo: fsmCtx.preInfo,
           uiControl,
           reasoning_deduction: reasoningDeduction,
           retrieved_evidence: retrievedEvidence,
@@ -578,6 +677,25 @@ async function saveToD1(
   } catch (e) {
     console.error('Failed to save session to D1:', e);
   }
+}
+
+/**
+ * 前置信息收集更新：合并 AI 输出的 pre_info_update
+ */
+export function applyPreInfoUpdate(
+  current: PreInfoData,
+  update: Record<string, unknown>,
+): PreInfoData {
+  const result = { ...current };
+  if (typeof update.user_name === 'string' && update.user_name.trim()) {
+    result.userName = update.user_name.trim();
+    delete result.fromMemory;
+  }
+  if (update.collection_completed === true || result.userName) {
+    result.collectionCompleted = true;
+    result.collectedAt = Date.now();
+  }
+  return result;
 }
 
 /**

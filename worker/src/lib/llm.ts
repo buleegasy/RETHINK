@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import type { Env, ChatMessage, FSMState, UserProfile } from '../types';
+import type { Env, ChatMessage, FSMState, UserProfile, PreInfoData } from '../types';
 import type { IntentType } from './intent-router';
 import type { RAGContext } from './rag';
 import { formatRAGContext } from './rag';
@@ -167,6 +167,37 @@ const OUTPUT_FORMAT_ICEBREAKER = `
 4. 确保 JSON 格式合法。`;
 
 /**
+ * 前置信息收集阶段专用输出格式
+ */
+const OUTPUT_FORMAT_PRE_INFO = `
+【🔴 强制输出格式规范 - 必须返回合法 JSON 对象】：
+你必须将回复封装在以下 JSON 结构中，严禁包含任何 JSON 以外的文字：
+
+{
+  "reasoning_deduction": {
+    "cognitive_distortion": "",
+    "emotional_core": "用户的初步状态",
+    "intervention_strategy": "前置信息收集：询问称呼"
+  },
+  "retrieved_evidence": {
+    "used_framework": ["pre_info_collection"],
+    "retrieved_chunks": []
+  },
+  "state_machine": "Pre_Info_Collection",
+  "pre_info_update": {
+    "user_name": "用户在回答中提供的称呼（如'小明'，未提供则填 null）",
+    "collection_completed": true/false (提取到名称或用户希望直接聊天时设为 true)
+  },
+  "ui_control": {
+    "color_theme": "#4FC3F7",
+    "lighting_style": "soft_ambient",
+    "transition_speed": "3000ms",
+    "effect": "slow_breathing"
+  },
+  "agent_reply": "你的接待对话回复（纯文字，1-2句话）"
+}`;
+
+/**
  * 电影级色彩心理学规则
  */
 const CINEMATIC_UI_RULES = `
@@ -207,10 +238,16 @@ export function buildSystemPromptFSM(
   profile?: UserProfile,
   facialEmotion?: { label: string; labelZh: string; confidence: number },
   icebreaker?: IcebreakerProfile,
+  preInfo?: PreInfoData,
 ): string {
   const parts: string[] = [];
 
   parts.push(NON_DIAGNOSTIC_BOUNDARY);
+
+  // 注入前置用户信息（称呼）到正式咨询 System Prompt
+  if (fsmState !== 'Pre_Info_Collection' && preInfo?.userName) {
+    parts.push(`【用户信息】：用户称呼为「${preInfo.userName}」。在后续对话中自然使用此称呼。`);
+  }
 
   if (intent === 'crisis') {
     parts.push(ROLE_CRISIS);
@@ -284,7 +321,9 @@ export function buildSystemPromptFSM(
 
   parts.push(CINEMATIC_UI_RULES);
 
-  if (fsmState === 'Onboarding') {
+  if (fsmState === 'Pre_Info_Collection') {
+    parts.push(OUTPUT_FORMAT_PRE_INFO);
+  } else if (fsmState === 'Onboarding') {
     parts.push(OUTPUT_FORMAT_ICEBREAKER);
   } else {
     parts.push(OUTPUT_FORMAT_JSON);
@@ -305,6 +344,7 @@ export function getLLMClient(env: Env) {
       'HTTP-Referer': 'https://re-think-agent.pages.dev',
       'X-Title': 'RE-THINK Agent',
     },
+    fetch: (env as any)?.FETCH || globalThis.fetch,
   });
 }
 

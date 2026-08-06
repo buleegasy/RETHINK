@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { requireAuth } from '../lib/auth-utils';
 import type { Env, AuthUser, HonoSchema } from '../types';
+import { MemoryService } from '../lib/memory';
 
 export const authRouter = new Hono<HonoSchema>();
 
@@ -399,6 +400,9 @@ authRouter.delete('/sessions/:id', requireAuth, async (c) => {
     await c.env.DB.prepare('DELETE FROM sessions WHERE id = ?')
       .bind(sessionId)
       .run();
+
+    // Clean-clear associated user memory entries (R3 Deletion Sync)
+    await MemoryService.deleteMemoriesBySessionId(c.env.DB, sessionId);
 
     return c.json({
       success: true,

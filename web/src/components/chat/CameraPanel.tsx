@@ -13,6 +13,7 @@ export const CameraPanel: React.FC<CameraPanelProps> = ({ onEmotionChange }) => 
   const {
     isCameraActive,
     isModelLoading,
+    modelLoadProgress,
     currentEmotion,
     videoRef,
     startCamera,
@@ -69,6 +70,18 @@ export const CameraPanel: React.FC<CameraPanelProps> = ({ onEmotionChange }) => 
             <div className="absolute inset-0 flex items-center justify-center bg-surface-dim/80 z-20 backdrop-blur-sm">
               {error ? (
                 <AlertCircle className="w-4 h-4 text-error" strokeWidth={2.5} />
+              ) : isModelLoading ? (
+                /* 环形进度指示器 */
+                <svg className="w-9 h-9 -rotate-90" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="currentColor"
+                    className="text-outline-variant/30" strokeWidth="3" />
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="currentColor"
+                    className="text-on-surface-variant transition-all duration-300 ease-out"
+                    strokeWidth="3"
+                    strokeDasharray={`${2 * Math.PI * 14}`}
+                    strokeDashoffset={`${2 * Math.PI * 14 * (1 - modelLoadProgress / 100)}`}
+                    strokeLinecap="round" />
+                </svg>
               ) : (
                 <div className="w-5 h-5 border-2 border-outline-variant border-t-on-surface-variant rounded-full animate-spin" />
               )}
@@ -81,7 +94,24 @@ export const CameraPanel: React.FC<CameraPanelProps> = ({ onEmotionChange }) => 
           {error ? (
             <p className="text-[9px] font-light tracking-wide text-error leading-tight px-1">{error.replace('请在浏览器设置中允许访问', '请在设置中允许访问')}</p>
           ) : isModelLoading ? (
-            <p className="text-[10px] font-light tracking-widest text-on-surface-variant/80 animate-pulse">加载模型中...</p>
+            <div className="flex flex-col gap-1.5 w-full pe-1">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-light tracking-widest text-on-surface-variant/80">加载模型</p>
+                <span className="text-[10px] font-medium tabular-nums text-on-surface-variant">
+                  {Math.round(modelLoadProgress)}%
+                </span>
+              </div>
+              {/* 线性进度条 */}
+              <div className="w-full h-[3px] bg-surface-container-high rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-300 ease-out"
+                  style={{
+                    width: `${modelLoadProgress}%`,
+                    background: 'linear-gradient(90deg, var(--color-primary, #6750A4), var(--color-secondary, #958DA5))',
+                  }}
+                />
+              </div>
+            </div>
           ) : !isCameraActive ? (
             <p className="text-[10px] font-light tracking-widest text-on-surface-variant/80">启动中...</p>
           ) : currentEmotion && emotionInfo ? (

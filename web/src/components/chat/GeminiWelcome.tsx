@@ -39,15 +39,15 @@ export function GeminiWelcome({ onStart }: GeminiWelcomeProps) {
         </span>
       </motion.h1>
       
-      {/* ── Sub-greeting (CBT context) ── */}
+      {/* ── Sub-greeting (Receptionist AI context) ── */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4, duration: 0.8 }}
         className="mt-6 text-on-surface-variant font-light tracking-wide text-sm md:text-base max-w-md text-center leading-relaxed"
       >
-        在这里，你可以放心地说出任何感受。<br />
-        <span className="text-on-surface-dim/80 text-xs md:text-sm mt-2 block">点击下方，我会先问你几个简单的问题来了解你。</span>
+        我是 RE-THINK 的前置接待小助手。<br />
+        <span className="text-on-surface-dim/80 text-xs md:text-sm mt-2 block">点击下方开始对话，让我们先认识一下。</span>
       </motion.p>
 
       {/* ── Start Button ── */}

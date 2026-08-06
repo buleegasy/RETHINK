@@ -86,6 +86,10 @@ export function useChat() {
                 reader.cancel().catch(e => console.warn(e));
               }
             }
+            // 更新前置接待信息
+            if (parsed.preInfo) {
+              useChatStore.getState().setPreInfo(parsed.preInfo);
+            }
             // 更新 UI 控制参数
             if (parsed.uiControl) {
               useChatStore.getState().setUIControl(parsed.uiControl);
@@ -124,6 +128,7 @@ export function useChat() {
                 model: parsed.model || 'unknown',
                 fsmState: parsed.fsmState,
                 fsmTrigger: parsed.fsmTrigger,
+                preInfo: parsed.preInfo,
               };
               useChatStore.getState().setLastMessageTechChain(techChain);
             }

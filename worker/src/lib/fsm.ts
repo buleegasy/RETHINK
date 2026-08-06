@@ -15,12 +15,14 @@
  */
 
 import type { IntentResult } from './intent-router';
+import type { PreInfoData } from '../types';
 
 // ============================================================
 // 类型定义
 // ============================================================
 
 export type FSMState =
+  | 'Pre_Info_Collection'
   | 'Onboarding'
   | 'Active_Listening'
   | 'CBT_Stripping'
@@ -28,6 +30,7 @@ export type FSMState =
   | 'Crisis_Escalation';
 
 export const FSM_STATES: FSMState[] = [
+  'Pre_Info_Collection',
   'Onboarding',
   'Active_Listening',
   'CBT_Stripping',
@@ -81,6 +84,8 @@ export interface FSMContext {
   emotionalStreak: number;
   /** 破冰阶段的渐进式画像数据 */
   icebreaker: IcebreakerProfile;
+  /** 前置信息收集数据 */
+  preInfo: PreInfoData;
 }
 
 /** FSM 状态转移结果 */
@@ -96,7 +101,7 @@ export interface FSMTransitionResult {
 
 export function createDefaultContext(): FSMContext {
   return {
-    currentState: 'Onboarding',
+    currentState: 'Pre_Info_Collection',
     turnCount: 0,
     profileCollected: false,
     abcCompleted: false,
@@ -106,6 +111,9 @@ export function createDefaultContext(): FSMContext {
       layer: 1,
       coreBeliefs: [],
       observations: [],
+    },
+    preInfo: {
+      collectionCompleted: false,
     },
   };
 }
@@ -154,6 +162,9 @@ export function transition(
 
   // ── 按状态分发 ──
   switch (currentState) {
+    case 'Pre_Info_Collection':
+      return transitionFromPreInfo(ctx, intent, phase, aiOutput);
+
     case 'Onboarding':
       return transitionFromOnboarding(ctx, intent, phase);
 
@@ -178,6 +189,46 @@ export function transition(
 // ============================================================
 // 各状态内部转移逻辑
 // ============================================================
+
+function transitionFromPreInfo(
+  ctx: FSMContext,
+  intent: IntentResult,
+  phase: 'pre' | 'post',
+  _aiOutput?: string,
+): FSMTransitionResult {
+  if (ctx.preInfo?.collectionCompleted || ctx.preInfo?.userName) {
+    return {
+      nextState: 'Active_Listening',
+      trigger: '前置信息（称呼）收集完成，平滑进入正式倾听',
+      contextUpdate: {
+        preInfo: {
+          ...ctx.preInfo,
+          collectionCompleted: true,
+        },
+      },
+    };
+  }
+
+  // Pre 阶段：若检测到强烈情绪表达，直接转入 Active_Listening 避免卡顿
+  if (phase === 'pre' && intent.type === 'emotional' && intent.confidence >= 0.5) {
+    return {
+      nextState: 'Active_Listening',
+      trigger: '用户在接待阶段倾诉强情绪，提前转入倾听',
+      contextUpdate: {
+        preInfo: {
+          ...ctx.preInfo,
+          collectionCompleted: true,
+        },
+      },
+    };
+  }
+
+  return {
+    nextState: 'Pre_Info_Collection',
+    trigger: '继续前置信息收集（询问称呼）',
+    contextUpdate: {},
+  };
+}
 
 function transitionFromOnboarding(
   ctx: FSMContext,
@@ -564,7 +615,7 @@ Layer 5: 探底与自然过渡（第 5 轮）
 }
 
 const PROMPT_ACTIVE_LISTENING = `你正在积极倾听用户的分享。你的任务是：
-1. 【首先必须真实反应】：绝对不要用“我能感受到你的痛苦”这种套话。用最真实、最接地气的人类本能反应来接住对方（例如：“卧槽，这也太窒息了吧”、“这换谁不崩啊”）。
+1. 【首先必须真实反应】：绝对不要用“我能感受到你的痛苦”这种套话。用最真实、最接地气的人类本能反应来接住对方（例如：“天哪，这也太让人糟心了吧”、“这换谁不崩啊”）。
 2. 不要主动进行深刻的 CBT 分析或讲大道理。
 3. 【情绪反射要贴着对方的话走】：紧贴具体内容，不要跳跃到更大的结论。
 4. 【强制输出结构】：你的回复必须极其简短（严格包含两句话，像微信短消息）：
@@ -626,11 +677,41 @@ const PROMPT_CRISIS = `【🚨 危机熔断协议 — 最高优先级】
 
 你唯一的目标是确保安全，让用户感到被听见，并把他们连接到现实中的救援力量。`;
 
+export const RECEPTIONIST_GREETING_CANDIDATES = [
+  '嗨，欢迎来到这里！我是 RE-THINK 的接待小助手。在正式开启聊天前，我可以怎么称呼你呢？',
+  '很高兴遇见你呀。你可以随心和我聊聊，不过在这之前，能告诉我该怎么称呼你吗？',
+  '你好呀！今天过得怎么样？在开始倾听前，方便告诉我你的名字或小名吗？',
+  '嗨，很高兴陪伴你。想怎么称呼你都行，可以先告诉我你的昵称吗？',
+  '欢迎来到这个私密的小角落。我是接待助手，请问怎么称呼你比较亲切呢？',
+];
+
+export function getRandomReceptionistGreeting(): string {
+  const index = Math.floor(Math.random() * RECEPTIONIST_GREETING_CANDIDATES.length);
+  return RECEPTIONIST_GREETING_CANDIDATES[index];
+}
+
+export function getPreInfoCollectionPrompt(): string {
+  const sampledGreeting = getRandomReceptionistGreeting();
+  return `你是一个温馨、敏锐、富有同理心的前台接待员助手。在正式进入心理咨询前，你需要以自然温暖的口吻询问用户的名字或昵称（称呼）。
+
+【核心使命与回复原则】
+1. **热情自然地打招呼/接住用户输入**：如果用户发了表情包（如😭, ☕, 🫠等）或开场短句，先给出一句同频温暖的心理接应（如：“看到这个表情，感觉你现在心里装了不少事呢”、“抱抱你，今天辛苦啦”）。
+2. **主动询问称呼**：接着自然地询问用户的名字或昵称。
+3. **本轮推荐开场引导语（实时轮播候选）**：
+   "${sampledGreeting}"
+4. **开场白风格多样性灵感库**：
+${RECEPTIONIST_GREETING_CANDIDATES.map(c => `   - "${c}"`).join('\n')}
+5. **简洁温馨**：保持语气轻松温馨，控制在 1-2 句话内，绝对不要像警官做笔录。
+6. **严禁粗俗词汇**：调性必须专业亲切，绝对禁止使用任何粗话俗语。`;
+}
+
 /**
  * 获取当前 FSM 状态对应的 System Prompt 片段
  */
 export function getPromptForState(state: FSMState, icebreakerLayer?: number): string {
   switch (state) {
+    case 'Pre_Info_Collection':
+      return getPreInfoCollectionPrompt();
     case 'Onboarding':
       return getOnboardingPrompt(icebreakerLayer ?? 1);
     case 'Active_Listening':
@@ -655,6 +736,11 @@ export const FSM_STATE_META: Record<FSMState, {
   description: string;
   colorHex: string;
 }> = {
+  'Pre_Info_Collection': {
+    label: '前置接待',
+    description: '欢迎并了解你的称呼',
+    colorHex: '#4FC3F7',    // 晴空蓝
+  },
   'Onboarding': {
     label: '登录破冰',
     description: '了解你的基本情况',

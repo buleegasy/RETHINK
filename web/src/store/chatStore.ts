@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { ChatMessage, CBTStage, FSMState, TechChain, UIControl } from '../types';
+import type { ChatMessage, CBTStage, FSMState, TechChain, UIControl, PreInfoData } from '../types';
 
 interface ChatState {
   // Chat state
@@ -12,6 +12,8 @@ interface ChatState {
   isStreaming: boolean;
   selectedModel: string;
   icebreakerLayer: number;
+  preInfo: PreInfoData | null;
+  userInfo: { name?: string } | null;
   // Actions
   setSessionId: (id: string) => void;
   loadSession: (session: {
@@ -19,12 +21,15 @@ interface ChatState {
     messages: ChatMessage[];
     current_stage?: number;
     fsm_state?: FSMState;
+    preInfo?: PreInfoData;
   }) => void;
   addMessage: (msg: ChatMessage) => void;
   updateLastMessage: (delta: string) => void;
   setLastMessageTechChain: (techChain: TechChain) => void;
   setStage: (stage: CBTStage) => void;
   setFSMState: (state: FSMState) => void;
+  setPreInfo: (preInfo: PreInfoData) => void;
+  setUserInfo: (userInfo: { name?: string }) => void;
   setUIControl: (uiControl: UIControl) => void;
   setOnboardingComplete: (complete: boolean) => void;
   setIsStreaming: (isStreaming: boolean) => void;
@@ -33,18 +38,28 @@ interface ChatState {
   clearChat: () => void;
 }
 
+const CBT_STAGE_BY_INDEX: Record<number, CBTStage> = {
+  1: '剥离事实',
+  2: '捕获想法',
+  3: '扫描漏洞',
+  4: '证据质询',
+  5: '重构认知',
+};
+
 export const useChatStore = create<ChatState>((set) => {
   return {
     // Chat initial state
     sessionId: null,
     messages: [],
     currentStage: '剥离事实',
-    fsmState: 'Onboarding',
+    fsmState: 'Pre_Info_Collection',
     uiControl: null,
     hasCompletedOnboarding: false,
     isStreaming: false,
     selectedModel: 'claude-haiku-4.5',
     icebreakerLayer: 1,
+    preInfo: null,
+    userInfo: null,
 
     // Chat Actions
     setSessionId: (id) => set({ sessionId: id }),
@@ -53,11 +68,13 @@ export const useChatStore = create<ChatState>((set) => {
       sessionId: session.id,
       messages: session.messages.map((msg) => ({ ...msg, id: msg.id || crypto.randomUUID() })),
       currentStage: session.current_stage ? CBT_STAGE_BY_INDEX[session.current_stage] || '剥离事实' : '剥离事实',
-      fsmState: session.fsm_state || 'Onboarding',
+      fsmState: session.fsm_state || 'Pre_Info_Collection',
       hasCompletedOnboarding: session.messages.length > 0,
       uiControl: null,
       isStreaming: false,
       icebreakerLayer: 1,
+      preInfo: session.preInfo || null,
+      userInfo: session.preInfo?.userName ? { name: session.preInfo.userName } : null,
     }),
     
     addMessage: (msg) => set((state) => ({ 
@@ -100,6 +117,13 @@ export const useChatStore = create<ChatState>((set) => {
     setStage: (stage) => set({ currentStage: stage }),
 
     setFSMState: (fsmState) => set({ fsmState }),
+
+    setPreInfo: (preInfo) => set((state) => ({
+      preInfo,
+      userInfo: preInfo.userName ? { name: preInfo.userName } : state.userInfo,
+    })),
+
+    setUserInfo: (userInfo) => set({ userInfo }),
     
     setUIControl: (uiControl) => set({ uiControl }),
 
@@ -115,11 +139,13 @@ export const useChatStore = create<ChatState>((set) => {
       sessionId: null, 
       messages: [], 
       currentStage: '剥离事实',
-      fsmState: 'Onboarding',
+      fsmState: 'Pre_Info_Collection',
       uiControl: null,
       hasCompletedOnboarding: false,
       isStreaming: false,
       icebreakerLayer: 1,
+      preInfo: null,
+      userInfo: null,
     }),
   };
 });
@@ -128,11 +154,3 @@ export const useChatStore = create<ChatState>((set) => {
 window.addEventListener('auth:logout', () => {
   useChatStore.getState().clearChat();
 });
-
-const CBT_STAGE_BY_INDEX: Record<number, CBTStage> = {
-  1: '剥离事实',
-  2: '捕获想法',
-  3: '扫描漏洞',
-  4: '证据质询',
-  5: '重构认知',
-};

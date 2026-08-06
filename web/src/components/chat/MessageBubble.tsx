@@ -273,6 +273,15 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
                                 <span className="col-span-9 text-gemini-purple/80">{tc.fsmTrigger}</span>
                               </div>
                             )}
+                            {tc.preInfo?.userName && (
+                              <div className="grid grid-cols-12 gap-1">
+                                <span className="col-span-3 text-on-surface-variant/60">用户称呼:</span>
+                                <span className="col-span-9 text-gemini-blue font-semibold">
+                                  {tc.preInfo.userName}
+                                  {tc.preInfo.fromMemory ? ' (来自 Memory)' : ''}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         )}
 

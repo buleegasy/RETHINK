@@ -1,5 +1,5 @@
 import { renderHook, act, cleanup } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach,  } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useVoiceInput } from './useVoiceInput';
 
 // Define the mock class structure based on ISpeechRecognition

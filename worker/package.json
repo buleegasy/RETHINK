@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "test": "vitest run",
+    "test:cov": "vitest run --coverage",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "hono": "^4.6.3",
@@ -15,7 +18,9 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241127.0",
+    "@vitest/coverage-v8": "^4.1.10",
     "typescript": "^5.5.2",
+    "vitest": "^4.1.10",
     "wrangler": "^3.91.0"
   }
 }
