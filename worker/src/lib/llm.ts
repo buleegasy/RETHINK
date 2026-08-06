@@ -107,6 +107,7 @@ const OUTPUT_FORMAT_JSON = `
     "transition_speed": "渐变速度（如 5000ms）",
     "effect": "视觉特效描述（如 slow_breathing）"
   },
+  "user_name_captured": "如果用户在本轮回复中提供了名字或昵称，填入该称呼（字符串）；否则填 null",
   "agent_reply": "你的心理干预回复文本（纯台词，严禁旁白）"
 }
 
@@ -239,14 +240,25 @@ export function buildSystemPromptFSM(
   facialEmotion?: { label: string; labelZh: string; confidence: number },
   icebreaker?: IcebreakerProfile,
   preInfo?: PreInfoData,
+  turnCount?: number,
 ): string {
   const parts: string[] = [];
 
   parts.push(NON_DIAGNOSTIC_BOUNDARY);
 
-  // 注入前置用户信息（称呼）到正式咨询 System Prompt
-  if (fsmState !== 'Pre_Info_Collection' && preInfo?.userName) {
+  // 注入已收集的用户称呼
+  if (preInfo?.userName) {
     parts.push(`【用户信息】：用户称呼为「${preInfo.userName}」。在后续对话中自然使用此称呼。`);
+  }
+
+  // 动态"适时询问名字"提示（仅当尚未获取名字时）
+  if (!preInfo?.userName) {
+    const tc = turnCount ?? 0;
+    if (tc < 5) {
+      parts.push(`【💬 称呼收集提示（软性指令）】：你还不知道用户的名字。如果对话进展自然，请在近几轮中找个合适的时机，以不突兀的方式询问用户怎么称呼。若当前情绪紧张或用户正倾诉，可先陪伴，之后再问。`);
+    } else {
+      parts.push(`【💬 称呼收集提示（强化）】：你目前还不知道用户的名字，且已对话 ${tc} 轮。请在本轮或下一轮，以温和自然的方式询问用户的称呼，不要再拖延。`);
+    }
   }
 
   if (intent === 'crisis') {

@@ -101,7 +101,7 @@ export interface FSMTransitionResult {
 
 export function createDefaultContext(): FSMContext {
   return {
-    currentState: 'Pre_Info_Collection',
+    currentState: 'Onboarding',
     turnCount: 0,
     profileCollected: false,
     abcCompleted: false,
