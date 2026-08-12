@@ -569,7 +569,6 @@ chatRouter.post('/', requireAuth, async (c) => {
         // 解析前置信息收集更新 (Pre_Info_Collection 阶段)
         if (parsed.pre_info_update || parsed.user_name_captured) {
           if (parsed.user_name_captured && !parsed.pre_info_update) { parsed.pre_info_update = { user_name: parsed.user_name_captured, collection_completed: true }; }
-          if (true) {
           fsmCtx.preInfo = applyPreInfoUpdate(fsmCtx.preInfo, parsed.pre_info_update);
           console.log(`[PreInfo Stream] userName=${fsmCtx.preInfo.userName || 'n/a'}, completed=${fsmCtx.preInfo.collectionCompleted}`);
           if (fsmCtx.preInfo?.userName && !fsmCtx.preInfo?.fromMemory && user?.uid) {
