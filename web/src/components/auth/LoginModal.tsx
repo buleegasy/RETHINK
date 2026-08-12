@@ -198,11 +198,13 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 </h2>
               </div>
 
-              <div className="flex bg-surface-container/30 rounded-full p-1 border border-outline-variant/30 mb-5 md:mb-8 relative z-10 backdrop-blur-md shadow-inner-soft">
+              <div role="tablist" aria-label="登录与注册" className="flex bg-surface-container/30 rounded-full p-1 border border-outline-variant/30 mb-5 md:mb-8 relative z-10 backdrop-blur-md shadow-inner-soft">
                 <motion.button
                   whileTap={{ scale: 0.98 }}
                   type="button"
-                  className={`flex-1 text-center py-2.5 text-xs tracking-widest uppercase font-medium rounded-full transition-colors duration-300 cursor-pointer ${
+                  role="tab"
+                  aria-selected={!isSignUp}
+                  className={`flex-1 text-center py-2.5 text-xs tracking-widest uppercase font-medium rounded-full transition-colors duration-300 cursor-pointer focus-visible:ring-2 focus-visible:ring-gemini-blue focus-visible:outline-none ${
                     !isSignUp ? 'bg-surface/80 shadow-sm text-on-surface border border-outline-variant/30' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container/40'
                   }`}
                   onClick={() => { setIsSignUp(false); setError(null); }}
@@ -212,7 +214,9 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 <motion.button
                   whileTap={{ scale: 0.98 }}
                   type="button"
-                  className={`flex-1 text-center py-2.5 text-xs tracking-widest uppercase font-medium rounded-full transition-colors duration-300 cursor-pointer ${
+                  role="tab"
+                  aria-selected={isSignUp}
+                  className={`flex-1 text-center py-2.5 text-xs tracking-widest uppercase font-medium rounded-full transition-colors duration-300 cursor-pointer focus-visible:ring-2 focus-visible:ring-gemini-blue focus-visible:outline-none ${
                     isSignUp ? 'bg-surface/80 shadow-sm text-on-surface border border-outline-variant/30' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container/40'
                   }`}
                   onClick={() => { setIsSignUp(true); setError(null); }}
@@ -292,7 +296,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   transition={{ type: "spring", stiffness: 400, damping: 12 }}
                   type="submit"
                   disabled={loading}
-                  className="group relative w-full bg-on-surface hover:bg-on-surface/90 text-surface font-light tracking-widest text-xs uppercase py-4 md:py-5 rounded-full transition-colors duration-300 disabled:opacity-40 overflow-hidden cursor-pointer"
+                  className="group relative w-full bg-on-surface hover:bg-on-surface/90 text-surface font-light tracking-widest text-xs uppercase py-4 md:py-5 rounded-full transition-colors duration-300 disabled:opacity-40 overflow-hidden cursor-pointer focus-visible:ring-2 focus-visible:ring-gemini-blue focus-visible:outline-none focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
                   {loading ? (
@@ -313,7 +317,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   disabled={loading}
                   aria-label="访客体验"
                   title="访客体验"
-                  className="text-on-surface-variant/80 hover:text-on-surface transition-colors flex items-center justify-center mx-auto p-2 bg-surface-container/30 hover:bg-surface-container/60 border border-outline-variant/30 rounded-full cursor-pointer w-10 h-10"
+                  className="text-on-surface-variant/80 hover:text-on-surface transition-colors flex items-center justify-center mx-auto p-2 bg-surface-container/30 hover:bg-surface-container/60 border border-outline-variant/30 rounded-full cursor-pointer w-10 h-10 focus-visible:ring-2 focus-visible:ring-gemini-blue focus-visible:outline-none"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />

@@ -30,3 +30,6 @@
 ## 2024-05-20 - [ARIA Label Overriding Visible Text]
 **Learning:** When enhancing accessibility on buttons containing critical visible text (like dynamic names or scores), adding an `aria-label` completely overrides the child elements' visible text for screen readers. Screen readers will only read the `aria-label` and ignore the text content within the button.
 **Action:** Avoid using `aria-label` to indicate state (like expanded/collapsed) when the button contains important visible text. Rely on attributes like `aria-expanded` which screen readers will read in addition to the element's text.
+## 2024-05-15 - [Tabbed Interfaces]
+**Learning:** When creating custom tabbed interfaces from visually styled elements (like toggle buttons for login/register), they lack default keyboard semantics. Screen readers need explicit ARIA roles.
+**Action:** Always ensure the parent container has `role="tablist"` and the child toggle buttons have `role="tab"` with a dynamic `aria-selected` attribute bounded to the active state.
