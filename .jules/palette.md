@@ -30,3 +30,6 @@
 ## 2024-05-20 - [ARIA Label Overriding Visible Text]
 **Learning:** When enhancing accessibility on buttons containing critical visible text (like dynamic names or scores), adding an `aria-label` completely overrides the child elements' visible text for screen readers. Screen readers will only read the `aria-label` and ignore the text content within the button.
 **Action:** Avoid using `aria-label` to indicate state (like expanded/collapsed) when the button contains important visible text. Rely on attributes like `aria-expanded` which screen readers will read in addition to the element's text.
+## 2025-03-06 - Login Modal Tab Accessibility
+**Learning:** When using visually styled elements (like toggle buttons) to create a custom tabbed interface, it is crucial to manually apply `role="tablist"` to the parent container and `role="tab"` along with a dynamically bound `aria-selected` boolean to the individual toggle buttons. This prevents screen readers from treating them as disjointed generic buttons and provides accurate contextual state.
+**Action:** Always verify custom switch/toggle interfaces to ensure they contain semantic ARIA mapping corresponding to standard disclosure or tab widget specs.

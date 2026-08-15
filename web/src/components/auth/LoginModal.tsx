@@ -198,10 +198,12 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 </h2>
               </div>
 
-              <div className="flex bg-surface-container/30 rounded-full p-1 border border-outline-variant/30 mb-5 md:mb-8 relative z-10 backdrop-blur-md shadow-inner-soft">
+              <div role="tablist" aria-label="登录与注册切换" className="flex bg-surface-container/30 rounded-full p-1 border border-outline-variant/30 mb-5 md:mb-8 relative z-10 backdrop-blur-md shadow-inner-soft">
                 <motion.button
                   whileTap={{ scale: 0.98 }}
                   type="button"
+                  role="tab"
+                  aria-selected={!isSignUp}
                   className={`flex-1 text-center py-2.5 text-xs tracking-widest uppercase font-medium rounded-full transition-colors duration-300 cursor-pointer ${
                     !isSignUp ? 'bg-surface/80 shadow-sm text-on-surface border border-outline-variant/30' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container/40'
                   }`}
@@ -212,6 +214,8 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 <motion.button
                   whileTap={{ scale: 0.98 }}
                   type="button"
+                  role="tab"
+                  aria-selected={isSignUp}
                   className={`flex-1 text-center py-2.5 text-xs tracking-widest uppercase font-medium rounded-full transition-colors duration-300 cursor-pointer ${
                     isSignUp ? 'bg-surface/80 shadow-sm text-on-surface border border-outline-variant/30' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container/40'
                   }`}
