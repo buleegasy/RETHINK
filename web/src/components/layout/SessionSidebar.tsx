@@ -160,9 +160,32 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
   };
 
   useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      if (!token) return;
+      setIsLoadingSessions(true);
+      setError(null);
+      try {
+        const data = await authApi.getSessions();
+        if (!mounted) return;
+        const nextSessions = data.sessions || [];
+        setSessions(nextSessions);
+
+        if (!sessionId && nextSessions.length > 0) {
+          await openSession(nextSessions[0].id);
+        }
+      } catch (err) {
+        if (!mounted) return;
+        const msg = (err as { message?: string })?.message || '加载会话失败';
+        setError(msg);
+      } finally {
+        if (mounted) setIsLoadingSessions(false);
+      }
+    };
     if (token) {
-      void fetchSessions(true);
+      void load();
     }
+    return () => { mounted = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
