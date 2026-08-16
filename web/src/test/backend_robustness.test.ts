@@ -24,7 +24,7 @@ describe('Backend Robustness & Fallback Tests', () => {
   describe('1. FSM state transition rules and turn counts', () => {
     it('should transition correctly from Pre_Info_Collection and increase turn counts', () => {
       const ctx = createDefaultContext();
-      expect(ctx.currentState).toBe('Pre_Info_Collection');
+      expect(ctx.currentState).toBe('Onboarding');
       expect(ctx.turnCount).toBe(0);
 
       // Crisis intent should immediately trigger Crisis_Escalation

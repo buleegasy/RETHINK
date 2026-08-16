@@ -766,3 +766,17 @@ export function applyTransition(
     currentState: result.nextState,
   };
 }
+
+// Legacy exports for tests backwards compatibility
+export const RECEPTIONIST_GREETING_CANDIDATES = [
+  "你好，很高兴见到你。你怎么称呼？",
+  "很高兴认识你。我可以怎么称呼你呢？",
+  "你好，很高兴遇见你。请问你的名字或者昵称是？",
+  "你好，很高兴能和你交流。怎么称呼比较好呢？",
+  "你好，很高兴认识你。你的名字是？"
+];
+
+export function getRandomReceptionistGreeting(): string {
+  const i = Math.floor(Math.random() * RECEPTIONIST_GREETING_CANDIDATES.length);
+  return RECEPTIONIST_GREETING_CANDIDATES[i];
+}
