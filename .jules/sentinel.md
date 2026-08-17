@@ -35,3 +35,8 @@
 **Vulnerability:** The unauthenticated `/api/onboarding/analyze` endpoint directly passed user-provided text to an LLM completion request without any length or type constraints.
 **Learning:** Endpoints proxying requests directly to LLMs without validation expose the application to severe financial and operational Denial of Service (DoS) attacks via excessive token consumption, even if the payload doesn't crash the database.
 **Prevention:** Always enforce strict input type checking (`typeof input === 'string'`) and a reasonable maximum length constraint (`input.length > MAX_LEN`) *before* invoking any downstream AI models on unauthenticated or lightly authenticated routes.
+
+## 2026-08-27 - Prevent Timing Attacks on Secret Tokens
+**Vulnerability:** The unauthenticated endpoints checking for the admin secret token (`x-admin-token`) across all internal management routes (e.g. `/api/admin`, `/api/survey`, and `/api/knowledge`) were doing direct string comparisons (`===` or `!==`) with `c.env.ADMIN_SECRET_TOKEN`. This exposes the application to timing attacks, where an attacker could theoretically guess the token character by character based on variations in response time.
+**Learning:** Checking secret tokens using basic string equality operators can result in early exit variations in execution time. This allows adversaries to statistically infer the actual token.
+**Prevention:** To prevent timing attacks when authenticating secret tokens (like `x-admin-token` in the worker middleware), avoid direct string comparisons (`===` or `!==`). Implement a custom bitwise XOR loop (or use a native timingSafeEqual method) for constant-time comparisons.
