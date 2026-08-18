@@ -1,6 +1,27 @@
 import { Context, Next } from 'hono';
 import type { Env, AuthUser, HonoSchema } from '../types';
 
+/**
+ * Compares two strings in constant time to prevent timing attacks.
+ */
+export function timingSafeEqual(a: string | undefined | null, b: string | undefined | null): boolean {
+  if (a == null || b == null) {
+    return false;
+  }
+
+  let mismatch = 0;
+  if (a.length !== b.length) {
+    mismatch = 1;
+    b = a;
+  }
+
+  for (let i = 0; i < a.length; i++) {
+    mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+
+  return mismatch === 0;
+}
+
 // Global cached JWKs
 let cachedKeys: any[] | null = null;
 let cachedKeysTime = 0;

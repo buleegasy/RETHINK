@@ -35,3 +35,7 @@
 **Vulnerability:** The unauthenticated `/api/onboarding/analyze` endpoint directly passed user-provided text to an LLM completion request without any length or type constraints.
 **Learning:** Endpoints proxying requests directly to LLMs without validation expose the application to severe financial and operational Denial of Service (DoS) attacks via excessive token consumption, even if the payload doesn't crash the database.
 **Prevention:** Always enforce strict input type checking (`typeof input === 'string'`) and a reasonable maximum length constraint (`input.length > MAX_LEN`) *before* invoking any downstream AI models on unauthenticated or lightly authenticated routes.
+## 2024-05-18 - [Timing Attack Vulnerability in Custom Middleware]
+**Vulnerability:** Direct string comparison (`!==`) was used to validate the `x-admin-token` header against the `ADMIN_SECRET_TOKEN` environment variable in custom Hono middleware.
+**Learning:** This allowed an attacker to theoretically guess the secret token character-by-character based on the short-circuiting behavior of the `!==` operator, which leads to varying response times.
+**Prevention:** Always use constant-time comparison functions (like `timingSafeEqual`) when validating secrets or authentication tokens. JavaScript/V8 strings are compared character-by-character, terminating early on mismatch, so a custom bitwise XOR loop implementation is required if native `crypto.timingSafeEqual` is unavailable (e.g. in some Cloudflare Worker contexts without the node:crypto module imported).
