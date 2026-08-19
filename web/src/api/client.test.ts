@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach, Mock } from 'vitest';
 import { apiClient, ApiError } from './client';
 
 describe('apiClient', () => {
@@ -21,7 +21,7 @@ describe('apiClient', () => {
     localStorage.setItem('rethink_auth_token', 'my-token');
     
     const mockResponse = { ok: true, status: 200, headers: new Headers(), json: async () => ({ data: 'ok' }) };
-    (global.fetch as any).mockResolvedValue(mockResponse);
+    (global.fetch as Mock).mockResolvedValue(mockResponse);
 
     await apiClient('/test');
     
@@ -37,7 +37,7 @@ describe('apiClient', () => {
 
   it('should not throw if requireAuth is false and no token', async () => {
     const mockResponse = { ok: true, status: 200, headers: new Headers(), json: async () => ({ data: 'ok' }) };
-    (global.fetch as any).mockResolvedValue(mockResponse);
+    (global.fetch as Mock).mockResolvedValue(mockResponse);
 
     const result = await apiClient('/test', { requireAuth: false });
     expect(result).toEqual({ data: 'ok' });
@@ -52,15 +52,17 @@ describe('apiClient', () => {
       headers: new Headers(),
       json: async () => ({ error: 'Bad Request' }) 
     };
-    (global.fetch as any).mockResolvedValue(mockResponse);
+    (global.fetch as Mock).mockResolvedValue(mockResponse);
 
     try {
       await apiClient('/test');
       expect.fail('Should have thrown');
-    } catch (e: any) {
+    } catch (e: unknown) {
       expect(e).toBeInstanceOf(ApiError);
-      expect(e.status).toBe(400);
-      expect(e.message).toBe('Bad Request');
+      if (e instanceof ApiError) {
+        expect(e.status).toBe(400);
+        expect(e.message).toBe('Bad Request');
+      }
     }
   });
 
@@ -74,13 +76,13 @@ describe('apiClient', () => {
       headers: new Headers(),
       json: async () => ({ error: 'Unauthorized' }) 
     };
-    (global.fetch as any).mockResolvedValue(mockResponse);
+    (global.fetch as Mock).mockResolvedValue(mockResponse);
 
     const dispatchEventSpy = vi.spyOn(window, 'dispatchEvent');
 
     try {
       await apiClient('/test');
-    } catch (e) {
+    } catch {
       // Expected
     }
 
@@ -95,7 +97,7 @@ describe('apiClient', () => {
       status: 204,
       headers: new Headers()
     };
-    (global.fetch as any).mockResolvedValue(mockResponse);
+    (global.fetch as Mock).mockResolvedValue(mockResponse);
 
     const result = await apiClient('/test', { requireAuth: false });
     expect(result).toEqual({});
