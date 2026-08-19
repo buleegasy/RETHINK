@@ -35,3 +35,8 @@
 **Vulnerability:** The unauthenticated `/api/onboarding/analyze` endpoint directly passed user-provided text to an LLM completion request without any length or type constraints.
 **Learning:** Endpoints proxying requests directly to LLMs without validation expose the application to severe financial and operational Denial of Service (DoS) attacks via excessive token consumption, even if the payload doesn't crash the database.
 **Prevention:** Always enforce strict input type checking (`typeof input === 'string'`) and a reasonable maximum length constraint (`input.length > MAX_LEN`) *before* invoking any downstream AI models on unauthenticated or lightly authenticated routes.
+## 2024-08-19 - Timing attacks in Javascript `===`
+
+**Vulnerability:** Comparing sensitive strings (e.g. `x-admin-token` vs `ADMIN_SECRET_TOKEN`) using Javascript's direct equality `===` (or `!==`) operator leads to a side-channel timing attack. `===` exits early on the first mismatched character, allowing an attacker to incrementally guess the secret token by measuring response times.
+**Learning:** Standard web frameworks don't always protect string comparisons by default. In Cloudflare Workers, a custom bitwise XOR loop can provide constant-time comparison when native Node.js `crypto.timingSafeEqual` is unavailable.
+**Prevention:** Implement and use a safe constant-time comparison utility (like `timingSafeEqual`) wherever secrets, tokens, or hashes are validated.
