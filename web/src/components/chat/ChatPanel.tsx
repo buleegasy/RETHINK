@@ -48,7 +48,7 @@ export const ChatPanel: React.FC = () => {
   const { sendMessage } = useChat();
   const scrollRef = useRef<HTMLDivElement>(null);
   
-  const [showEmojiSelector] = useState(false);
+  const [showEmojiSelector, setShowEmojiSelector] = useState(false);
   const isAtBottomRef = useRef(true);
 
   const handleScroll = () => {
