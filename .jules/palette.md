@@ -33,3 +33,6 @@
 ## 2025-03-06 - Login Modal Tab Accessibility
 **Learning:** When using visually styled elements (like toggle buttons) to create a custom tabbed interface, it is crucial to manually apply `role="tablist"` to the parent container and `role="tab"` along with a dynamically bound `aria-selected` boolean to the individual toggle buttons. This prevents screen readers from treating them as disjointed generic buttons and provides accurate contextual state.
 **Action:** Always verify custom switch/toggle interfaces to ensure they contain semantic ARIA mapping corresponding to standard disclosure or tab widget specs.
+## 2024-05-18 - Adding aria-hidden to decorative SVGs
+**Learning:** When adding `aria-label` to buttons containing decorative `<svg>` elements, the `<svg>` itself must explicitly receive `aria-hidden="true"`. Without this, some screen readers will redundantly announce the presence of an image/graphic alongside the button label, degrading the auditory user experience.
+**Action:** Always include `aria-hidden="true"` on `<svg>` icons when the parent button or link provides the semantic context via text or `aria-label`.
