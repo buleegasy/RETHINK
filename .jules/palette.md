@@ -33,3 +33,6 @@
 ## 2025-03-06 - Login Modal Tab Accessibility
 **Learning:** When using visually styled elements (like toggle buttons) to create a custom tabbed interface, it is crucial to manually apply `role="tablist"` to the parent container and `role="tab"` along with a dynamically bound `aria-selected` boolean to the individual toggle buttons. This prevents screen readers from treating them as disjointed generic buttons and provides accurate contextual state.
 **Action:** Always verify custom switch/toggle interfaces to ensure they contain semantic ARIA mapping corresponding to standard disclosure or tab widget specs.
+## 2026-08-05 - Decorative Icon Accessibility
+**Learning:** Screen readers may redundantly announce or attempt to read the internal markup of decorative SVG or lucide-react icons inside interactive elements like buttons, even if the parent button has an `aria-label`.
+**Action:** When adding icons to buttons, especially icon-only buttons with `aria-label`s, always explicitly add `aria-hidden="true"` to the `<svg>` or icon component itself to ensure a clean, non-repetitive screen reader experience.

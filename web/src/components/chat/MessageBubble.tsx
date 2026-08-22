@@ -201,7 +201,7 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
                   className="flex items-center gap-1.5 py-0.5 px-1.5 rounded text-[10px] font-mono text-on-surface-variant/70 hover:text-on-surface hover:bg-surface-container/80 transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-gemini-blue focus-visible:outline-none"
                 >
                   <span>{showTechChain ? '收起推演日志' : '展开系统推演'}</span>
-                  {showTechChain ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  {showTechChain ? <ChevronUp className="w-3 h-3" aria-hidden="true" /> : <ChevronDown className="w-3 h-3" aria-hidden="true" />}
                 </button>
 
                 <AnimatePresence initial={false}>
