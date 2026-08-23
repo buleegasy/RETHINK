@@ -5,6 +5,9 @@ interface Env {
 	API_KEY: string;
 	API_BASE_URL: string;
 	MODEL_NAME: string;
+	FIREBASE_API_KEY: string;
+	FIREBASE_PROJECT_ID: string;
+	TURNSTILE_SECRET_KEY: string;
 	DB: D1Database;
 	VECTORIZE: VectorizeIndex;
 	AI: Ai;
