@@ -123,7 +123,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
                     : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60'
                 } ${isStreaming ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <rect width="8" height="12" x="8" y="2" rx="4"/>
                   <path d="M4 14a8 8 0 0 0 16 0"/>
                   <line x1="12" y1="22" x2="12" y2="19"/>
@@ -166,7 +166,7 @@ export const InputBar: React.FC<InputBarProps> = ({ onSend }) => {
                   : 'text-on-surface-variant/50 cursor-not-allowed'
               }`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <line x1="12" y1="19" x2="12" y2="5"/>
                 <polyline points="5 12 12 5 19 12"/>
               </svg>
