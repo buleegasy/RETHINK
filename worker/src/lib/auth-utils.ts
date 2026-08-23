@@ -8,6 +8,32 @@ let cachedKeysTime = 0;
 /**
  * Verifies a Firebase ID token (RS256 JWT) using Google's public JWK set.
  */
+/**
+ * Compares two strings in constant time to prevent timing attacks.
+ */
+export function timingSafeEqual(a: string | undefined | null, b: string | undefined | null): boolean {
+  if (a == null || b == null) {
+    return false;
+  }
+
+  if (a.length !== b.length) {
+    // To strictly prevent timing attacks based on length, we could always hash or pad,
+    // but in V8/Workers, checking length early is a standard trade-off.
+    // To be fully constant-time on length, we would still iterate, but since one string
+    // is a secret token whose length is fixed, revealing its length difference
+    // is often acceptable or we can just fail fast.
+    // We'll use a basic bitwise XOR loop on the strings directly.
+    return false;
+  }
+
+  let mismatch = 0;
+  for (let i = 0; i < a.length; i++) {
+    mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+
+  return mismatch === 0;
+}
+
 export async function verifyFirebaseToken(token: string, projectId: string, apiKey: string): Promise<AuthUser> {
   // Support mock tokens for local testing when Firebase API key is mock and token starts with mock-token-
   if (apiKey === 'mock_firebase_key_for_testing' && token.startsWith('mock-token-')) {
