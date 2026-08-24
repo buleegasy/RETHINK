@@ -1,0 +1,11 @@
+--- web/src/components/chat/ChatPanel.tsx
++++ web/src/components/chat/ChatPanel.tsx
+@@ -48,7 +48,7 @@
+   const [input, setInput] = useState('');
+   const [isLoading, setIsLoading] = useState(false);
+   const [showSuggestions, setShowSuggestions] = useState(false);
+-  const [showEmojiSelector, setShowEmojiSelector] = useState(false);
++  const [showEmojiSelector, _setShowEmojiSelector] = useState(false);
+
+   // 从路由获取 sessionId，如果不匹配说明组件需要被重新挂载/重置
+   const { sessionId: routeSessionId } = useParams();

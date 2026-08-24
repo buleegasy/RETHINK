@@ -43,12 +43,11 @@ export const ChatPanel: React.FC = () => {
   const messages = useChatStore(state => state.messages);
   const isStreaming = useChatStore(state => state.isStreaming);
   const hasCompletedOnboarding = useChatStore(state => state.hasCompletedOnboarding);
-  
+
   const setOnboardingComplete = useChatStore(state => state.setOnboardingComplete);
   const { sendMessage } = useChat();
   const scrollRef = useRef<HTMLDivElement>(null);
-  
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const [showEmojiSelector, setShowEmojiSelector] = useState(false);
   const isAtBottomRef = useRef(true);
 
@@ -85,8 +84,8 @@ export const ChatPanel: React.FC = () => {
   };
 
   return (
-    <div 
-      ref={scrollRef} 
+    <div
+      ref={scrollRef}
       onScroll={handleScroll}
       className="flex-1 overflow-y-auto px-3 pt-4 pb-4 md:px-8 md:pt-20 md:pb-8 scroll-smooth bg-transparent relative z-10 flex flex-col"
     >

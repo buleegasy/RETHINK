@@ -21,6 +21,7 @@ describe('apiClient', () => {
     localStorage.setItem('rethink_auth_token', 'my-token');
     
     const mockResponse = { ok: true, status: 200, headers: new Headers(), json: async () => ({ data: 'ok' }) };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (global.fetch as any).mockResolvedValue(mockResponse);
 
     await apiClient('/test');
@@ -37,6 +38,7 @@ describe('apiClient', () => {
 
   it('should not throw if requireAuth is false and no token', async () => {
     const mockResponse = { ok: true, status: 200, headers: new Headers(), json: async () => ({ data: 'ok' }) };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (global.fetch as any).mockResolvedValue(mockResponse);
 
     const result = await apiClient('/test', { requireAuth: false });
@@ -52,11 +54,13 @@ describe('apiClient', () => {
       headers: new Headers(),
       json: async () => ({ error: 'Bad Request' }) 
     };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (global.fetch as any).mockResolvedValue(mockResponse);
 
     try {
       await apiClient('/test');
       expect.fail('Should have thrown');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       expect(e).toBeInstanceOf(ApiError);
       expect(e.status).toBe(400);
@@ -74,13 +78,15 @@ describe('apiClient', () => {
       headers: new Headers(),
       json: async () => ({ error: 'Unauthorized' }) 
     };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (global.fetch as any).mockResolvedValue(mockResponse);
 
     const dispatchEventSpy = vi.spyOn(window, 'dispatchEvent');
 
     try {
       await apiClient('/test');
-    } catch (e) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_e) {
       // Expected
     }
 
@@ -95,6 +101,7 @@ describe('apiClient', () => {
       status: 204,
       headers: new Headers()
     };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (global.fetch as any).mockResolvedValue(mockResponse);
 
     const result = await apiClient('/test', { requireAuth: false });
