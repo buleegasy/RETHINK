@@ -6,6 +6,21 @@ let cachedKeys: any[] | null = null;
 let cachedKeysTime = 0;
 
 /**
+ * Compares two strings in constant time to prevent timing attacks.
+ */
+export function timingSafeEqual(a: string | undefined | null, b: string | undefined | null): boolean {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  let mismatch = a.length === b.length ? 0 : 1;
+  const len = Math.max(a.length, b.length);
+  for (let i = 0; i < len; i++) {
+    const charA = i < a.length ? a.charCodeAt(i) : 0;
+    const charB = i < b.length ? b.charCodeAt(i) : 0;
+    mismatch |= charA ^ charB;
+  }
+  return mismatch === 0;
+}
+
+/**
  * Verifies a Firebase ID token (RS256 JWT) using Google's public JWK set.
  */
 export async function verifyFirebaseToken(token: string, projectId: string, apiKey: string): Promise<AuthUser> {
