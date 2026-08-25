@@ -14,7 +14,7 @@ export const ReThinkLogo = ({
       
       {/* Universal Gooey SVG Filter for true liquid physics. 
           Extended bounds (x, y, width, height) prevent cropping when droplets spin outward. */}
-      <svg width="0" height="0" className="absolute pointer-events-none">
+      <svg aria-hidden="true" width="0" height="0" className="absolute pointer-events-none">
         <defs>
           <filter id="rethink-goo" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />

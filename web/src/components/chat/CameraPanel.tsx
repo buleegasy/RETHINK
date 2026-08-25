@@ -72,7 +72,7 @@ export const CameraPanel: React.FC<CameraPanelProps> = ({ onEmotionChange }) => 
                 <AlertCircle className="w-4 h-4 text-error" strokeWidth={2.5} />
               ) : isModelLoading ? (
                 /* 环形进度指示器 */
-                <svg className="w-9 h-9 -rotate-90" viewBox="0 0 36 36">
+                <svg aria-hidden="true" className="w-9 h-9 -rotate-90" viewBox="0 0 36 36">
                   <circle cx="18" cy="18" r="14" fill="none" stroke="currentColor"
                     className="text-outline-variant/30" strokeWidth="3" />
                   <circle cx="18" cy="18" r="14" fill="none" stroke="currentColor"
