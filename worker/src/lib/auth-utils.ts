@@ -120,6 +120,24 @@ export async function verifyFirebaseToken(token: string, projectId: string, apiK
 }
 
 /**
+ * Constant-time string comparison to prevent timing attacks
+ * Implement bitwise XOR loop to safely compare two strings.
+ */
+export function timingSafeEqual(a: string, b: string): boolean {
+  if (typeof a !== 'string' || typeof b !== 'string') {
+    return false;
+  }
+  if (a.length !== b.length) {
+    return false;
+  }
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
+/**
  * Hono authentication middleware.
  * Verifies JWT token and saves user payload to context `c.get('user')`.
  */
