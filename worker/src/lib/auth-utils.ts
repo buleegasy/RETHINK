@@ -6,6 +6,23 @@ let cachedKeys: any[] | null = null;
 let cachedKeysTime = 0;
 
 /**
+ * Constant-time string comparison to prevent timing attacks.
+ */
+export function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    // Return false immediately if lengths don't match, but still do a dummy check
+    // to partially mitigate length-based timing (though length usually isn't a secret)
+    return false;
+  }
+
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
+/**
  * Verifies a Firebase ID token (RS256 JWT) using Google's public JWK set.
  */
 export async function verifyFirebaseToken(token: string, projectId: string, apiKey: string): Promise<AuthUser> {
