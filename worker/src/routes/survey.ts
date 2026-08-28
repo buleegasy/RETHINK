@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import type { Env } from '../types';
+import { timingSafeEqual } from '../lib/auth-utils';
 
 export const surveyRouter = new Hono<{ Bindings: Env }>();
 
@@ -64,7 +65,7 @@ surveyRouter.get('/results', async (c) => {
     return c.json({ error: 'Admin token not configured' }, 500);
   }
   const providedToken = c.req.header('x-admin-token');
-  if (providedToken !== adminToken) {
+  if (!(await timingSafeEqual(providedToken, adminToken))) {
     return c.json({ error: 'Unauthorized: Invalid admin token' }, 401);
   }
 

@@ -120,6 +120,47 @@ export async function verifyFirebaseToken(token: string, projectId: string, apiK
 }
 
 /**
+ * Constant-time string comparison to prevent timing attacks.
+ */
+export async function timingSafeEqual(a: string | undefined | null, b: string | undefined | null): Promise<boolean> {
+  if (typeof a !== 'string' || typeof b !== 'string') {
+    return false;
+  }
+
+  // Prevent DoS by capping the length of attacker input we will process.
+  if (a.length > 500) {
+    return false;
+  }
+
+  const encoder = new TextEncoder();
+  const aBuffer = encoder.encode(a);
+  const bBuffer = encoder.encode(b);
+
+  if (aBuffer.byteLength !== bBuffer.byteLength) {
+      return false;
+  }
+
+  const key = await crypto.subtle.generateKey(
+      { name: 'HMAC', hash: 'SHA-256' },
+      true,
+      ['sign', 'verify']
+  ) as CryptoKey;
+
+  const macA = await crypto.subtle.sign('HMAC', key, aBuffer);
+  const macB = await crypto.subtle.sign('HMAC', key, bBuffer);
+
+  const viewA = new Uint8Array(macA);
+  const viewB = new Uint8Array(macB);
+
+  let mismatch = 0;
+  for (let i = 0; i < viewA.length; i++) {
+      mismatch |= viewA[i] ^ viewB[i];
+  }
+
+  return mismatch === 0;
+}
+
+/**
  * Hono authentication middleware.
  * Verifies JWT token and saves user payload to context `c.get('user')`.
  */
