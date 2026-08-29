@@ -33,3 +33,6 @@
 ## 2025-03-06 - Login Modal Tab Accessibility
 **Learning:** When using visually styled elements (like toggle buttons) to create a custom tabbed interface, it is crucial to manually apply `role="tablist"` to the parent container and `role="tab"` along with a dynamically bound `aria-selected` boolean to the individual toggle buttons. This prevents screen readers from treating them as disjointed generic buttons and provides accurate contextual state.
 **Action:** Always verify custom switch/toggle interfaces to ensure they contain semantic ARIA mapping corresponding to standard disclosure or tab widget specs.
+## 2026-08-29 - Error Message and Decorative Icon Accessibility
+**Learning:** Decorative SVG icons inside actionable elements (like buttons with descriptive labels or text) can cause screen readers to announce redundant or confusing information. Furthermore, dynamic error messages must have `role="alert"` to be proactively announced by screen readers when they appear.
+**Action:** Always add `aria-hidden="true"` to decorative SVGs, especially those inside elements that already have text or an `aria-label`. Ensure dynamically appearing error messages (like form validation errors or connection issues) are wrapped in a container with `role="alert"`.
