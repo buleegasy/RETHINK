@@ -35,3 +35,7 @@
 **Vulnerability:** The unauthenticated `/api/onboarding/analyze` endpoint directly passed user-provided text to an LLM completion request without any length or type constraints.
 **Learning:** Endpoints proxying requests directly to LLMs without validation expose the application to severe financial and operational Denial of Service (DoS) attacks via excessive token consumption, even if the payload doesn't crash the database.
 **Prevention:** Always enforce strict input type checking (`typeof input === 'string'`) and a reasonable maximum length constraint (`input.length > MAX_LEN`) *before* invoking any downstream AI models on unauthenticated or lightly authenticated routes.
+## 2026-08-29 - [Timing Attack Mitigation in Authentication Middleware]
+**Vulnerability:** The application used simple string comparison (`!==`) for authenticating the `x-admin-token` in `worker/src/routes/admin.ts`, `ingest.ts`, and `survey.ts`. This exposed the endpoints to timing attacks where an attacker could deduce the token by measuring the response time difference for each character.
+**Learning:** Standard Cloudflare Workers edge environments don't always expose `node:crypto.timingSafeEqual` by default, requiring a custom constant-time implementation to safely perform bitwise XOR comparisons.
+**Prevention:** Implement and reuse a custom `timingSafeEqual` utility function across all token and credential verification logic within the Worker environment to ensure comparisons run in constant time regardless of the matched prefix length.
