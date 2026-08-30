@@ -35,3 +35,8 @@
 **Vulnerability:** The unauthenticated `/api/onboarding/analyze` endpoint directly passed user-provided text to an LLM completion request without any length or type constraints.
 **Learning:** Endpoints proxying requests directly to LLMs without validation expose the application to severe financial and operational Denial of Service (DoS) attacks via excessive token consumption, even if the payload doesn't crash the database.
 **Prevention:** Always enforce strict input type checking (`typeof input === 'string'`) and a reasonable maximum length constraint (`input.length > MAX_LEN`) *before* invoking any downstream AI models on unauthenticated or lightly authenticated routes.
+
+## 2025-02-28 - [High] Prevent timing attacks in token validation
+**Vulnerability:** Found direct string comparisons (`!==`) used to validate the `x-admin-token` header against the `ADMIN_SECRET_TOKEN` environment variable in multiple endpoints (`admin.ts`, `ingest.ts`, `survey.ts`). This allows an attacker to deduce the admin token character-by-character based on the timing differences in string comparison failures.
+**Learning:** Cloudflare Workers use standard V8 engines where direct string comparisons fail fast. When validating secrets, the time it takes for a request to fail can leak information about the secret itself.
+**Prevention:** Implemented a custom constant-time string comparison function (`timingSafeEqual`) using a bitwise XOR loop and replaced all direct secret string comparisons with it. Future secret validations must always use a constant-time comparison method.
