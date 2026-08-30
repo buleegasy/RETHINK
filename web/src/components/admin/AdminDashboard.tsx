@@ -266,7 +266,7 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
                                   title="Save"
                                   aria-label="Save changes"
                                 >
-                                  <Check className="w-4 h-4" />
+                                  <Check aria-hidden="true" className="w-4 h-4" />
                                 </button>
                                 <button
                                   onClick={() => setEditingCode(null)}
@@ -274,7 +274,7 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
                                   title="Cancel"
                                   aria-label="Cancel editing"
                                 >
-                                  <X className="w-4 h-4" />
+                                  <X aria-hidden="true" className="w-4 h-4" />
                                 </button>
                               </>
                             ) : (
@@ -287,7 +287,7 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
                                 title="Edit Max Uses"
                                 aria-label="Edit max uses"
                               >
-                                <Edit2 className="w-4 h-4" />
+                                <Edit2 aria-hidden="true" className="w-4 h-4" />
                               </button>
                             )}
                             <button
@@ -296,7 +296,7 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
                               title="Delete Code"
                               aria-label="Delete code"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 aria-hidden="true" className="w-4 h-4" />
                             </button>
                           </div>
                         </td>
