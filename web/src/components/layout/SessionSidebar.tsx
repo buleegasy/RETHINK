@@ -226,7 +226,7 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
             className="text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors cursor-pointer focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-gemini-blue"
             aria-label="隐藏侧边栏"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
               <line x1="4" y1="12" x2="20" y2="12"></line>
               <line x1="4" y1="6" x2="20" y2="6"></line>
               <line x1="4" y1="18" x2="20" y2="18"></line>
@@ -237,7 +237,7 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
         <div className="flex items-center justify-between gap-3 mb-6">
               <div>
                 <div className="text-[13px] font-mono tracking-widest text-on-surface flex items-center gap-2 uppercase">
-                  <MessageSquareText className="w-4 h-4" strokeWidth={1.5} />
+                  <MessageSquareText aria-hidden="true" className="w-4 h-4" strokeWidth={1.5} />
                   历史对话
                 </div>
                 <div className="text-[11px] text-on-surface/70 font-normal mt-1 tracking-wide">
@@ -253,7 +253,7 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
                 className="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container/60 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-gemini-blue"
                 aria-label="刷新历史对话"
               >
-                {isLoadingSessions ? <Loader2 className="w-4 h-4 animate-spin" strokeWidth={1.5} /> : <RefreshCw className="w-4 h-4" strokeWidth={1.5} />}
+                {isLoadingSessions ? <Loader2 aria-hidden="true" className="w-4 h-4 animate-spin" strokeWidth={1.5} /> : <RefreshCw aria-hidden="true" className="w-4 h-4" strokeWidth={1.5} />}
               </motion.button>
             </div>
 
@@ -270,12 +270,12 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
               }}
               className="w-full mb-4 h-10 rounded-full bg-on-surface/90 text-surface text-xs font-medium tracking-[0.2em] uppercase flex items-center justify-center gap-2 hover:bg-on-surface active:scale-[0.99] transition-all shadow-sm cursor-pointer focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-gemini-blue"
             >
-              <Plus className="w-3.5 h-3.5" strokeWidth={1.5} />
+              <Plus aria-hidden="true" className="w-3.5 h-3.5" strokeWidth={1.5} />
               新对话
             </motion.button>
 
             {error && (
-              <div className="mb-3 rounded-chip bg-error-container/80 text-error text-xs px-3 py-2 border border-error/25">
+              <div role="alert" className="mb-3 rounded-chip bg-error-container/80 text-error text-xs px-3 py-2 border border-error/25">
                 {error}
               </div>
             )}
@@ -340,7 +340,7 @@ export function SessionSidebar({ isOpen, onClose, onEmotionChange }: SessionSide
                               className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-1 rounded-full text-on-surface-variant/60 hover:text-error hover:bg-error/10 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-error focus-visible:outline-none"
                               aria-label="删除此对话"
                             >
-                              <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
+                              <Trash2 aria-hidden="true" className="w-3.5 h-3.5" strokeWidth={1.5} />
                             </button>
                           )}
                         </div>
