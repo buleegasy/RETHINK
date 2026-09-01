@@ -35,3 +35,7 @@
 **Vulnerability:** The unauthenticated `/api/onboarding/analyze` endpoint directly passed user-provided text to an LLM completion request without any length or type constraints.
 **Learning:** Endpoints proxying requests directly to LLMs without validation expose the application to severe financial and operational Denial of Service (DoS) attacks via excessive token consumption, even if the payload doesn't crash the database.
 **Prevention:** Always enforce strict input type checking (`typeof input === 'string'`) and a reasonable maximum length constraint (`input.length > MAX_LEN`) *before* invoking any downstream AI models on unauthenticated or lightly authenticated routes.
+## 2026-08-05 - Prevent Timing Attacks on Token Verification
+**Vulnerability:** The admin token verification logic in multiple routes (`admin.ts`, `ingest.ts`, `survey.ts`) used a direct string comparison (`!==`), making the application vulnerable to timing attacks.
+**Learning:** Direct string comparison fails fast on the first mismatched character. Attackers can measure the response time to guess the secret token character by character.
+**Prevention:** Always use a constant-time comparison algorithm (e.g., bitwise XOR loop) when comparing secret tokens, passwords, or HMAC signatures to ensure the execution time remains uniform regardless of input differences.
