@@ -33,3 +33,6 @@
 ## 2025-03-06 - Login Modal Tab Accessibility
 **Learning:** When using visually styled elements (like toggle buttons) to create a custom tabbed interface, it is crucial to manually apply `role="tablist"` to the parent container and `role="tab"` along with a dynamically bound `aria-selected` boolean to the individual toggle buttons. This prevents screen readers from treating them as disjointed generic buttons and provides accurate contextual state.
 **Action:** Always verify custom switch/toggle interfaces to ensure they contain semantic ARIA mapping corresponding to standard disclosure or tab widget specs.
+## 2024-05-18 - Accessibility Micro-Improvements
+**Learning:** When making accessibility changes such as adding `aria-hidden="true"` to SVGs within buttons, ensure the button itself already possesses an `aria-label`. Otherwise, hiding the SVG removes its only content, creating an inaccessible, silent button. Also, avoid unintentionally modifying dependency lockfiles when they are not part of the requested changes.
+**Action:** Always check the parent element of an SVG for an `aria-label` before hiding it. Ensure lockfiles like `pnpm-lock.yaml` are reverted before committing.

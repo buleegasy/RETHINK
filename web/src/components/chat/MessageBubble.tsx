@@ -201,7 +201,7 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
                   className="flex items-center gap-1.5 py-0.5 px-1.5 rounded text-[10px] font-mono text-on-surface-variant/70 hover:text-on-surface hover:bg-surface-container/80 transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-gemini-blue focus-visible:outline-none"
                 >
                   <span>{showTechChain ? '收起推演日志' : '展开系统推演'}</span>
-                  {showTechChain ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  {showTechChain ? <ChevronUp aria-hidden="true" className="w-3 h-3" /> : <ChevronDown aria-hidden="true" className="w-3 h-3" />}
                 </button>
 
                 <AnimatePresence initial={false}>
@@ -367,7 +367,7 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
                         {/* ─── SYSTEM_ALERT ─── */}
                         {tc.riskLevel && tc.riskLevel !== 'low' && (
                           <div className="flex gap-1.5 p-1.5 rounded bg-error/10 border border-error/20 text-stage-red text-[10px]">
-                            <ShieldAlert className="w-3.5 h-3.5 shrink-0 text-stage-red mt-0.5" />
+                            <ShieldAlert aria-hidden="true" className="w-3.5 h-3.5 shrink-0 text-stage-red mt-0.5" />
                             <div>
                               <div className="font-semibold uppercase">危机系统警报: {tc.riskLevel}</div>
                               {tc.riskReason && <div className="opacity-80 leading-normal">{tc.riskReason}</div>}
