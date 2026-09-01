@@ -123,6 +123,25 @@ export async function verifyFirebaseToken(token: string, projectId: string, apiK
  * Hono authentication middleware.
  * Verifies JWT token and saves user payload to context `c.get('user')`.
  */
+/**
+ * Constant-time string comparison to prevent timing attacks
+ */
+export function timingSafeEqual(a: string | undefined | null, b: string | undefined | null): boolean {
+  const strA = a ?? '';
+  const strB = b ?? '';
+
+  if (strA.length !== strB.length) {
+    return false;
+  }
+
+  let result = 0;
+  for (let i = 0; i < strA.length; i++) {
+    result |= strA.charCodeAt(i) ^ strB.charCodeAt(i);
+  }
+
+  return result === 0;
+}
+
 export async function requireAuth(c: Context<HonoSchema>, next: Next) {
   const authHeader = c.req.header('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
