@@ -39,7 +39,11 @@ const MessageRow = React.memo(({ msg, idx, isFirstInGroup, isLastInGroup, isCurr
 
 MessageRow.displayName = 'MessageRow';
 
-export const ChatPanel: React.FC = () => {
+interface ChatPanelProps {
+  onStartVoice?: () => void;
+}
+
+export const ChatPanel: React.FC<ChatPanelProps> = ({ onStartVoice }) => {
   const messages = useChatStore(state => state.messages);
   const isStreaming = useChatStore(state => state.isStreaming);
   const hasCompletedOnboarding = useChatStore(state => state.hasCompletedOnboarding);
@@ -101,7 +105,14 @@ export const ChatPanel: React.FC = () => {
                 transition={{ duration: 0.3 }}
                 className="flex-1 flex flex-col justify-center w-full h-full"
               >
-                <GeminiWelcome onStart={handleStart} />
+                <GeminiWelcome onStart={() => {
+                  setOnboardingComplete(true);
+                  if (onStartVoice) {
+                    onStartVoice();
+                  } else {
+                    sendMessage('你好', undefined, undefined, { isHidden: true });
+                  }
+                }} />
               </motion.div>
             ) : (
               <motion.div

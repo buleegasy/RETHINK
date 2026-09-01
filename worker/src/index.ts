@@ -16,10 +16,13 @@ app.use('*', corsMiddleware);
 // 基础健康检查
 app.get('/', (c) => c.text('RE-THINK Agent API (Cloudflare Worker) is running!'));
 
+import { voiceRouter } from './routes/voice';
+
 // 挂载路由
 app.route('/api/auth', authRouter);
 app.route('/api/admin', adminRouter);
 app.route('/api/chat', chatRouter);
+app.route('/api/voice', voiceRouter);
 app.route('/api/knowledge', knowledgeRouter);
 app.route('/api/onboarding', onboardingRouter);
 app.route('/api/survey', surveyRouter);

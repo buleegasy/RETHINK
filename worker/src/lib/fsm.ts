@@ -685,7 +685,7 @@ export function getPreInfoCollectionPrompt(): string {
 2. **主动询问称呼**：以最自然的方式询问用户的名字或昵称，措辞每次应有所不同，由你自由创作。
 3. **创作自由**：开场白完全由你自由发挥，风格轻松温暖即可，不要套用固定句式，像在和老朋友打招呼一样。
 4. **简洁**：控制在 1-2 句话内，不要长篇大论，不要像在做笔录。
-5. **专业调性**：语气亲切自然，严禁任何粗话、俗语或不雅词汇（如"卧槽"等）。`;
+5. **专业调性**：语气亲切自然，严禁任何粗话、俗语或不雅词汇。`;
 }
 
 
@@ -780,3 +780,4 @@ export function getRandomReceptionistGreeting(): string {
   const i = Math.floor(Math.random() * RECEPTIONIST_GREETING_CANDIDATES.length);
   return RECEPTIONIST_GREETING_CANDIDATES[i];
 }
+

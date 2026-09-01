@@ -153,6 +153,7 @@ export default {
         'sparkle': 'sparkle 3s ease-in-out infinite',
         'ping-slow': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
         'bounce-in': 'bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+        'shimmer': 'shimmer 1.5s infinite linear',
       },
       keyframes: {
         fadeIn: {
@@ -180,6 +181,10 @@ export default {
           '60%': { opacity: '1', transform: 'scale(1.03)' },
           '100%': { transform: 'scale(1)' },
         },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        }
       },
     },
   },

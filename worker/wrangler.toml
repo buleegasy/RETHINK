@@ -45,6 +45,7 @@ FIREBASE_PROJECT_ID = "rethink-852d8"
 # ADMIN_SECRET_TOKEN = "V4r..."
 # API_KEY = "sk-or-v1-xxxx"          (OpenRouter API Key)
 # FIREBASE_API_KEY = "AIzaSy..."     (Firebase Auth Web API Key)
+# OPENAI_API_KEY = "sk-proj-xxxx"    (OpenAI API Key for Realtime API)
 # ==========================
 
 # Intercept API requests on the Pages domains directly

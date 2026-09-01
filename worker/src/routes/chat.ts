@@ -25,8 +25,17 @@ chatRouter.post('/', requireAuth, async (c) => {
   try { body = await c.req.json<ChatRequest>(); } catch (e) {}
   const { messages, stream = true, sessionId = crypto.randomUUID(), profile, facialEmotion, model: requestedModel } = body;
 
-  if (!messages || messages.length === 0) {
-    return c.json({ error: 'messages cannot be empty' }, 400);
+  // 🛡️ Security Enhancement: Input validation and length limits to prevent DoS
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return c.json({ error: 'messages must be a non-empty array' }, 400);
+  }
+
+  if (messages.length > 100) {
+    return c.json({ error: 'Too many messages in one request' }, 400);
+  }
+
+  if (typeof sessionId !== 'string' || sessionId.length > 100) {
+    return c.json({ error: 'Invalid or excessively long sessionId' }, 400);
   }
 
   // ── 1. 从 D1 获取历史会话 + FSM 状态 ──
@@ -95,6 +104,12 @@ chatRouter.post('/', requireAuth, async (c) => {
 
   // ── 2. 意图路由（代码层面） ──
   const userLastMessage = messages.filter(m => m.role === 'user').pop()?.content || '';
+
+  // 🛡️ Security Enhancement: Limit user input length to prevent excessive LLM token consumption
+  if (userLastMessage.length > 2000) {
+    return c.json({ error: 'Message is too long. Please keep it under 2000 characters.' }, 400);
+  }
+
   const intentResult = await classifyIntent(userLastMessage, c.env);
 
   console.log(`[Intent Router] type=${intentResult.type}, confidence=${intentResult.confidence}, triggers=${intentResult.triggers.join(',')}`);
@@ -568,7 +583,9 @@ chatRouter.post('/', requireAuth, async (c) => {
 
         // 解析前置信息收集更新 (Pre_Info_Collection 阶段)
         if (parsed.pre_info_update || parsed.user_name_captured) {
-          if (parsed.user_name_captured && !parsed.pre_info_update) { parsed.pre_info_update = { user_name: parsed.user_name_captured, collection_completed: true }; }
+          if (parsed.user_name_captured && !parsed.pre_info_update) { 
+            parsed.pre_info_update = { user_name: parsed.user_name_captured, collection_completed: true }; 
+          }
 
           fsmCtx.preInfo = applyPreInfoUpdate(fsmCtx.preInfo, parsed.pre_info_update);
           console.log(`[PreInfo Stream] userName=${fsmCtx.preInfo.userName || 'n/a'}, completed=${fsmCtx.preInfo.collectionCompleted}`);
@@ -579,7 +596,6 @@ chatRouter.post('/', requireAuth, async (c) => {
               await MemoryService.saveMemory(c.env.DB, user.uid, sessionId, 'user_name', fsmCtx.preInfo.userName);
             }
           }
-
         }
         // 解析破冰画像增量更新
         if (parsed.icebreaker_update && fsmCtx.currentState === 'Onboarding') {

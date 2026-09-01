@@ -21,6 +21,7 @@ export interface Env {
   FIREBASE_PROJECT_ID: string;
   TURNSTILE_SECRET_KEY: string;
   ADMIN_SECRET_TOKEN: string;
+  OPENAI_API_KEY: string;
 }
 
 // ============================================================
@@ -171,4 +172,27 @@ export interface SessionRow {
   fsm_state: string;
   /** FSM 上下文 JSON */
   fsm_context: string;
+}
+
+// ============================================================
+// Voice / Realtime API 类型
+// ============================================================
+
+export interface VoiceTokenResponse {
+  client_secret: string;
+  expires_at: number;
+  session_id: string;
+}
+
+export interface RAGQueryRequest {
+  query: string;
+  session_id?: string;
+  top_k?: number;
+}
+
+export interface VoicePersistRequest {
+  session_id: string;
+  messages: ChatMessage[];
+  fsm_state: FSMState;
+  user_id?: string;
 }

@@ -19,24 +19,5 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
-  },
-  "overrides": {
-    "postcss-selector-parser": "^6.1.2"
-  },
-  "dependencies": {
-    "baseline-browser-mapping": "^2.10.38",
-    "caniuse-lite": "^1.0.30001799",
-    "electron-to-chromium": "^1.5.376",
-    "escalade": "^3.2.0",
-    "micromark-factory-destination": "^2.0.1",
-    "micromark-factory-label": "^2.0.1",
-    "micromark-factory-title": "^2.0.1",
-    "micromark-factory-whitespace": "^2.0.1",
-    "micromark-util-html-tag-name": "^2.0.1",
-    "node-releases": "^2.0.48",
-    "picocolors": "^1.1.1",
-    "playwright": "^1.61.0",
-    "postcss": "^8.5.15",
-    "strip-indent": "^4.1.1"
   }
 }

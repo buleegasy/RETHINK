@@ -61,7 +61,7 @@ export function GeminiWelcome({ onStart }: GeminiWelcomeProps) {
           onClick={onStart}
           className="mt-12 px-8 py-3.5 rounded-full bg-surface-container/40 backdrop-blur-md border border-outline-variant/30 text-on-surface font-light text-sm tracking-[0.2em] uppercase hover:bg-surface-container/60 transition-colors shadow-md flex items-center gap-2.5 group cursor-pointer focus-visible:ring-2 focus-visible:ring-gemini-blue focus-visible:outline-none"
         >
-          <span>开始对话</span>
+          <span>开始语音对话</span>
           <svg aria-hidden="true" className="w-5 h-5 opacity-70 group-hover:opacity-100 group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
           </svg>

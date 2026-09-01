@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { ChatPanel } from './components/chat/ChatPanel';
 import { InputBar } from './components/chat/InputBar';
+import { VoiceDock } from './components/voice/VoiceDock';
+import { useRealtimeSession } from './hooks/useRealtimeSession';
 import { LoginWall } from './components/auth/LoginWall';
 import { SessionSidebar } from './components/layout/SessionSidebar';
 import { useChat } from './hooks/useChat';
@@ -24,6 +26,21 @@ function App() {
   const fsmState = useChatStore(state => state.fsmState);
 
   const [isSidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
+  const [isVoiceMode, setIsVoiceMode] = useState(false);
+  
+  const voiceSession = useRealtimeSession({
+    onError: (err) => console.error("Voice error:", err)
+  });
+
+  const handleStartVoice = useCallback(() => {
+    setIsVoiceMode(true);
+    voiceSession.connect();
+  }, [voiceSession]);
+
+  const handleEndVoice = useCallback(() => {
+    voiceSession.disconnect();
+    setIsVoiceMode(false);
+  }, [voiceSession]);
   
   // 计算进度
   const stageIndex = (fsmState === 'Pre_Info_Collection' || fsmState === 'Onboarding')
@@ -181,13 +198,22 @@ function App() {
               )}
             </AnimatePresence>
 
-            <ChatPanel />
-            {hasCompletedOnboarding && fsmState !== 'Crisis_Escalation' && (
+            {!isVoiceMode && <ChatPanel onStartVoice={handleStartVoice} />}
+            {hasCompletedOnboarding && fsmState !== 'Crisis_Escalation' && !isVoiceMode && (
               <InputBar 
                 onSend={handleSendWithEmotion} 
               />
             )}
           </div>
+
+          {/* 语音模式 Dock */}
+          {isVoiceMode && (
+            <VoiceDock 
+              status={voiceSession.status}
+              onDisconnect={handleEndVoice}
+              onSwitchToText={handleEndVoice}
+            />
+          )}
 
           {/* 危机干预覆盖层 */}
           {fsmState === 'Crisis_Escalation' && <CrisisOverlay />}

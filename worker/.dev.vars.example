@@ -1,19 +1,18 @@
-# 本地开发环境变量 (.dev.vars)
-# 复制此文件为 .dev.vars 并填入真实值
-# 注意：.dev.vars 不可提交到 git！
+# =====================================================================
+# 开发环境变量模板 (Local Development Environment Variables)
+# 
+# 使用说明：
+# 1. 复制本文件并重命名为 `.dev.vars`
+# 2. 在下方填入您的真实 API Key
+# 3. 本地运行 `npm run dev` 时会自动加载，请勿将 `.dev.vars` 提交到 Git！
+# 
+# 线上部署说明：
+# 线上环境需要使用命令行设置 Secret，请勿将 Key 写在代码中。
+# 执行: npx wrangler secret put OPENAI_API_KEY
+# =====================================================================
 
-# OpenRouter API Key
-API_KEY=sk-or-v1-your_openrouter_api_key_here
+# 用于 Realtime API 语音通信 (必需)
+OPENAI_API_KEY="sk-proj-xxxxxxxxxxxxxxxxxxxx"
 
-# OpenRouter API 基础 URL
-API_BASE_URL=https://openrouter.ai/api/v1
-
-# 使用的模型名称（Llama 3.3 70B，后续可升级为 Llama 4）
-MODEL_NAME=meta-llama/llama-3.3-70b-instruct
-
-# Firebase Auth Configuration
-FIREBASE_API_KEY=AIzaSyYourFirebaseApiKeyHere
-FIREBASE_PROJECT_ID=re-think-agent-beta
-
-# Cloudflare Turnstile Configuration (Testing key defaults to always pass)
-TURNSTILE_SECRET_KEY=1x00000000000000000000000000000000
+# 以下可选项视需要配置
+# API_BASE_URL="https://api.openai.com/v1"

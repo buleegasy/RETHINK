@@ -14,6 +14,13 @@ interface ChatState {
   icebreakerLayer: number;
   preInfo: PreInfoData | null;
   userInfo: { name?: string } | null;
+  
+  // Voice state
+  isMicActive: boolean;
+  duplexPhase: 'idle' | 'listening' | 'thinking' | 'speaking';
+  audioLevel: number;
+  voiceSessionId: string | null;
+
   // Actions
   setSessionId: (id: string) => void;
   loadSession: (session: {
@@ -35,6 +42,13 @@ interface ChatState {
   setIsStreaming: (isStreaming: boolean) => void;
   setSelectedModel: (model: string) => void;
   setIcebreakerLayer: (layer: number) => void;
+  
+  // Voice Actions
+  setIsMicActive: (active: boolean) => void;
+  setDuplexPhase: (phase: 'idle' | 'listening' | 'thinking' | 'speaking') => void;
+  setAudioLevel: (level: number) => void;
+  setVoiceSessionId: (id: string | null) => void;
+  
   clearChat: () => void;
 }
 
@@ -60,6 +74,12 @@ export const useChatStore = create<ChatState>((set) => {
     icebreakerLayer: 1,
     preInfo: null,
     userInfo: null,
+    
+    // Voice initial state
+    isMicActive: false,
+    duplexPhase: 'idle',
+    audioLevel: 0,
+    voiceSessionId: null,
 
     // Chat Actions
     setSessionId: (id) => set({ sessionId: id }),
@@ -75,6 +95,11 @@ export const useChatStore = create<ChatState>((set) => {
       icebreakerLayer: 1,
       preInfo: session.preInfo || null,
       userInfo: session.preInfo?.userName ? { name: session.preInfo.userName } : null,
+      // reset voice state on load
+      isMicActive: false,
+      duplexPhase: 'idle',
+      audioLevel: 0,
+      voiceSessionId: null,
     }),
     
     addMessage: (msg) => set((state) => ({ 
@@ -134,6 +159,12 @@ export const useChatStore = create<ChatState>((set) => {
     setSelectedModel: (model) => set({ selectedModel: model }),
 
     setIcebreakerLayer: (icebreakerLayer) => set({ icebreakerLayer }),
+    
+    // Voice Actions
+    setIsMicActive: (active) => set({ isMicActive: active }),
+    setDuplexPhase: (phase) => set({ duplexPhase: phase }),
+    setAudioLevel: (level) => set({ audioLevel: level }),
+    setVoiceSessionId: (id) => set({ voiceSessionId: id }),
 
     clearChat: () => set({ 
       sessionId: null, 
@@ -146,6 +177,10 @@ export const useChatStore = create<ChatState>((set) => {
       icebreakerLayer: 1,
       preInfo: null,
       userInfo: null,
+      isMicActive: false,
+      duplexPhase: 'idle',
+      audioLevel: 0,
+      voiceSessionId: null,
     }),
   };
 });

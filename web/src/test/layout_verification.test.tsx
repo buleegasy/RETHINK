@@ -9,6 +9,12 @@ const mockChatState = {
   hasCompletedOnboarding: true,
   fsmState: 'Active_Listening',
   setOnboardingComplete: vi.fn(),
+  setIsMicActive: vi.fn(),
+  setDuplexPhase: vi.fn(),
+  setVoiceSessionId: vi.fn(),
+  addMessage: vi.fn(),
+  updateLastMessage: vi.fn(),
+  setFSMState: vi.fn(),
 };
 
 const mockAuthState = {
@@ -20,7 +26,7 @@ const mockAuthState = {
 // Mock the store modules entirely to bypass real Zustand / localStorage imports
 vi.mock('../store/chatStore', () => ({
   useChatStore: Object.assign(
-    (selector: any) => selector(mockChatState),
+    (selector?: any) => (typeof selector === 'function' ? selector(mockChatState) : mockChatState),
     {
       getState: () => mockChatState,
       setState: (newState: any) => {
