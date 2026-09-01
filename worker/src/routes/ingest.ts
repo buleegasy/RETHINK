@@ -9,6 +9,7 @@
 import { Hono } from 'hono';
 import type { Env } from '../types';
 import { ingestDocument, listDocuments, deleteDocument, retrieveContext } from '../lib/rag';
+import { secureCompare } from '../lib/crypto-utils';
 
 export const knowledgeRouter = new Hono<{ Bindings: Env }>();
 
@@ -19,7 +20,7 @@ knowledgeRouter.use('*', async (c, next) => {
   }
 
   const providedToken = c.req.header('x-admin-token');
-  if (providedToken !== adminToken) {
+  if (!secureCompare(providedToken, adminToken)) {
     return c.json({ error: 'Unauthorized: Invalid admin token' }, 401);
   }
 
