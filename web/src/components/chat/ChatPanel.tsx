@@ -68,8 +68,9 @@ export const ChatPanel: React.FC = () => {
 
   const handleStart = () => {
     // 标记破冰/接待开始，自动发送隐式打招呼触发 AI 接待员首句话
-    setOnboardingComplete(true);
-    sendMessage('你好', undefined, undefined, { isHidden: true });
+    // setOnboardingComplete(true);
+    // sendMessage('你好', undefined, undefined, { isHidden: true });
+    setShowEmojiSelector(true);
   };
 
   const handleSelectEmoji = (emojiText: string) => {
