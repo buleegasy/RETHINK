@@ -7,6 +7,7 @@
  */
 
 import { Hono } from 'hono';
+import { timingSafeEqual } from 'hono/utils/buffer';
 import type { Env } from '../types';
 import { ingestDocument, listDocuments, deleteDocument, retrieveContext } from '../lib/rag';
 
@@ -19,7 +20,7 @@ knowledgeRouter.use('*', async (c, next) => {
   }
 
   const providedToken = c.req.header('x-admin-token');
-  if (providedToken !== adminToken) {
+  if (!(await timingSafeEqual(adminToken, providedToken || ''))) {
     return c.json({ error: 'Unauthorized: Invalid admin token' }, 401);
   }
 
