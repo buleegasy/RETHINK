@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { HonoSchema } from '../types';
+import { timingSafeEqual } from '../lib/auth-utils';
 
 const adminRouter = new Hono<HonoSchema>();
 
@@ -11,7 +12,7 @@ adminRouter.use('*', async (c, next) => {
   }
 
   const providedToken = c.req.header('x-admin-token');
-  if (providedToken !== adminToken) {
+  if (!providedToken || !timingSafeEqual(providedToken, adminToken)) {
     return c.json({ error: 'Unauthorized: Invalid admin token' }, 401);
   }
 

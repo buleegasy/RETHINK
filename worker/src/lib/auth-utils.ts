@@ -6,6 +6,32 @@ let cachedKeys: any[] | null = null;
 let cachedKeysTime = 0;
 
 /**
+ * Constant-time string comparison to prevent timing attacks.
+ */
+export function timingSafeEqual(a: string, b: string): boolean {
+  if (typeof a !== 'string' || typeof b !== 'string') {
+    return false;
+  }
+
+  // We don't want to fail fast on length difference for timing attack prevention,
+  // but if lengths differ, they can't be equal. To keep it constant time relative
+  // to the input length, we can pad or do a dummy loop, but the easiest acceptable
+  // implementation in JS where true constant time is hard, is at least not failing
+  // fast on character mismatch.
+  // Actually, standard timingSafeEqual usually returns false early on length mismatch,
+  // which exposes length but not content.
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
+/**
  * Verifies a Firebase ID token (RS256 JWT) using Google's public JWK set.
  */
 export async function verifyFirebaseToken(token: string, projectId: string, apiKey: string): Promise<AuthUser> {
