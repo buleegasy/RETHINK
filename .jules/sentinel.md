@@ -35,3 +35,7 @@
 **Vulnerability:** The unauthenticated `/api/onboarding/analyze` endpoint directly passed user-provided text to an LLM completion request without any length or type constraints.
 **Learning:** Endpoints proxying requests directly to LLMs without validation expose the application to severe financial and operational Denial of Service (DoS) attacks via excessive token consumption, even if the payload doesn't crash the database.
 **Prevention:** Always enforce strict input type checking (`typeof input === 'string'`) and a reasonable maximum length constraint (`input.length > MAX_LEN`) *before* invoking any downstream AI models on unauthenticated or lightly authenticated routes.
+## 2024-05-25 - [Fix timing attack vulnerability in admin token verification]
+**Vulnerability:** Timing attack vulnerability in admin token verification across multiple routes (`admin.ts`, `ingest.ts`, `survey.ts`) due to the use of direct string comparison (`!==`).
+**Learning:** Direct string comparisons evaluate character by character and return `false` early if characters don't match, which leaks information about the time it takes to process. This could allow an attacker to guess the `ADMIN_SECRET_TOKEN` character by character.
+**Prevention:** Always use constant-time string comparison functions, such as a custom `timingSafeEqual` leveraging a bitwise XOR loop, to prevent timing attacks when comparing sensitive secrets.

@@ -21,7 +21,7 @@ describe('apiClient', () => {
     localStorage.setItem('rethink_auth_token', 'my-token');
     
     const mockResponse = { ok: true, status: 200, headers: new Headers(), json: async () => ({ data: 'ok' }) };
-    (global.fetch as any).mockResolvedValue(mockResponse);
+    vi.mocked(global.fetch).mockResolvedValue(mockResponse);
 
     await apiClient('/test');
     
@@ -37,7 +37,7 @@ describe('apiClient', () => {
 
   it('should not throw if requireAuth is false and no token', async () => {
     const mockResponse = { ok: true, status: 200, headers: new Headers(), json: async () => ({ data: 'ok' }) };
-    (global.fetch as any).mockResolvedValue(mockResponse);
+    vi.mocked(global.fetch).mockResolvedValue(mockResponse);
 
     const result = await apiClient('/test', { requireAuth: false });
     expect(result).toEqual({ data: 'ok' });
@@ -52,15 +52,15 @@ describe('apiClient', () => {
       headers: new Headers(),
       json: async () => ({ error: 'Bad Request' }) 
     };
-    (global.fetch as any).mockResolvedValue(mockResponse);
+    vi.mocked(global.fetch).mockResolvedValue(mockResponse);
 
     try {
       await apiClient('/test');
       expect.fail('Should have thrown');
-    } catch (e: any) {
-      expect(e).toBeInstanceOf(ApiError);
-      expect(e.status).toBe(400);
-      expect(e.message).toBe('Bad Request');
+    } catch (e: unknown) {
+      expect(e as Error).toBeInstanceOf(ApiError);
+      expect((e as ApiError).status).toBe(400);
+      expect((e as Error).message).toBe('Bad Request');
     }
   });
 
@@ -74,13 +74,13 @@ describe('apiClient', () => {
       headers: new Headers(),
       json: async () => ({ error: 'Unauthorized' }) 
     };
-    (global.fetch as any).mockResolvedValue(mockResponse);
+    vi.mocked(global.fetch).mockResolvedValue(mockResponse);
 
     const dispatchEventSpy = vi.spyOn(window, 'dispatchEvent');
 
     try {
       await apiClient('/test');
-    } catch (e) {
+    } catch {
       // Expected
     }
 
@@ -95,7 +95,7 @@ describe('apiClient', () => {
       status: 204,
       headers: new Headers()
     };
-    (global.fetch as any).mockResolvedValue(mockResponse);
+    vi.mocked(global.fetch).mockResolvedValue(mockResponse);
 
     const result = await apiClient('/test', { requireAuth: false });
     expect(result).toEqual({});
