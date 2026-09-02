@@ -36,6 +36,3 @@
 ## 2024-05-18 - Accessibility Micro-Improvements
 **Learning:** When making accessibility changes such as adding `aria-hidden="true"` to SVGs within buttons, ensure the button itself already possesses an `aria-label`. Otherwise, hiding the SVG removes its only content, creating an inaccessible, silent button. Also, avoid unintentionally modifying dependency lockfiles when they are not part of the requested changes.
 **Action:** Always check the parent element of an SVG for an `aria-label` before hiding it. Ensure lockfiles like `pnpm-lock.yaml` are reverted before committing.
-## 2024-05-14 - [Adding Accessible Focus Rings to Dock Elements]
-**Learning:** Found that custom stylized controls in absolute/fixed docks (like the VoiceDock) often lack explicit focus indicators, relying heavily on pointer interaction. The lack of standard outlines when `focus-visible` isn't specified can make these controls invisible to keyboard navigators.
-**Action:** When working on docked or absolute-positioned micro-interactions, explicitly use `focus-visible` utility classes (`focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2`) that contrast well against the dock's backdrop.
