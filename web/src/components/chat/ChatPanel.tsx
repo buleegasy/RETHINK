@@ -70,6 +70,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ onStartVoice }) => {
     }
   }, [messages, isStreaming]);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleStart = () => {
     // 标记破冰/接待开始，自动发送隐式打招呼触发 AI 接待员首句话
     setOnboardingComplete(true);
