@@ -11,7 +11,7 @@ interface VoiceDockProps {
 }
 
 // 极其平滑的阻尼曲线 (Cinematic Easing)
-const SPRING_TRANSITION = { type: 'spring', damping: 25, stiffness: 120, mass: 0.5 };
+const SPRING_TRANSITION = { type: 'spring' as const, damping: 25, stiffness: 120, mass: 0.5 };
 
 export const VoiceDock: React.FC<VoiceDockProps> = ({ onDisconnect, onSwitchToText, status }) => {
   const { duplexPhase } = useChatStore();
