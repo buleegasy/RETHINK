@@ -21,3 +21,14 @@ worker/dist/
 
 # AI Agent Data
 .agents/
+worker/coverage
+worker/node_modules*
+*.docx
+worker/test-*.js
+web/test_run.txt
+web/vite_output.txt
+worker/worker_logs.txt
+.mf/
+pnpm-workspace.yaml
+pnpm-lock.yaml
+package-lock.json
