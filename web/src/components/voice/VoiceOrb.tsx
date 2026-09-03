@@ -22,7 +22,7 @@ export const VoiceOrb: React.FC = () => {
   const isThinking = duplexPhase === 'thinking';
 
   return (
-    <div className="relative w-64 h-64 flex items-center justify-center overflow-visible">
+    <div aria-hidden="true" className="relative w-64 h-64 flex items-center justify-center overflow-visible">
       
       {/* SVG Gooey Filter Definition */}
       <svg className="absolute w-0 h-0">
