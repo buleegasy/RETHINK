@@ -75,6 +75,8 @@ export const VoiceDock: React.FC<VoiceDockProps> = ({ onDisconnect, onSwitchToTe
         <motion.div 
           layout
           transition={SPRING_TRANSITION}
+          aria-live="polite"
+          aria-atomic="true"
           className="text-gray-200 text-sm font-medium mt-8 tracking-wider drop-shadow-md backdrop-blur-xl px-5 py-2 rounded-full bg-white/5 border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.1)]"
         >
           {getStatusText()}
@@ -87,7 +89,7 @@ export const VoiceDock: React.FC<VoiceDockProps> = ({ onDisconnect, onSwitchToTe
             whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             onClick={onDisconnect}
-            className="px-6 py-2.5 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors rounded-full font-medium shadow-[0_0_15px_rgba(239,68,68,0.1)] backdrop-blur-md border border-red-500/20 relative overflow-hidden group"
+            className="px-6 py-2.5 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors rounded-full font-medium shadow-[0_0_15px_rgba(239,68,68,0.1)] backdrop-blur-md border border-red-500/20 relative overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
             {/* Shimmer effect */}
             <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
@@ -99,7 +101,7 @@ export const VoiceDock: React.FC<VoiceDockProps> = ({ onDisconnect, onSwitchToTe
             whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             onClick={onSwitchToText}
-            className="px-6 py-2.5 bg-gray-800/40 text-gray-300 hover:bg-gray-700/60 transition-colors rounded-full font-medium shadow-[0_0_15px_rgba(255,255,255,0.05)] backdrop-blur-md border border-white/10 relative overflow-hidden group"
+            className="px-6 py-2.5 bg-gray-800/40 text-gray-300 hover:bg-gray-700/60 transition-colors rounded-full font-medium shadow-[0_0_15px_rgba(255,255,255,0.05)] backdrop-blur-md border border-white/10 relative overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
             <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
             文字模式
