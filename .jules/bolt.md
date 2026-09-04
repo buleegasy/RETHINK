@@ -8,3 +8,11 @@
 ## 2024-07-26 - [React.memo Propagation Issue with Adjacent Object Refs]
 **Learning:** Even if a list item component like `MessageRow` is wrapped in `React.memo`, passing adjacent object references (`prev={messages[idx - 1]}`, `next={messages[idx + 1]}`) or the overall array length (`messagesLength`) as props will silently break the memoization. During text streaming updates, because these references and lengths change on every chunk for the active message, *all* historical messages re-render simultaneously, causing an O(N) performance bottleneck.
 **Action:** When mapping over dynamic arrays in React, compute derived boolean properties (like `isFirstInGroup` or `isCurrentlyStreaming`) within the `.map()` loop itself, and pass only those stable primitive values down to `React.memo`-wrapped list item components.
+
+## 2026-09-04 - Zustand Targeted Selectors for High-Frequency State
+**Learning:** When using Zustand for state that updates extremely rapidly (like 60fps audio levels or continuous WebRTC streaming phases), destructuring the entire store () forces unnecessary renders on every state change, heavily impacting performance.
+**Action:** Always use individual, targeted selectors (e.g., `const level = useStore(state => state.level)`) in components listening to high-frequency state to minimize re-renders.
+
+## 2025-03-09 - Zustand Targeted Selectors for High-Frequency State
+**Learning:** When using Zustand for state that updates extremely rapidly (like 60fps audio levels or continuous WebRTC streaming phases), destructuring the entire store (`const { level } = useStore()`) forces unnecessary renders on every state change, heavily impacting performance.
+**Action:** Always use individual, targeted selectors (e.g., `const level = useStore(state => state.level)`) in components listening to high-frequency state to minimize re-renders.

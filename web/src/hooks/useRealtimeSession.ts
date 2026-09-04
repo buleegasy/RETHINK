@@ -9,14 +9,13 @@ interface RealtimeSessionOptions {
 }
 
 export function useRealtimeSession(options?: RealtimeSessionOptions) {
-  const { 
-    setIsMicActive, 
-    setDuplexPhase, 
-    setVoiceSessionId,
-    addMessage,
-    updateLastMessage,
-    setFSMState
-  } = useChatStore();
+  // Use targeted selectors to prevent component re-renders when unneeded store values update
+  const setIsMicActive = useChatStore(state => state.setIsMicActive);
+  const setDuplexPhase = useChatStore(state => state.setDuplexPhase);
+  const setVoiceSessionId = useChatStore(state => state.setVoiceSessionId);
+  const addMessage = useChatStore(state => state.addMessage);
+  const updateLastMessage = useChatStore(state => state.updateLastMessage);
+  const setFSMState = useChatStore(state => state.setFSMState);
 
   const [status, setStatus] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle');
   const [transcript, setTranscript] = useState({ user: '', assistant: '' });

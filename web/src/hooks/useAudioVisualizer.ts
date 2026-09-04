@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useChatStore } from '../store/chatStore';
 
 export function useAudioVisualizer(stream: MediaStream | null) {
-  const { setAudioLevel } = useChatStore();
+  // Use targeted selector to prevent unnecessary re-renders when other state changes
+  const setAudioLevel = useChatStore(state => state.setAudioLevel);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const rafRef = useRef<number>(0);

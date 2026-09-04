@@ -3,7 +3,10 @@ import { motion } from 'framer-motion';
 import { useChatStore } from '../../store/chatStore';
 
 export const VoiceOrb: React.FC = () => {
-  const { duplexPhase, audioLevel, fsmState } = useChatStore();
+  // Use targeted selectors to prevent unnecessary re-renders on every store update
+  const duplexPhase = useChatStore(state => state.duplexPhase);
+  const audioLevel = useChatStore(state => state.audioLevel);
+  const fsmState = useChatStore(state => state.fsmState);
 
   // Premium Luminous Clarity Palette mapped to FSM
   const colorMap = useMemo(() => {
