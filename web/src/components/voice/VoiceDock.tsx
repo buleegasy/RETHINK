@@ -14,7 +14,10 @@ interface VoiceDockProps {
 const SPRING_TRANSITION = { type: 'spring', damping: 25, stiffness: 120, mass: 0.5 };
 
 export const VoiceDock: React.FC<VoiceDockProps> = ({ onDisconnect, onSwitchToText, status }) => {
-  const { duplexPhase, fsmState } = useChatStore();
+  // ⚡ Bolt Optimization: Use targeted selectors instead of destructuring
+  // Prevents VoiceDock from re-rendering on 60fps audioLevel updates
+  const duplexPhase = useChatStore(state => state.duplexPhase);
+  const fsmState = useChatStore(state => state.fsmState);
 
   const getStatusText = () => {
     if (status === 'connecting') return '正在建立安全连接...';
