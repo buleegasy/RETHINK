@@ -36,3 +36,7 @@
 ## 2024-05-18 - Accessibility Micro-Improvements
 **Learning:** When making accessibility changes such as adding `aria-hidden="true"` to SVGs within buttons, ensure the button itself already possesses an `aria-label`. Otherwise, hiding the SVG removes its only content, creating an inaccessible, silent button. Also, avoid unintentionally modifying dependency lockfiles when they are not part of the requested changes.
 **Action:** Always check the parent element of an SVG for an `aria-label` before hiding it. Ensure lockfiles like `pnpm-lock.yaml` are reverted before committing.
+
+## 2024-05-18 - Keyboard Accessibility in Error States
+**Learning:** Error boundaries often lack accessibility attributes like focus styles and explicit button types, which is critical since they represent recovery paths for users.
+**Action:** Always ensure fallback UI components include proper focus indicators and semantic button types to support keyboard-only users during error recovery.
