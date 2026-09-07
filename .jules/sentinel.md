@@ -39,3 +39,7 @@
 **Vulnerability:** Timing attack vulnerability in admin token verification across multiple routes (`admin.ts`, `ingest.ts`, `survey.ts`) due to the use of direct string comparison (`!==`).
 **Learning:** Direct string comparisons evaluate character by character and return `false` early if characters don't match, which leaks information about the time it takes to process. This could allow an attacker to guess the `ADMIN_SECRET_TOKEN` character by character.
 **Prevention:** Always use constant-time string comparison functions, such as a custom `timingSafeEqual` leveraging a bitwise XOR loop, to prevent timing attacks when comparing sensitive secrets.
+## 2024-05-18 - [Zombie LLM Endpoints Leak]
+**Vulnerability:** Found an unauthenticated POST endpoint (`/api/onboarding/analyze`) that forwards any request to a paid LLM API (OpenRouter).
+**Learning:** Even deprecated features ("zombie endpoints" like the old onboarding flow) left active without authentication create massive attack surfaces for financial DoS, allowing attackers to continuously consume expensive LLM tokens.
+**Prevention:** Always ensure that all endpoints that interact with paid external APIs (especially LLMs) are strictly protected by authentication middleware (e.g. `requireAuth`). When a feature is deprecated on the frontend, proactively remove or fully secure its corresponding backend endpoints.

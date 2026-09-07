@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { getLLMClient, getModelName } from '../lib/llm';
+import { requireAuth } from '../lib/auth-utils';
 import type { Env, UserProfile } from '../types';
 
 export const onboardingRouter = new Hono<{ Bindings: Env }>();
@@ -36,7 +37,8 @@ const SYSTEM_PROMPT = `
 注意：仅输出 JSON，不要任何其他文字或 Markdown 标记！
 `;
 
-onboardingRouter.post('/analyze', async (c) => {
+// 🛡️ Security Enhancement: Require authentication to prevent unauthenticated LLM token exhaustion (financial DoS).
+onboardingRouter.post('/analyze', requireAuth, async (c) => {
   try {
     let text = '';
     try { const parsed = await c.req.json<{ text: string }>(); text = parsed.text; } catch (e) {}
