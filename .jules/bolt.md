@@ -1,10 +1,19 @@
 ## 2024-07-20 - Targeted Zustand Selectors for Streaming
 **Learning:** Subscribing to the entire `messages` array in components that only need specific nested properties (like `AmbientGlow` needing `techChain`) causes severe performance bottlenecks, as text streaming updates the array on every single token.
 **Action:** Always use targeted Zustand selectors that extract specific nested objects. Because `updateLastMessage` preserves the `techChain` reference, a targeted selector returns the same reference during streaming, bypassing unnecessary React re-renders.
-\n## 2025-05-18 - React.memo and streaming optimizations\n**Learning:** During AI streaming, parent components that map over the entire chat history (like `ChatPanel`) will re-render all elements for every single character chunk. Also, passing array literals like `remarkPlugins={[remarkGfm]}` to Markdown renderers prevents their internal memoization and causes heavy AST re-parsing on every render.\n**Action:** Extract repeating items into `React.memo` wrappers. Hoist array/object literal props out of render functions into stable constants, especially inside highly volatile components like streaming chat bubbles.
+
+## 2025-05-18 - React.memo and streaming optimizations
+**Learning:** During AI streaming, parent components that map over the entire chat history (like `ChatPanel`) will re-render all elements for every single character chunk. Also, passing array literals like `remarkPlugins={[remarkGfm]}` to Markdown renderers prevents their internal memoization and causes heavy AST re-parsing on every render.
+**Action:** Extract repeating items into `React.memo` wrappers. Hoist array/object literal props out of render functions into stable constants, especially inside highly volatile components like streaming chat bubbles.
+
 ## 2026-07-23 - Leverage V8 String Methods for Stream Parsing Performance
 **Learning:** Manual character-by-character iteration loops (`for (let i = 0; i < str.length; i++)`) in JS are significantly slower than native V8-backed string search methods. During text streaming where fragments are parsed constantly, loops looking for unescaped quotes create a bottleneck.
 **Action:** Use `indexOf` recursively or appropriately constructed regular expressions to jump to occurrences rather than walking the whole string length, validating edge cases like backwards escape character checking (`\`) to correctly identify boundary markers. Benchmarks show >10x improvements for optimized `indexOf` loops.
+
 ## 2024-07-26 - [React.memo Propagation Issue with Adjacent Object Refs]
 **Learning:** Even if a list item component like `MessageRow` is wrapped in `React.memo`, passing adjacent object references (`prev={messages[idx - 1]}`, `next={messages[idx + 1]}`) or the overall array length (`messagesLength`) as props will silently break the memoization. During text streaming updates, because these references and lengths change on every chunk for the active message, *all* historical messages re-render simultaneously, causing an O(N) performance bottleneck.
 **Action:** When mapping over dynamic arrays in React, compute derived boolean properties (like `isFirstInGroup` or `isCurrentlyStreaming`) within the `.map()` loop itself, and pass only those stable primitive values down to `React.memo`-wrapped list item components.
+
+## 2024-05-18 - Avoid Zustand Destructuring Re-renders
+**Learning:** Destructuring useChatStore() subscribes the component to ALL state updates, causing severe performance bottlenecks on 60fps audio level changes and text streaming.
+**Action:** Use targeted selectors useChatStore(state => state.property) instead of destructured object assignment.
