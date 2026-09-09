@@ -13,6 +13,15 @@ const app = new Hono<{ Bindings: Env }>();
 // 全局中间件
 app.use('*', corsMiddleware);
 
+// Security Headers Middleware
+app.use('*', async (c, next) => {
+  await next();
+  c.header('X-Content-Type-Options', 'nosniff');
+  c.header('X-Frame-Options', 'DENY');
+  c.header('X-XSS-Protection', '1; mode=block');
+  c.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+});
+
 // 基础健康检查
 app.get('/', (c) => c.text('RE-THINK Agent API (Cloudflare Worker) is running!'));
 
@@ -30,7 +39,8 @@ app.route('/api/survey', surveyRouter);
 // 全局错误处理
 app.onError((err, c) => {
   console.error('Global Error:', err);
-  return c.json({ error: 'Internal Server Error', details: err.message }, 500);
+  // Do not expose error details to the client to prevent sensitive info leaks
+  return c.json({ error: 'Internal Server Error' }, 500);
 });
 
 export default app;

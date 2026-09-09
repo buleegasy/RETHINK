@@ -39,3 +39,8 @@
 **Vulnerability:** Timing attack vulnerability in admin token verification across multiple routes (`admin.ts`, `ingest.ts`, `survey.ts`) due to the use of direct string comparison (`!==`).
 **Learning:** Direct string comparisons evaluate character by character and return `false` early if characters don't match, which leaks information about the time it takes to process. This could allow an attacker to guess the `ADMIN_SECRET_TOKEN` character by character.
 **Prevention:** Always use constant-time string comparison functions, such as a custom `timingSafeEqual` leveraging a bitwise XOR loop, to prevent timing attacks when comparing sensitive secrets.
+
+## 2026-08-05 - Missing Security Headers & Information Leakage in Global Error Handler
+**Vulnerability:** The Cloudflare Worker entry point (`worker/src/index.ts`) lacked global security headers (such as HSTS, X-Content-Type-Options, X-Frame-Options, X-XSS-Protection) and the global `app.onError` handler returned internal error details (`err.message`) to the client.
+**Learning:** Default API frameworks often omit secure header defaults and may leak internal error messages during unhandled exceptions, which attackers can leverage for reconnaissance (e.g. mapping internal components or DB structure).
+**Prevention:** Always implement a global middleware to set standard security headers on all responses, and ensure global error handlers return generic messages (e.g. "Internal Server Error") to the client while logging detailed information server-side.
