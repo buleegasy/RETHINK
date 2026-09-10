@@ -149,10 +149,13 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
         <div className="mb-6 flex justify-between items-center">
           <h2 className="text-lg font-medium text-white/90">Invitation Codes</h2>
           <button
+            type="button"
             onClick={() => setIsCreating(!isCreating)}
-            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors"
+            aria-expanded={isCreating}
+            aria-controls="new-code-form"
+            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
           >
-            {isCreating ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            {isCreating ? <X aria-hidden="true" className="w-4 h-4" /> : <Plus aria-hidden="true" className="w-4 h-4" />}
             {isCreating ? 'Cancel' : 'New Code'}
           </button>
         </div>
@@ -165,7 +168,7 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden mb-6"
             >
-              <form onSubmit={handleCreate} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-wrap gap-4 items-end">
+              <form id="new-code-form" onSubmit={handleCreate} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-wrap gap-4 items-end">
                 <div className="flex-1 min-w-[200px]">
                   <label htmlFor="customCodeInput" className="block text-xs text-white/50 mb-2 uppercase tracking-wider">Custom Code (Optional)</label>
                   <input

@@ -36,3 +36,6 @@
 ## 2024-05-18 - Accessibility Micro-Improvements
 **Learning:** When making accessibility changes such as adding `aria-hidden="true"` to SVGs within buttons, ensure the button itself already possesses an `aria-label`. Otherwise, hiding the SVG removes its only content, creating an inaccessible, silent button. Also, avoid unintentionally modifying dependency lockfiles when they are not part of the requested changes.
 **Action:** Always check the parent element of an SVG for an `aria-label` before hiding it. Ensure lockfiles like `pnpm-lock.yaml` are reverted before committing.
+## 2026-06-06 - Disclosure Widgets and Custom Collapsible Panels
+**Learning:** For custom disclosure widgets or collapsible panels, screen readers need to understand the relationship between the toggle button and the content it controls, as well as the current state of the panel. Hiding decorative icons on these buttons prevents redundant announcements.
+**Action:** Strictly ensure the toggle button includes an `aria-expanded` attribute dynamically bound to its state, an `aria-controls` attribute correctly pointing to the content's ID, and explicit `focus-visible` styling to support clear keyboard navigation. Apply `aria-hidden="true"` to decorative icons inside the button. Always verify with `type="button"` to avoid form submission issues.
