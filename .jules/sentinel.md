@@ -39,3 +39,7 @@
 **Vulnerability:** Timing attack vulnerability in admin token verification across multiple routes (`admin.ts`, `ingest.ts`, `survey.ts`) due to the use of direct string comparison (`!==`).
 **Learning:** Direct string comparisons evaluate character by character and return `false` early if characters don't match, which leaks information about the time it takes to process. This could allow an attacker to guess the `ADMIN_SECRET_TOKEN` character by character.
 **Prevention:** Always use constant-time string comparison functions, such as a custom `timingSafeEqual` leveraging a bitwise XOR loop, to prevent timing attacks when comparing sensitive secrets.
+## 2025-02-14 - Hono Global Error Handler Information Leak and Missing Secure Headers
+**Vulnerability:** The global error handler (`app.onError`) in the Cloudflare Worker was leaking internal error details (`err.message`) in production JSON responses. Additionally, standard web security headers (HSTS, X-Content-Type-Options, etc.) were missing.
+**Learning:** Returning `err.message` directly in a global 500 error handler is a common anti-pattern that can inadvertently expose stack traces, internal database paths, or sensitive credentials.
+**Prevention:** Always sanitize production error responses to return generic messages (e.g., 'An unexpected error occurred') while keeping detailed logs on the server side (`console.error`). Ensure modern web frameworks like Hono implement their built-in `secureHeaders` middleware globally by default to enforce defense-in-depth headers.
