@@ -8,3 +8,7 @@
 ## 2024-07-26 - [React.memo Propagation Issue with Adjacent Object Refs]
 **Learning:** Even if a list item component like `MessageRow` is wrapped in `React.memo`, passing adjacent object references (`prev={messages[idx - 1]}`, `next={messages[idx + 1]}`) or the overall array length (`messagesLength`) as props will silently break the memoization. During text streaming updates, because these references and lengths change on every chunk for the active message, *all* historical messages re-render simultaneously, causing an O(N) performance bottleneck.
 **Action:** When mapping over dynamic arrays in React, compute derived boolean properties (like `isFirstInGroup` or `isCurrentlyStreaming`) within the `.map()` loop itself, and pass only those stable primitive values down to `React.memo`-wrapped list item components.
+
+## 2024-07-27 - [Preserve Architectural Docs]
+**Learning:** Overwriting `plan.md` in the root directory for temporary task plans destroys valuable architectural documentation.
+**Action:** Always write temporary execution plans to a safe temporary location (e.g., `/tmp/plan.md`) to prevent wiping out the root `plan.md`.
