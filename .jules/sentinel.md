@@ -39,7 +39,3 @@
 **Vulnerability:** Timing attack vulnerability in admin token verification across multiple routes (`admin.ts`, `ingest.ts`, `survey.ts`) due to the use of direct string comparison (`!==`).
 **Learning:** Direct string comparisons evaluate character by character and return `false` early if characters don't match, which leaks information about the time it takes to process. This could allow an attacker to guess the `ADMIN_SECRET_TOKEN` character by character.
 **Prevention:** Always use constant-time string comparison functions, such as a custom `timingSafeEqual` leveraging a bitwise XOR loop, to prevent timing attacks when comparing sensitive secrets.
-## 2025-02-14 - Information Leakage in Global Error Handler
-**Vulnerability:** The global error handler (`app.onError`) in `worker/src/index.ts` was returning `err.message` in the JSON response payload. This exposes internal server error details, which may contain sensitive context, stack traces, or configuration secrets to external users.
-**Learning:** Returning explicit `err.message` values directly to the client from unhandled exceptions breaks the principle of failing securely, inadvertently turning standard 500 errors into an information disclosure vector.
-**Prevention:** Configure global error handlers to log detailed errors to internal monitoring systems (e.g., via `console.error`) while returning safe, sanitized, and generic messages (e.g., 'Internal Server Error') to the client interface.
