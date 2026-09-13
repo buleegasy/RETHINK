@@ -1,0 +1,3 @@
+## 2024-06-25 - Playwright WebRTC mocking for Voice UIs
+**Learning:** In headless Playwright environments, merely using `--use-fake-ui-for-media-stream` and `--use-fake-device-for-media-stream` is often insufficient to fully trigger conditional voice component states (like `VoiceDock` or components relying on TensorFlow/VAD models). The app may internally block or fail initialization if specific WebRTC APIs or underlying WASM backends are not perfectly mocked, leading to missing DOM elements during visual tests.
+**Action:** When implementing purely CSS-based accessibility enhancements (like `focus-visible`) on voice/camera components, rely on rigorous unit tests and code review rather than enforcing fragile end-to-end visual tests that require complex media mocking.
