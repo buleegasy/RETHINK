@@ -30,7 +30,7 @@ app.route('/api/survey', surveyRouter);
 // 全局错误处理
 app.onError((err, c) => {
   console.error('Global Error:', err);
-  return c.json({ error: 'Internal Server Error', details: err.message }, 500);
+  return c.json({ error: 'Internal Server Error' }, 500);
 });
 
 export default app;
