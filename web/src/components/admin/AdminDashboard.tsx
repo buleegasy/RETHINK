@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { KeyRound, LogOut, Plus, Trash2, Edit2, Check, X, Key } from 'lucide-react';
+import { KeyRound, LogOut, Plus, Trash2, Edit2, Check, X, Key, Loader2 } from 'lucide-react';
 import { ReThinkLogo } from '../layout/ReThinkLogo';
 
 // Config
@@ -26,6 +26,7 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
   const [error, setError] = useState<string | null>(null);
 
   const [isCreating, setIsCreating] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newCode, setNewCode] = useState('');
   const [newMaxUses, setNewMaxUses] = useState(1);
 
@@ -63,6 +64,7 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setIsSubmitting(true);
       const res = await fetch(`${API_BASE}/admin/invitations`, {
         method: 'POST',
         headers: {
@@ -84,6 +86,8 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
       fetchCodes();
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -190,9 +194,17 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
                 </div>
                 <button
                   type="submit"
-                  className="bg-white text-black px-6 py-2 rounded-xl text-sm font-medium hover:bg-white/90 transition-colors h-[42px]"
+                  disabled={isSubmitting}
+                  className="bg-white text-black px-6 py-2 rounded-xl text-sm font-medium hover:bg-white/90 transition-colors h-[42px] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Generate
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    'Generate'
+                  )}
                 </button>
               </form>
             </motion.div>

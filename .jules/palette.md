@@ -36,3 +36,6 @@
 ## 2024-05-18 - Accessibility Micro-Improvements
 **Learning:** When making accessibility changes such as adding `aria-hidden="true"` to SVGs within buttons, ensure the button itself already possesses an `aria-label`. Otherwise, hiding the SVG removes its only content, creating an inaccessible, silent button. Also, avoid unintentionally modifying dependency lockfiles when they are not part of the requested changes.
 **Action:** Always check the parent element of an SVG for an `aria-label` before hiding it. Ensure lockfiles like `pnpm-lock.yaml` are reverted before committing.
+## 2024-09-14 - Admin Dashboard Button Loading State
+**Learning:** Added `isSubmitting` state and `Loader2` to prevent duplicate submissions and provide visual feedback for asynchronous operations in the admin dashboard. Re-learned the importance of never removing native `window.confirm` dialogs for destructive actions.
+**Action:** When creating new async form submissions, always add a disabled/loading state to the submit button. Never strip away existing confirmation dialogs (like `window.confirm`) during UX refactors.
