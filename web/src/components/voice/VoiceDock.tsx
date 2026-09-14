@@ -15,7 +15,6 @@ const SPRING_TRANSITION = { type: 'spring', damping: 25, stiffness: 120, mass: 0
 
 export const VoiceDock: React.FC<VoiceDockProps> = ({ onDisconnect, onSwitchToText, status }) => {
   const duplexPhase = useChatStore(state => state.duplexPhase);
-  const fsmState = useChatStore(state => state.fsmState);
 
   const getStatusText = () => {
     if (status === 'connecting') return '正在建立安全连接...';
