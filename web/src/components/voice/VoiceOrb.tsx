@@ -3,7 +3,12 @@ import { motion } from 'framer-motion';
 import { useChatStore } from '../../store/chatStore';
 
 export const VoiceOrb: React.FC = () => {
-  const { duplexPhase, audioLevel, fsmState } = useChatStore();
+  // ⚡ Bolt Performance Optimization:
+  // Use targeted Zustand selectors instead of destructuring the whole store (e.g. const { duplexPhase } = useChatStore()).
+  // This prevents unnecessary React re-renders when other unrelated store properties (like messages array during streaming) change.
+  const duplexPhase = useChatStore(state => state.duplexPhase);
+  const audioLevel = useChatStore(state => state.audioLevel);
+  const fsmState = useChatStore(state => state.fsmState);
 
   // Premium Luminous Clarity Palette mapped to FSM
   const colorMap = useMemo(() => {
