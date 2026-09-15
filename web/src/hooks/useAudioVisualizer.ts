@@ -2,7 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useChatStore } from '../store/chatStore';
 
 export function useAudioVisualizer(stream: MediaStream | null) {
-  const { setAudioLevel } = useChatStore();
+  // ⚡ Bolt Performance Optimization:
+  // Targeted Zustand selector prevents the hook from re-evaluating when other store properties change.
+  const setAudioLevel = useChatStore(state => state.setAudioLevel);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const rafRef = useRef<number>(0);
