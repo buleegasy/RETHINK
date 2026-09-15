@@ -39,3 +39,8 @@
 **Vulnerability:** Timing attack vulnerability in admin token verification across multiple routes (`admin.ts`, `ingest.ts`, `survey.ts`) due to the use of direct string comparison (`!==`).
 **Learning:** Direct string comparisons evaluate character by character and return `false` early if characters don't match, which leaks information about the time it takes to process. This could allow an attacker to guess the `ADMIN_SECRET_TOKEN` character by character.
 **Prevention:** Always use constant-time string comparison functions, such as a custom `timingSafeEqual` leveraging a bitwise XOR loop, to prevent timing attacks when comparing sensitive secrets.
+
+## 2025-03-09 - Stop Error Details Leakage & Missing Security Headers
+**Vulnerability:** The global error handler leaked `err.message` to clients, and standard security headers were missing.
+**Learning:** Exposing internal error messages provides attackers with system internals, and missing security headers leaves the API open to misconfiguration attacks.
+**Prevention:** Always sanitize global error responses to generic messages and apply Hono `secureHeaders` middleware by default.
